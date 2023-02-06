@@ -1,4 +1,4 @@
-import { Base58, MockVM, chain, protocol } from "@koinos/sdk-as";
+import { Base58, MockVM, chain, protocol, System } from "@koinos/sdk-as";
 import { Nameservice } from "../Nameservice";
 
 const CONTRACT_ID = Base58.decode("1DQzuCcTKacbs9GGScRTU1Hc8BsyARTPqe");
@@ -24,13 +24,13 @@ describe("nameservice", () => {
     let nameObj = ns.parseName(name);
 
     expect(nameObj.name).toStrictEqual(name);
-    expect(nameObj.domain).toStrictEqual(name);
+    expect(nameObj.domain).toStrictEqual('');
 
     name = 'test-domain';
     nameObj = ns.parseName(name);
 
     expect(nameObj.name).toStrictEqual('test-domain');
-    expect(nameObj.domain).toStrictEqual('test-domain');
+    expect(nameObj.domain).toStrictEqual('');
 
     name = 'name.domain';
     nameObj = ns.parseName(name);
@@ -56,28 +56,23 @@ describe("nameservice", () => {
     expect(nameObj.name).toStrictEqual('name');
     expect(nameObj.domain).toStrictEqual('subsubdomain.subdomain.domain');
 
+    name = 'domain.';
+    nameObj = ns.parseName(name);
+
+    expect(nameObj.name).toStrictEqual('domain');
+    expect(nameObj.domain).toStrictEqual('');
+
+    name = 'name..domain';
+    nameObj = ns.parseName(name);
+
+    expect(nameObj.name).toStrictEqual('name');
+    expect(nameObj.domain).toStrictEqual('.domain');
+
+
     expect(() => {
       const ns = new Nameservice();
 
       const name = '.domain';
-      ns.parseName(name);
-    }).toThrow();
-
-    expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
-
-    expect(() => {
-      const ns = new Nameservice();
-
-      const name = 'domain.';
-      ns.parseName(name);
-    }).toThrow();
-
-    expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
-
-    expect(() => {
-      const ns = new Nameservice();
-
-      const name = 'name..domain';
       ns.parseName(name);
     }).toThrow();
 

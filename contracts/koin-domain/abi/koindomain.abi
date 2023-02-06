@@ -1,0 +1,12 @@
+{
+    "methods": {
+        "authorize_registration": {
+            "argument": "koindomain.authorize_registration_arguments",
+            "return": "koindomain.authorize_registration_result",
+            "description": "Authorize the registration of a name",
+            "entry-point": "0x69213583",
+            "read-only": false
+        }
+    },
+    "types": "CoMDCh9hc3NlbWJseS9wcm90by9rb2luZG9tYWluLnByb3RvEgprb2luZG9tYWluGhRrb2lub3Mvb3B0aW9ucy5wcm90byL+AQogYXV0aG9yaXplX3JlZ2lzdHJhdGlvbl9hcmd1bWVudHMSEgoEbmFtZRgBIAEoCVIEbmFtZRIWCgZkb21haW4YAiABKAlSBmRvbWFpbhIvChNkdXJhdGlvbl9pbmNyZW1lbnRzGAMgASgNUhJkdXJhdGlvbkluY3JlbWVudHMSGgoFb3duZXIYBCABKAxCBIC1GAZSBW93bmVyEicKDHBheW1lbnRfZnJvbRgFIAEoDEIEgLUYBlILcGF5bWVudEZyb20SOAoVcGF5bWVudF90b2tlbl9hZGRyZXNzGAYgASgMQgSAtRgFUhNwYXltZW50VG9rZW5BZGRyZXNzIjUKHWF1dGhvcml6ZV9yZWdpc3RyYXRpb25fcmVzdWx0EhQKBXZhbHVlGAEgASgEUgV2YWx1ZWIGcHJvdG8z"
+}

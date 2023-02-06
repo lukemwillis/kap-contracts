@@ -1,0 +1,64 @@
+{
+    "methods": {
+        "authorize_registration": {
+            "argument": "koindomain.authorize_registration_arguments",
+            "return": "koindomain.authorize_registration_result",
+            "description": "Authorize the registration of a name",
+            "entry_point": 1763784067,
+            "read_only": false
+        }
+    },
+    "types": {
+        "nested": {
+            "koindomain": {
+                "nested": {
+                    "authorize_registration_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "domain": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "durationIncrements": {
+                                "type": "uint32",
+                                "id": 3
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "paymentFrom": {
+                                "type": "bytes",
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "paymentTokenAddress": {
+                                "type": "bytes",
+                                "id": 6,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_registration_result": {
+                        "fields": {
+                            "value": {
+                                "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

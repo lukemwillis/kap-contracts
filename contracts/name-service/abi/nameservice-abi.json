@@ -1,18 +1,18 @@
 {
     "methods": {
         "register": {
-            "input": "nameservice.register_arguments",
-            "output": "nameservice.empty_object",
+            "argument": "nameservice.register_arguments",
+            "return": "nameservice.empty_object",
             "description": "Register a name or TLA",
-            "entryPoint": 2272792485,
-            "readOnly": true
+            "entry_point": 2272792485,
+            "read_only": false
         },
         "get_metadata": {
-            "input": "nameservice.get_metadata_arguments",
-            "output": "nameservice.metadata_object",
+            "argument": "nameservice.get_metadata_arguments",
+            "return": "nameservice.metadata_object",
             "description": "Get contract metadata",
-            "entryPoint": 4244088463,
-            "readOnly": true
+            "entry_point": 4244088463,
+            "read_only": true
         }
     },
     "types": {
@@ -70,13 +70,6 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
-                            },
-                            "oracleAddress": {
-                                "type": "bytes",
-                                "id": 3,
-                                "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
-                                }
                             }
                         }
                     },
@@ -103,66 +96,47 @@
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
-                            },
-                            "rules": {
-                                "type": "domain_rules_object",
-                                "id": 5
                             }
                         }
                     },
-                    "domain_rules_object": {
+                    "authorize_registration_args": {
                         "fields": {
-                            "isMintable": {
-                                "type": "bool",
+                            "name": {
+                                "type": "string",
                                 "id": 1
                             },
-                            "daysPerIncrement": {
-                                "type": "uint32",
+                            "domain": {
+                                "type": "string",
                                 "id": 2
                             },
-                            "pricings": {
-                                "rule": "repeated",
-                                "type": "pricing_object",
+                            "durationIncrements": {
+                                "type": "uint32",
                                 "id": 3
                             },
-                            "allowedPaymentTokens": {
-                                "rule": "repeated",
+                            "owner": {
                                 "type": "bytes",
                                 "id": 4,
                                 "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
+                                    "(koinos.btype)": "ADDRESS"
                                 }
-                            }
-                        }
-                    },
-                    "pricing_object": {
-                        "fields": {
-                            "numberCharactersFrom": {
-                                "type": "uint32",
-                                "id": 1
                             },
-                            "numberCharactersTo": {
-                                "type": "uint32",
-                                "id": 2
-                            },
-                            "pricePerIncrement": {
-                                "type": "uint64",
-                                "id": 3
-                            }
-                        }
-                    },
-                    "get_usd_price_args": {
-                        "fields": {
-                            "tokenAddress": {
+                            "paymentFrom": {
                                 "type": "bytes",
-                                "id": 1,
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "paymentTokenAddress": {
+                                "type": "bytes",
+                                "id": 6,
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
                             }
                         }
                     },
-                    "get_usd_price_res": {
+                    "authorize_registration_res": {
                         "fields": {
                             "value": {
                                 "type": "uint64",

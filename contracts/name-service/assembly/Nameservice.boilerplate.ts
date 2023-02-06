@@ -24,7 +24,6 @@ export class Nameservice {
     const res = new nameservice.metadata_object();
     // res.tla_registration_fee = ;
     // res.kap_token_address = ;
-    // res.oracle_address = ;
 
     return res;
   }

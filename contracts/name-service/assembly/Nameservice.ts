@@ -1,5 +1,5 @@
-import { Arrays, authority, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
-import { MILLISECONDS_PER_DAY } from "./Constants";
+import { authority, Protobuf, System, Token } from "@koinos/sdk-as";
+import { AUTHORIZE_REGISTRATION_ENTRYPOINT } from "./Constants";
 import { nameservice } from "./proto/nameservice";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
@@ -8,35 +8,13 @@ export class Nameservice {
   contractId: Uint8Array = System.getContractId();
 
   /**
-    * Get the USD price of a token from the oracle contract
-    */
-  getUSDPrice(tokenAddress: Uint8Array): u64 {
-    const args = new nameservice.get_usd_price_args(tokenAddress);
-    const metadata = new Metadata(this.contractId).get()!;
-
-    const callRes = System.call(metadata.oracle_address, 0x1, Protobuf.encode(args, nameservice.get_usd_price_args.encode));
-    System.require(callRes.code == 0, "failed to retrieve USD price");
-    const res = Protobuf.decode<nameservice.get_usd_price_res>(callRes.res.object, nameservice.get_usd_price_res.decode);
-
-    return res.value;
-  }
-
-  /**
     * Validate a name or domain
     */
   validateElement(element: string): void {
     System.require(element.length > 0, 'an element cannot be empty');
-    System.require(element.at(0) != '-', `element "${element}" cannot start with an hyphen (-)`);
-    System.require(element.at(element.length - 1) != '-', `element "${element}" cannot end with an hyphen (-)`);
-
-    let prevChar = '';
-    for (let index = 0; index < element.length; index++) {
-      const char = element.at(index);
-      if (prevChar == '-' && char == '-') {
-        System.revert(`element "${element}" cannot have consecutive hyphens (-)`);
-      }
-      prevChar = char;
-    }
+    System.require(!element.startsWith('-'), `element "${element}" cannot start with an hyphen (-)`);
+    System.require(!element.endsWith('-'), `element "${element}" cannot end with an hyphen (-)`);
+    System.require(!element.includes('--'), `element "${element}" cannot have consecutive hyphens (-)`);
   }
 
   /**
@@ -47,11 +25,9 @@ export class Nameservice {
   parseName(name: string): nameservice.name_object {
     const splittedNameArr = name.toLowerCase().split('.');
 
-    // validate each element composing the name
-    for (let index = 0; index < splittedNameArr.length; index++) {
-      const element = splittedNameArr[index];
-      this.validateElement(element);
-    }
+    // validate first element only 
+    // everything after the first "." would have been previously validated
+    this.validateElement(splittedNameArr[0]);
 
     const nameObject = new nameservice.name_object();
 
@@ -71,6 +47,7 @@ export class Nameservice {
   register(args: nameservice.register_arguments): nameservice.empty_object {
     System.require(args.owner.length > 0, 'missing "owner" argument');
 
+    // parseName will fail if args.name has an invalid format
     const nameObj = this.parseName(args.name);
 
     const names = new Names(this.contractId);
@@ -91,65 +68,42 @@ export class Nameservice {
       }
     } else {
       // otherwise, the user is trying to register a name
-      // get the domain's rules
+      // get the domain
       // to get the domain object, we need to parse the domain name into a name_object
       // if the user is trying to register "john.koin" 
-      // then the we need to get the rules for the name_object name: "koin" / domain: ""
+      // then we need to get the domain with the name_object name: "koin" / domain: ""
       // if the user is trying to register "john.sub.koin" 
-      // then the we need to get the rules for the name_object name: "john" / domain: "sub.koin"
+      // then we need to get the domain for the name_object name: "sub" / domain: "koin"
+      // if the user is trying to register "john.subsub.sub.koin" 
+      // then we need to get the domain for the name_object name: "subsub" / domain: "sub.koin"
       const domainNameObj = this.parseName(nameObj.domain);
       const domainObj = names.get(domainNameObj);
 
       System.require(domainObj != null, `domain "${nameObj.domain}" does not exist`);
-      System.require(domainObj!.rules != null && domainObj!.rules!.is_mintable, `domain "${nameObj.domain}" is not setup for registration`);
+    
+      // call the "autorize_registration" entrypoint of the contract hosted at "owner" address
+      // this call must return the name expiration as uint64
+      // by default, nobody can register a name on a domain because:
+      // if there is no contract at "owner", then the system.call will fail
+      // if the "autorize_registration" entrypoint is not setup  in the contract, then the system.call will fail
+      // this means that "owner" has to setup a contract in order to manage its name registrations
+      const authArgs = new nameservice.authorize_registration_args(
+        nameObj.name,
+        nameObj.domain,
+        args.duration_increments,
+        args.owner,
+        args.payment_from,
+        args.payment_token_address
+      );
+      const callRes = System.call(nameObj.owner, AUTHORIZE_REGISTRATION_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_registration_args.encode));
+      System.require(callRes.code == 0, 'failed to authorize registration');
+      const expiration = Protobuf.decode<nameservice.authorize_registration_res>(callRes.res.object, nameservice.authorize_registration_res.decode);
 
-      // process payment if payment tokens and pricings are setup
-      if (domainNameObj.rules!.allowed_payment_tokens.length > 0
-        && domainObj!.rules!.pricings.length > 0) {
-        // find the correct pricing
-        const nameLength = nameObj.name.length as u32;
-        let pricePerIncrement: u64 = 0;
-        for (let index = 0; index < domainObj!.rules!.pricings.length; index++) {
-          const pricing = domainObj!.rules!.pricings[index];
-          if (nameLength >= pricing.number_characters_from
-            && nameLength <= pricing.number_characters_to) {
-            pricePerIncrement = pricing.price_per_increment;
-            break;
-          }
-        }
-
-        const totalUSDPrice = SafeMath.mul(pricePerIncrement, args.duration_increments);
-
-        if (totalUSDPrice > 0) {
-          // check if payment token address is allowed
-          let foundPaymentToken = false;
-          for (let index = 0; index < domainObj!.rules!.allowed_payment_tokens.length; index++) {
-            const paymentToken = domainObj!.rules!.allowed_payment_tokens[index];
-
-            if (Arrays.equal(args.payment_token_address, paymentToken)) {
-              foundPaymentToken = true;
-            }
-          }
-
-          System.require(foundPaymentToken == true, 'the payment token address provided is not supported');
-
-          // get number of tokens to transfer
-          const paymentTokenUSDPrice = this.getUSDPrice(args.payment_token_address);
-          const numberOfTokensToTransfer = SafeMath.div(totalUSDPrice, paymentTokenUSDPrice);
-
-          // transfer tokens to domain owner
-          const tokenContract = new Token(args.payment_token_address);
-          System.require(tokenContract.transfer(args.payment_from, domainObj!.owner, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
-        }
-      }
-
-      // set expiration
-      const now = System.getHeadInfo().head_block_time;
-      const expirationInDays = SafeMath.mul(args.duration_increments, domainObj!.rules!.days_per_increment);
-      const expirationInMs = SafeMath.mul(expirationInDays, MILLISECONDS_PER_DAY);
-
-      nameObj.expiration = SafeMath.add(now, expirationInMs);
+      nameObj.expiration = expiration.value;
     }
+
+    // if the execution reaches this line, then the TLA or name are authorized
+    // so we can proceed with saving it
 
     // save new name
     nameObj.owner = args.owner;
