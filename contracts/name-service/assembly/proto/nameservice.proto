@@ -20,6 +20,16 @@ message register_arguments {
 }
 
 /* 
+  @description Get name object
+  @read-only true
+  @result name_object
+*/
+message get_name_arguments {
+  string name = 1;
+}
+
+
+/* 
   @description Get contract metadata
   @read-only true
   @result metadata_object

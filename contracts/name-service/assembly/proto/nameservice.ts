@@ -86,6 +86,41 @@ export namespace nameservice {
     }
   }
 
+  export class get_name_arguments {
+    static encode(message: get_name_arguments, writer: Writer): void {
+      if (message.name.length != 0) {
+        writer.uint32(10);
+        writer.string(message.name);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): get_name_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new get_name_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.name = reader.string();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    name: string;
+
+    constructor(name: string = "") {
+      this.name = name;
+    }
+  }
+
   @unmanaged
   export class get_metadata_arguments {
     static encode(message: get_metadata_arguments, writer: Writer): void {}

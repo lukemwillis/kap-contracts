@@ -95,7 +95,8 @@ export class Nameservice {
         args.payment_from,
         args.payment_token_address
       );
-      const callRes = System.call(nameObj.owner, AUTHORIZE_REGISTRATION_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_registration_args.encode));
+
+      const callRes = System.call(domainObj!.owner, AUTHORIZE_REGISTRATION_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_registration_args.encode));
       System.require(callRes.code == 0, 'failed to authorize registration');
       const expiration = Protobuf.decode<nameservice.authorize_registration_res>(callRes.res.object, nameservice.authorize_registration_res.decode);
 
@@ -110,6 +111,20 @@ export class Nameservice {
     names.put(new nameservice.name_object(nameObj.domain, nameObj.name), nameObj);
 
     return new nameservice.empty_object();
+  }
+
+  get_name(args: nameservice.get_name_arguments): nameservice.name_object {
+    // parseName will fail if args.name has an invalid format
+    const nameKey = this.parseName(args.name);
+
+    const names = new Names(this.contractId);
+    const nameObj = names.get(nameKey);
+
+    if (nameObj) {
+      return nameObj;
+    }
+
+    return new nameservice.name_object();
   }
 
   get_metadata(

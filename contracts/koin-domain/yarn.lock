@@ -165,9 +165,9 @@
     google-protobuf "^3.19.4"
     protobufjs "^6.11.2"
 
-"@koinos/abi-proto-gen@github:roaminro/koinos-abi-proto-gen#96ff0c8dcb2ab20c47887c39128cda0de44cd760":
+"@koinos/abi-proto-gen@github:roaminro/koinos-abi-proto-gen#b0a4b0a843e95b3a58bfea284a33f68ac71d7b37":
   version "1.0.1"
-  resolved "https://codeload.github.com/roaminro/koinos-abi-proto-gen/tar.gz/96ff0c8dcb2ab20c47887c39128cda0de44cd760"
+  resolved "https://codeload.github.com/roaminro/koinos-abi-proto-gen/tar.gz/b0a4b0a843e95b3a58bfea284a33f68ac71d7b37"
   dependencies:
     google-protobuf "^3.19.4"
     protobufjs "^6.11.2"
