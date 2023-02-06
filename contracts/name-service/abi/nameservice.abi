@@ -1,0 +1,19 @@
+{
+    "methods": {
+        "register": {
+            "argument": "nameservice.register_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Register a name or TLA",
+            "entry-point": "0x87780fa5",
+            "read-only": true
+        },
+        "get_metadata": {
+            "argument": "nameservice.get_metadata_arguments",
+            "return": "nameservice.metadata_object",
+            "description": "Get contract metadata",
+            "entry-point": "0xfcf7a68f",
+            "read-only": true
+        }
+    },
+    "types": "Cp4JCiBhc3NlbWJseS9wcm90by9uYW1lc2VydmljZS5wcm90bxILbmFtZXNlcnZpY2UaFGtvaW5vcy9vcHRpb25zLnByb3RvItgBChJyZWdpc3Rlcl9hcmd1bWVudHMSEgoEbmFtZRgBIAEoCVIEbmFtZRIvChNkdXJhdGlvbl9pbmNyZW1lbnRzGAIgASgNUhJkdXJhdGlvbkluY3JlbWVudHMSGgoFb3duZXIYAyABKAxCBIC1GAZSBW93bmVyEicKDHBheW1lbnRfZnJvbRgEIAEoDEIEgLUYBlILcGF5bWVudEZyb20SOAoVcGF5bWVudF90b2tlbl9hZGRyZXNzGAUgASgMQgSAtRgFUhNwYXltZW50VG9rZW5BZGRyZXNzIhgKFmdldF9tZXRhZGF0YV9hcmd1bWVudHMiDgoMZW1wdHlfb2JqZWN0IqIBCg9tZXRhZGF0YV9vYmplY3QSMAoUdGxhX3JlZ2lzdHJhdGlvbl9mZWUYASABKARSEnRsYVJlZ2lzdHJhdGlvbkZlZRIwChFrYXBfdG9rZW5fYWRkcmVzcxgCIAEoDEIEgLUYBVIPa2FwVG9rZW5BZGRyZXNzEisKDm9yYWNsZV9hZGRyZXNzGAMgASgMQgSAtRgFUg1vcmFjbGVBZGRyZXNzIrEBCgtuYW1lX29iamVjdBIWCgZkb21haW4YASABKAlSBmRvbWFpbhISCgRuYW1lGAIgASgJUgRuYW1lEhoKBW93bmVyGAMgASgMQgSAtRgGUgVvd25lchIiCgpleHBpcmF0aW9uGAQgASgEQgIwAVIKZXhwaXJhdGlvbhI2CgVydWxlcxgFIAEoCzIgLm5hbWVzZXJ2aWNlLmRvbWFpbl9ydWxlc19vYmplY3RSBXJ1bGVzItkBChNkb21haW5fcnVsZXNfb2JqZWN0Eh8KC2lzX21pbnRhYmxlGAEgASgIUgppc01pbnRhYmxlEiwKEmRheXNfcGVyX2luY3JlbWVudBgCIAEoDVIQZGF5c1BlckluY3JlbWVudBI3CghwcmljaW5ncxgDIAMoCzIbLm5hbWVzZXJ2aWNlLnByaWNpbmdfb2JqZWN0UghwcmljaW5ncxI6ChZhbGxvd2VkX3BheW1lbnRfdG9rZW5zGAQgAygMQgSAtRgFUhRhbGxvd2VkUGF5bWVudFRva2VucyKoAQoOcHJpY2luZ19vYmplY3QSNAoWbnVtYmVyX2NoYXJhY3RlcnNfZnJvbRgBIAEoDVIUbnVtYmVyQ2hhcmFjdGVyc0Zyb20SMAoUbnVtYmVyX2NoYXJhY3RlcnNfdG8YAiABKA1SEm51bWJlckNoYXJhY3RlcnNUbxIuChNwcmljZV9wZXJfaW5jcmVtZW50GAMgASgEUhFwcmljZVBlckluY3JlbWVudCI/ChJnZXRfdXNkX3ByaWNlX2FyZ3MSKQoNdG9rZW5fYWRkcmVzcxgBIAEoDEIEgLUYBVIMdG9rZW5BZGRyZXNzIikKEWdldF91c2RfcHJpY2VfcmVzEhQKBXZhbHVlGAEgASgEUgV2YWx1ZWIGcHJvdG8z"
+}

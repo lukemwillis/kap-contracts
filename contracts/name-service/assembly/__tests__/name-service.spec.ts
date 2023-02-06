@@ -1,19 +1,11 @@
-import { Base58, MockVM, authority, Arrays, Protobuf, chain, protocol, name_service } from "@koinos/sdk-as";
-import { NameService } from "../NameService";
+import { Base58, MockVM, chain, protocol } from "@koinos/sdk-as";
+import { Nameservice } from "../Nameservice";
 
 const CONTRACT_ID = Base58.decode("1DQzuCcTKacbs9GGScRTU1Hc8BsyARTPqe");
 
-const MOCK_ACCT1 = Base58.decode("1DQzuCcTKacbs9GGScRTU1Hc8BsyARTPqG");
-const MOCK_ACCT2 = Base58.decode("1DQzuCcTKacbs9GGScRTU1Hc8BsyARTPqK");
-const MOCK_ACCT3 = Base58.decode("1Fv9wJ69oNchdrdWMzYWU12hTfZSCpXZgy");
-
-const MOCK_NAME1 = "test1";
-const MOCK_NAME2 = "test2";
-const MOCK_NAME3 = "test3";
-
 let headBlock = new protocol.block();
 
-describe("name-service", () => {
+describe("nameservice", () => {
   beforeEach(() => {
     MockVM.reset();
     MockVM.setContractId(CONTRACT_ID);
@@ -25,64 +17,98 @@ describe("name-service", () => {
     MockVM.setBlock(headBlock);
   });
 
-  it("should ensure basic mapping", () => {
-    const ns = new NameService();
+  it("should parse a name into a name object", () => {
+    const ns = new Nameservice();
 
-    MockVM.setSystemAuthority(true);
+    let name = 'domain';
+    let nameObj = ns.parseName(name);
 
-    // set some records
-    ns.set_record(new name_service.set_record_arguments(MOCK_NAME1, MOCK_ACCT1));
-    ns.set_record(new name_service.set_record_arguments(MOCK_NAME2, MOCK_ACCT2));
+    expect(nameObj.name).toStrictEqual(name);
+    expect(nameObj.domain).toStrictEqual(name);
 
-    // check the records
-    check_mapping(ns, MOCK_NAME1, MOCK_ACCT1);
-    check_mapping(ns, MOCK_NAME2, MOCK_ACCT2);
+    name = 'test-domain';
+    nameObj = ns.parseName(name);
 
-    // Update the record to a new address
-    ns.set_record(new name_service.set_record_arguments(MOCK_NAME1, MOCK_ACCT3));
+    expect(nameObj.name).toStrictEqual('test-domain');
+    expect(nameObj.domain).toStrictEqual('test-domain');
 
-    // check the records
-    check_mapping(ns, MOCK_NAME1, MOCK_ACCT3);
-    check_mapping(ns, MOCK_NAME2, MOCK_ACCT2);
+    name = 'name.domain';
+    nameObj = ns.parseName(name);
 
-    // check throw on getting old record
-    expect(() => {
-      const ns = new NameService();
-      ns.get_name(new name_service.get_name_arguments(MOCK_ACCT1));
-    }).toThrow();
+    expect(nameObj.name).toStrictEqual('name');
+    expect(nameObj.domain).toStrictEqual('domain');
 
-    // Update the record to a new name
+    name = 'name-test.domain';
+    nameObj = ns.parseName(name);
 
-    ns.set_record(new name_service.set_record_arguments(MOCK_NAME3, MOCK_ACCT3));
+    expect(nameObj.name).toStrictEqual('name-test');
+    expect(nameObj.domain).toStrictEqual('domain');
 
-    // check the records
-    check_mapping(ns, MOCK_NAME3, MOCK_ACCT3);
-    check_mapping(ns, MOCK_NAME2, MOCK_ACCT2);
+    name = 'name.subdomain.domain';
+    nameObj = ns.parseName(name);
 
-    // check throw on getting old record
-    expect(() => {
-      const ns = new NameService();
-      ns.get_address(new name_service.get_address_arguments(MOCK_NAME1));
-    }).toThrow();
+    expect(nameObj.name).toStrictEqual('name');
+    expect(nameObj.domain).toStrictEqual('subdomain.domain');
 
-    // check throw when setting without system authority
-    MockVM.setSystemAuthority(false);
+    name = 'name.subsubdomain.subdomain.domain';
+    nameObj = ns.parseName(name);
+
+    expect(nameObj.name).toStrictEqual('name');
+    expect(nameObj.domain).toStrictEqual('subsubdomain.subdomain.domain');
 
     expect(() => {
-      const ns = new NameService();
-      ns.set_record(new name_service.set_record_arguments(MOCK_NAME1, MOCK_ACCT1));
+      const ns = new Nameservice();
+
+      const name = '.domain';
+      ns.parseName(name);
     }).toThrow();
 
-    // check the records
-    check_mapping(ns, MOCK_NAME3, MOCK_ACCT3);
-    check_mapping(ns, MOCK_NAME2, MOCK_ACCT2);
+    expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
+
+    expect(() => {
+      const ns = new Nameservice();
+
+      const name = 'domain.';
+      ns.parseName(name);
+    }).toThrow();
+
+    expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
+
+    expect(() => {
+      const ns = new Nameservice();
+
+      const name = 'name..domain';
+      ns.parseName(name);
+    }).toThrow();
+
+    expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
+
+    expect(() => {
+      const ns = new Nameservice();
+
+      const name = '-name.domain';
+      ns.parseName(name);
+    }).toThrow();
+
+    expect(MockVM.getErrorMessage()).toStrictEqual('element "-name" cannot start with an hyphen (-)');
+
+    expect(() => {
+      const ns = new Nameservice();
+
+      const name = 'name-.domain';
+      ns.parseName(name);
+    }).toThrow();
+
+    expect(MockVM.getErrorMessage()).toStrictEqual('element "name-" cannot end with an hyphen (-)');
+
+    expect(() => {
+      const ns = new Nameservice();
+
+      const name = 'name--test.domain';
+      ns.parseName(name);
+    }).toThrow();
+
+    expect(MockVM.getErrorMessage()).toStrictEqual('element "name--test" cannot have consecutive hyphens (-)');
+
   });
 });
-
-function check_mapping(ns:NameService, expected_name:string, expected_address:Uint8Array): void {
-  const a_record = ns.get_address(new name_service.get_address_arguments(expected_name));
-  expect(Arrays.equal(a_record.value!.address, expected_address)).toBe(true);
-
-  const n_record = ns.get_name(new name_service.get_name_arguments(expected_address));
-  expect(n_record.value!.name).toBe(expected_name);
-}

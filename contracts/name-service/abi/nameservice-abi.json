@@ -1,0 +1,177 @@
+{
+    "methods": {
+        "register": {
+            "input": "nameservice.register_arguments",
+            "output": "nameservice.empty_object",
+            "description": "Register a name or TLA",
+            "entryPoint": 2272792485,
+            "readOnly": true
+        },
+        "get_metadata": {
+            "input": "nameservice.get_metadata_arguments",
+            "output": "nameservice.metadata_object",
+            "description": "Get contract metadata",
+            "entryPoint": 4244088463,
+            "readOnly": true
+        }
+    },
+    "types": {
+        "nested": {
+            "nameservice": {
+                "nested": {
+                    "register_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "durationIncrements": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "paymentFrom": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "paymentTokenAddress": {
+                                "type": "bytes",
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "get_metadata_arguments": {
+                        "fields": {}
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "metadata_object": {
+                        "fields": {
+                            "tlaRegistrationFee": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "kapTokenAddress": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "oracleAddress": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "name_object": {
+                        "fields": {
+                            "domain": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "rules": {
+                                "type": "domain_rules_object",
+                                "id": 5
+                            }
+                        }
+                    },
+                    "domain_rules_object": {
+                        "fields": {
+                            "isMintable": {
+                                "type": "bool",
+                                "id": 1
+                            },
+                            "daysPerIncrement": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "pricings": {
+                                "rule": "repeated",
+                                "type": "pricing_object",
+                                "id": 3
+                            },
+                            "allowedPaymentTokens": {
+                                "rule": "repeated",
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "pricing_object": {
+                        "fields": {
+                            "numberCharactersFrom": {
+                                "type": "uint32",
+                                "id": 1
+                            },
+                            "numberCharactersTo": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "pricePerIncrement": {
+                                "type": "uint64",
+                                "id": 3
+                            }
+                        }
+                    },
+                    "get_usd_price_args": {
+                        "fields": {
+                            "tokenAddress": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "get_usd_price_res": {
+                        "fields": {
+                            "value": {
+                                "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package nameservice;
+
+import "koinos/options.proto"; 
+
+// Entrypoints
+
+/* 
+  @description Register a name or TLA
+  @read-only true
+  @result empty_object
+*/
+message register_arguments {
+  string name = 1;
+  uint32 duration_increments = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_from = 4 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 5 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
+  @description Get contract metadata
+  @read-only true
+  @result metadata_object
+*/
+message get_metadata_arguments {
+}
+
+// Events
+
+// Objects
+message empty_object {
+
+}
+
+message metadata_object {
+  uint64 tla_registration_fee = 1;
+  bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes oracle_address = 3 [(koinos.btype) = CONTRACT_ID];
+}
+
+message name_object {
+  string domain = 1;
+  string name = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  uint64 expiration = 4 [jstype = JS_STRING];
+  domain_rules_object rules = 5;
+}
+
+message domain_rules_object {
+  bool is_mintable = 1; // wether or not people can register names under this domain
+  uint32 days_per_increment = 2; // e.g.: 365 for yearly increments, 30 for monthly increments
+  repeated pricing_object pricings = 3;
+  repeated bytes allowed_payment_tokens = 4 [(koinos.btype) = CONTRACT_ID]; // Koin, KAP, etc...
+}
+
+message pricing_object {
+  uint32 number_characters_from = 1; // (inclusive!) e.g.: from 2 characters 
+  uint32 number_characters_to = 2; // (inclusive!) e.g.: to 3 characters
+  uint64 price_per_increment = 3; // in USD 6 decimals, so $1 = 1000000
+}
+
+// oracle
+message get_usd_price_args {
+  bytes token_address = 1 [(koinos.btype) = CONTRACT_ID];
+}
+
+message get_usd_price_res {
+  uint64 value = 1;
+}

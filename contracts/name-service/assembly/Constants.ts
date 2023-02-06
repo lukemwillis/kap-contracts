@@ -1,0 +1,1 @@
+export const MILLISECONDS_PER_DAY: u64 = 86400000;

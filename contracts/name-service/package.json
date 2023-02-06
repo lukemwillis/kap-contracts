@@ -3,26 +3,26 @@
   "version": "1.0.0",
   "license": "MIT",
   "devDependencies": {
-    "@koinos/sdk-as": "1.0.2",
-    "@types/jest": "^27.5.1",
+    "@as-covers/core": "^0.2.1",
+    "@as-pect/cli": "^6.2.4",
+    "@koinos/abi-proto-gen": "^0.4.0",
+    "@koinos/mock-vm": "^1.0.0",
+    "@koinos/sdk-as": "^1.0.2",
+    "@koinos/as-proto-gen": "^1.0.3",
+    "@roamin/protoc": "^2.4.0",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
     "@typescript-eslint/parser": "^5.10.0",
+    "assemblyscript": "^0.19.22",
     "eslint": "^8.7.0",
-    "jest": "^28.1.0",
-    "local-koinos": "^0.0.5",
-    "ts-jest": "^28.0.2",
     "ts-node": "^10.4.0",
-    "typescript": "^4.6.4",
+    "typescript": "^4.5.5",
     "yaml": "^2.0.0-11"
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 --ext ts \"*/assembly/**/*.ts\"",
-    "build:debug": "koinos-sdk-as-cli build debug",
-    "build:release": "koinos-sdk-as-cli build release",
+    "build:debug": "koinos-sdk-as-cli build-all debug 0 nameservice.proto",
+    "build:release": "koinos-sdk-as-cli build-all release 0 nameservice.proto",
     "test": "koinos-sdk-as-cli run-tests",
-    "integration-tests": "yarn jest",
-    "local-koinos-auto": "local-koinos start -i 5000",
-    "local-koinos:start": "local-koinos start",
-    "local-koinos:stop": "local-koinos stop"
+    "integration-tests": "yarn jest"
   }
 }

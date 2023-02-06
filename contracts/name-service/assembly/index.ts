@@ -1,5 +1,6 @@
-import { System, Protobuf, authority, name_service } from "@koinos/sdk-as";
-import { NameService as ContractClass } from "./NameService";
+import { System, Protobuf, authority } from "@koinos/sdk-as";
+import { Nameservice as ContractClass } from "./Nameservice";
+import { nameservice as ProtoNamespace } from "./proto/nameservice";
 
 export function main(): i32 {
   const contractArgs = System.getArguments();
@@ -8,57 +9,30 @@ export function main(): i32 {
   const c = new ContractClass();
 
   switch (contractArgs.entry_point) {
-    case 0xe248c73a: {
-      const args = Protobuf.decode<name_service.set_record_arguments>(
+    case 0x87780fa5: {
+      const args = Protobuf.decode<ProtoNamespace.register_arguments>(
         contractArgs.args,
-        name_service.set_record_arguments.decode
+        ProtoNamespace.register_arguments.decode
       );
-      const res = c.set_record(args);
-      retbuf = Protobuf.encode(
-        res,
-        name_service.set_record_result.encode
-      );
+      const res = c.register(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
       break;
     }
 
-  case 0xe5070a16: {
-    const args = Protobuf.decode<name_service.get_name_arguments>(
-      contractArgs.args,
-      name_service.get_name_arguments.decode
-    );
-    const res = c.get_name(args);
-    retbuf = Protobuf.encode(
-      res,
-      name_service.get_name_result.encode
-    );
-    break;
-  }
+    case 0xfcf7a68f: {
+      const args = Protobuf.decode<ProtoNamespace.get_metadata_arguments>(
+        contractArgs.args,
+        ProtoNamespace.get_metadata_arguments.decode
+      );
+      const res = c.get_metadata(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.metadata_object.encode);
+      break;
+    }
 
-  case 0xa61ae5e8: {
-    const args = Protobuf.decode<name_service.get_address_arguments>(
-      contractArgs.args,
-      name_service.get_address_arguments.decode
-    );
-    const res = c.get_address(args);
-    retbuf = Protobuf.encode(
-      res,
-      name_service.get_address_result.encode
-    );
-    break;
+    default:
+      System.exit(1);
+      break;
   }
-
-  case 0x4a2dbd90: {
-    retbuf = Protobuf.encode(
-      new authority.authorize_result(System.checkSystemAuthority()),
-      authority.authorize_result.encode
-    )
-    break;
-  }
-
-  default:
-    System.exit(1);
-    break;
-}
 
   System.exit(0, retbuf);
   return 0;
