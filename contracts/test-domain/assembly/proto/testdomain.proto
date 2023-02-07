@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package testdomain;
+
+/* 
+  @description Authorize the mint of a name
+  @read-only false
+*/
+message authorize_mint_arguments {
+  string name = 1;
+  string domain = 2;
+  uint32 duration_increments = 3;
+  bytes owner = 4 [(koinos.btype) = ADDRESS];
+  bytes payment_from = 5 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_mint_result {
+  uint64 expiration = 1;
+}
+
+/* 
+  @description Authorize the burn of a name
+  @read-only false
+*/
+message authorize_burn_arguments {
+  name_object name = 1;
+}
+
+message authorize_burn_result {
+  bool authorized = 1;
+}
+
+/* 
+  @description Authorize the renewal of a name
+  @read-only false
+*/
+message authorize_renewal_arguments {
+  name_object name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_renewal_result {
+  uint64 expiration = 1;
+}
+
+/* 
+  @description Authorize the reclaim of a name
+  @read-only false
+*/
+message authorize_reclaim_arguments {
+  name_object name = 1;
+}
+
+message authorize_reclaim_result {
+  bool authorized = 1;
+}

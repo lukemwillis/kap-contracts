@@ -2,9 +2,9 @@ import { System, SafeMath, Arrays } from "@koinos/sdk-as";
 import { koindomain } from "./proto/koindomain";
 
 export class Koindomain {
-  authorize_registration(
-    args: koindomain.authorize_registration_arguments
-  ): koindomain.authorize_registration_result {
+  authorize_mint(
+    args: koindomain.authorize_mint_arguments
+  ): koindomain.authorize_mint_result {
     // const name = args.name;
     // const domain = args.domain;
     // const duration_increments = args.duration_increments;
@@ -26,6 +26,6 @@ export class Koindomain {
     const expirationInDays = SafeMath.mul(args.duration_increments, DAYS_PER_INCREMENT);
     const expirationInMs = SafeMath.mul(expirationInDays, MILLISECONDS_PER_DAY);
 
-    return new koindomain.authorize_registration_result(SafeMath.add(now, expirationInMs));
+    return new koindomain.authorize_mint_result(SafeMath.add(now, expirationInMs));
   }
 }

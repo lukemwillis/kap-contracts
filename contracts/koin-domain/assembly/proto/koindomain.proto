@@ -5,10 +5,10 @@ package koindomain;
 import "koinos/options.proto"; 
 
 /* 
-  @description Authorize the registration of a name
+  @description Authorize the mint of a name
   @read-only false
 */
-message authorize_registration_arguments {
+message authorize_mint_arguments {
   string name = 1;
   string domain = 2;
   uint32 duration_increments = 3;
@@ -17,6 +17,6 @@ message authorize_registration_arguments {
   bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
 }
 
-message authorize_registration_result {
+message authorize_mint_result {
   uint64 value = 1;
 }

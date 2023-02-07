@@ -1,12 +1,12 @@
 {
     "methods": {
-        "authorize_registration": {
-            "argument": "koindomain.authorize_registration_arguments",
-            "return": "koindomain.authorize_registration_result",
-            "description": "Authorize the registration of a name",
-            "entry-point": "0x69213583",
+        "authorize_mint": {
+            "argument": "koindomain.authorize_mint_arguments",
+            "return": "koindomain.authorize_mint_result",
+            "description": "Authorize the mint of a name",
+            "entry-point": "0x86cb119c",
             "read-only": false
         }
     },
-    "types": "CoMDCh9hc3NlbWJseS9wcm90by9rb2luZG9tYWluLnByb3RvEgprb2luZG9tYWluGhRrb2lub3Mvb3B0aW9ucy5wcm90byL+AQogYXV0aG9yaXplX3JlZ2lzdHJhdGlvbl9hcmd1bWVudHMSEgoEbmFtZRgBIAEoCVIEbmFtZRIWCgZkb21haW4YAiABKAlSBmRvbWFpbhIvChNkdXJhdGlvbl9pbmNyZW1lbnRzGAMgASgNUhJkdXJhdGlvbkluY3JlbWVudHMSGgoFb3duZXIYBCABKAxCBIC1GAZSBW93bmVyEicKDHBheW1lbnRfZnJvbRgFIAEoDEIEgLUYBlILcGF5bWVudEZyb20SOAoVcGF5bWVudF90b2tlbl9hZGRyZXNzGAYgASgMQgSAtRgFUhNwYXltZW50VG9rZW5BZGRyZXNzIjUKHWF1dGhvcml6ZV9yZWdpc3RyYXRpb25fcmVzdWx0EhQKBXZhbHVlGAEgASgEUgV2YWx1ZWIGcHJvdG8z"
+    "types": "CvMCCh9hc3NlbWJseS9wcm90by9rb2luZG9tYWluLnByb3RvEgprb2luZG9tYWluGhRrb2lub3Mvb3B0aW9ucy5wcm90byL2AQoYYXV0aG9yaXplX21pbnRfYXJndW1lbnRzEhIKBG5hbWUYASABKAlSBG5hbWUSFgoGZG9tYWluGAIgASgJUgZkb21haW4SLwoTZHVyYXRpb25faW5jcmVtZW50cxgDIAEoDVISZHVyYXRpb25JbmNyZW1lbnRzEhoKBW93bmVyGAQgASgMQgSAtRgGUgVvd25lchInCgxwYXltZW50X2Zyb20YBSABKAxCBIC1GAZSC3BheW1lbnRGcm9tEjgKFXBheW1lbnRfdG9rZW5fYWRkcmVzcxgGIAEoDEIEgLUYBVITcGF5bWVudFRva2VuQWRkcmVzcyItChVhdXRob3JpemVfbWludF9yZXN1bHQSFAoFdmFsdWUYASABKARSBXZhbHVlYgZwcm90bzM="
 }

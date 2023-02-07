@@ -48,7 +48,7 @@ test("registration", async () => {
   const doedotkoinDomainContract = await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../koin-domain/build/debug/contract.wasm', abi);
 
 
-  let res = await nameserviceContract.functions.register({
+  let res = await nameserviceContract.functions.mint({
     name: 'koin',
     owner: koinDomainAcct.address
   });
@@ -63,7 +63,7 @@ test("registration", async () => {
   expect(res?.result?.owner).toBe(koinDomainAcct.address);
   expect(res?.result?.expiration).toBe('0');
 
-  res = await nameserviceContract.functions.register({
+  res = await nameserviceContract.functions.mint({
     name: 'doe.koin',
     duration_increments: 3,
     owner: doedotkoinDomainAcct.address,
@@ -81,7 +81,7 @@ test("registration", async () => {
   expect(res?.result?.domain).toBe('koin');
   expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
 
-  res = await nameserviceContract.functions.register({
+  res = await nameserviceContract.functions.mint({
     name: 'john.doe.koin',
     duration_increments: 3,
     owner: user1.address,

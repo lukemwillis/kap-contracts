@@ -9,16 +9,15 @@ export function main(): i32 {
   const c = new ContractClass();
 
   switch (contractArgs.entry_point) {
-    case 0x69213583: {
-      const args =
-        Protobuf.decode<ProtoNamespace.authorize_registration_arguments>(
-          contractArgs.args,
-          ProtoNamespace.authorize_registration_arguments.decode
-        );
-      const res = c.authorize_registration(args);
+    case 0x86cb119c: {
+      const args = Protobuf.decode<ProtoNamespace.authorize_mint_arguments>(
+        contractArgs.args,
+        ProtoNamespace.authorize_mint_arguments.decode
+      );
+      const res = c.authorize_mint(args);
       retbuf = Protobuf.encode(
         res,
-        ProtoNamespace.authorize_registration_result.encode
+        ProtoNamespace.authorize_mint_result.encode
       );
       break;
     }

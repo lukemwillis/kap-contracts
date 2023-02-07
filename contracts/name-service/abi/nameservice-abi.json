@@ -1,15 +1,36 @@
 {
     "methods": {
-        "register": {
-            "argument": "nameservice.register_arguments",
+        "mint": {
+            "argument": "nameservice.mint_arguments",
             "return": "nameservice.empty_object",
-            "description": "Register a name or TLA",
-            "entry_point": 2272792485,
+            "description": "Mint a name or TLA",
+            "entry_point": 3698268091,
+            "read_only": false
+        },
+        "burn": {
+            "argument": "nameservice.burn_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Burn a name or TLA",
+            "entry_point": 2241834181,
+            "read_only": false
+        },
+        "transfer": {
+            "argument": "nameservice.transfer_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Transfer ownership of a name or TLA",
+            "entry_point": 670398154,
+            "read_only": false
+        },
+        "renew": {
+            "argument": "nameservice.renew_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Renew a name",
+            "entry_point": 2741644513,
             "read_only": false
         },
         "get_name": {
             "argument": "nameservice.get_name_arguments",
-            "return": "nameservice.name_object",
+            "return": "nameservice.get_name_result",
             "description": "Get name object",
             "entry_point": 3842443798,
             "read_only": true
@@ -26,7 +47,7 @@
         "nested": {
             "nameservice": {
                 "nested": {
-                    "register_arguments": {
+                    "mint_arguments": {
                         "fields": {
                             "name": {
                                 "type": "string",
@@ -59,11 +80,108 @@
                             }
                         }
                     },
+                    "burn_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "transfer_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "to": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "renew_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
                     "get_name_arguments": {
                         "fields": {
                             "name": {
                                 "type": "string",
                                 "id": 1
+                            }
+                        }
+                    },
+                    "get_name_result": {
+                        "fields": {
+                            "domain": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "sub_names_count": {
+                                "type": "uint64",
+                                "id": 5,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "locked_kap_tokens": {
+                                "type": "uint64",
+                                "id": 6,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "has_expired": {
+                                "type": "bool",
+                                "id": 7
+                            },
+                            "can_be_reclaimed": {
+                                "type": "bool",
+                                "id": 8
                             }
                         }
                     },
@@ -75,7 +193,7 @@
                     },
                     "metadata_object": {
                         "fields": {
-                            "tla_registration_fee": {
+                            "tla_mint_fee": {
                                 "type": "uint64",
                                 "id": 1
                             },
@@ -111,10 +229,24 @@
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
+                            },
+                            "sub_names_count": {
+                                "type": "uint64",
+                                "id": 5,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "locked_kap_tokens": {
+                                "type": "uint64",
+                                "id": 6,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             }
                         }
                     },
-                    "authorize_registration_args": {
+                    "authorize_mint_args": {
                         "fields": {
                             "name": {
                                 "type": "string",
@@ -151,10 +283,76 @@
                             }
                         }
                     },
-                    "authorize_registration_res": {
+                    "authorize_mint_res": {
                         "fields": {
-                            "value": {
+                            "expiration": {
                                 "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_burn_args": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_burn_res": {
+                        "fields": {
+                            "authorized": {
+                                "type": "bool",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_renewal_args": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_renewal_res": {
+                        "fields": {
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_reclaim_args": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_reclaim_res": {
+                        "fields": {
+                            "authorized": {
+                                "type": "bool",
                                 "id": 1
                             }
                         }

@@ -7,11 +7,11 @@ import "koinos/options.proto";
 // Entrypoints
 
 /* 
-  @description Register a name or TLA
+  @description Mint a name or TLA
   @read-only false
   @result empty_object
 */
-message register_arguments {
+message mint_arguments {
   string name = 1;
   uint32 duration_increments = 2;
   bytes owner = 3 [(koinos.btype) = ADDRESS];
@@ -20,12 +20,53 @@ message register_arguments {
 }
 
 /* 
+  @description Burn a name or TLA
+  @read-only false
+  @result empty_object
+*/
+message burn_arguments {
+  string name = 1;
+}
+
+/* 
+  @description Transfer ownership of a name or TLA
+  @read-only false
+  @result empty_object
+*/
+message transfer_arguments {
+  string name = 1;
+  bytes to = 2 [(koinos.btype) = ADDRESS];
+}
+
+/* 
+  @description Renew a name
+  @read-only false
+  @result empty_object
+*/
+message renew_arguments {
+  string name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
   @description Get name object
   @read-only true
-  @result name_object
 */
 message get_name_arguments {
   string name = 1;
+}
+
+message get_name_result {
+  string domain = 1;
+  string name = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  uint64 expiration = 4 [jstype = JS_STRING];
+  uint64 sub_names_count = 5 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 6  [jstype = JS_STRING];
+  bool has_expired = 7;
+  bool can_be_reclaimed = 8;
 }
 
 /* 
@@ -44,7 +85,7 @@ message empty_object {
 }
 
 message metadata_object {
-  uint64 tla_registration_fee = 1;
+  uint64 tla_mint_fee = 1;
   bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
 }
 
@@ -53,9 +94,13 @@ message name_object {
   string name = 2;
   bytes owner = 3 [(koinos.btype) = ADDRESS];
   uint64 expiration = 4 [jstype = JS_STRING];
+  uint64 sub_names_count = 5 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 6  [jstype = JS_STRING];
 }
 
-message authorize_registration_args {
+// External calls objects
+
+message authorize_mint_args {
   string name = 1;
   string domain = 2;
   uint32 duration_increments = 3;
@@ -64,6 +109,33 @@ message authorize_registration_args {
   bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
 }
 
-message authorize_registration_res {
-  uint64 value = 1;
+message authorize_mint_res {
+  uint64 expiration = 1;
+}
+
+message authorize_burn_args {
+  name_object name = 1;
+}
+
+message authorize_burn_res {
+  bool authorized = 1;
+}
+
+message authorize_renewal_args {
+  name_object name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_renewal_res {
+  uint64 expiration = 1;
+}
+
+message authorize_reclaim_args {
+  name_object name = 1;
+}
+
+message authorize_reclaim_res {
+  bool authorized = 1;
 }

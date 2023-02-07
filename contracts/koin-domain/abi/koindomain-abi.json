@@ -1,10 +1,10 @@
 {
     "methods": {
-        "authorize_registration": {
-            "argument": "koindomain.authorize_registration_arguments",
-            "return": "koindomain.authorize_registration_result",
-            "description": "Authorize the registration of a name",
-            "entry_point": 1763784067,
+        "authorize_mint": {
+            "argument": "koindomain.authorize_mint_arguments",
+            "return": "koindomain.authorize_mint_result",
+            "description": "Authorize the mint of a name",
+            "entry_point": 2261455260,
             "read_only": false
         }
     },
@@ -12,7 +12,7 @@
         "nested": {
             "koindomain": {
                 "nested": {
-                    "authorize_registration_arguments": {
+                    "authorize_mint_arguments": {
                         "fields": {
                             "name": {
                                 "type": "string",
@@ -49,7 +49,7 @@
                             }
                         }
                     },
-                    "authorize_registration_result": {
+                    "authorize_mint_result": {
                         "fields": {
                             "value": {
                                 "type": "uint64",

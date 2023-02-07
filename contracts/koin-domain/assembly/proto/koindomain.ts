@@ -1,11 +1,8 @@
 import { Writer, Reader } from "as-proto";
 
 export namespace koindomain {
-  export class authorize_registration_arguments {
-    static encode(
-      message: authorize_registration_arguments,
-      writer: Writer
-    ): void {
+  export class authorize_mint_arguments {
+    static encode(message: authorize_mint_arguments, writer: Writer): void {
       if (message.name.length != 0) {
         writer.uint32(10);
         writer.string(message.name);
@@ -37,12 +34,9 @@ export namespace koindomain {
       }
     }
 
-    static decode(
-      reader: Reader,
-      length: i32
-    ): authorize_registration_arguments {
+    static decode(reader: Reader, length: i32): authorize_mint_arguments {
       const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new authorize_registration_arguments();
+      const message = new authorize_mint_arguments();
 
       while (reader.ptr < end) {
         const tag = reader.uint32();
@@ -105,20 +99,17 @@ export namespace koindomain {
   }
 
   @unmanaged
-  export class authorize_registration_result {
-    static encode(
-      message: authorize_registration_result,
-      writer: Writer
-    ): void {
+  export class authorize_mint_result {
+    static encode(message: authorize_mint_result, writer: Writer): void {
       if (message.value != 0) {
         writer.uint32(8);
         writer.uint64(message.value);
       }
     }
 
-    static decode(reader: Reader, length: i32): authorize_registration_result {
+    static decode(reader: Reader, length: i32): authorize_mint_result {
       const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new authorize_registration_result();
+      const message = new authorize_mint_result();
 
       while (reader.ptr < end) {
         const tag = reader.uint32();

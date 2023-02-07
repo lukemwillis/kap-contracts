@@ -9,12 +9,42 @@ export function main(): i32 {
   const c = new ContractClass();
 
   switch (contractArgs.entry_point) {
-    case 0x87780fa5: {
-      const args = Protobuf.decode<ProtoNamespace.register_arguments>(
+    case 0xdc6f17bb: {
+      const args = Protobuf.decode<ProtoNamespace.mint_arguments>(
         contractArgs.args,
-        ProtoNamespace.register_arguments.decode
+        ProtoNamespace.mint_arguments.decode
       );
-      const res = c.register(args);
+      const res = c.mint(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
+      break;
+    }
+
+    case 0x859facc5: {
+      const args = Protobuf.decode<ProtoNamespace.burn_arguments>(
+        contractArgs.args,
+        ProtoNamespace.burn_arguments.decode
+      );
+      const res = c.burn(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
+      break;
+    }
+
+    case 0x27f576ca: {
+      const args = Protobuf.decode<ProtoNamespace.transfer_arguments>(
+        contractArgs.args,
+        ProtoNamespace.transfer_arguments.decode
+      );
+      const res = c.transfer(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
+      break;
+    }
+
+    case 0xa36a2ce1: {
+      const args = Protobuf.decode<ProtoNamespace.renew_arguments>(
+        contractArgs.args,
+        ProtoNamespace.renew_arguments.decode
+      );
+      const res = c.renew(args);
       retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
       break;
     }
@@ -25,7 +55,7 @@ export function main(): i32 {
         ProtoNamespace.get_name_arguments.decode
       );
       const res = c.get_name(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.name_object.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.get_name_result.encode);
       break;
     }
 
