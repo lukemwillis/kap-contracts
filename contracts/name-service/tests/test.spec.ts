@@ -22,6 +22,9 @@ beforeAll(async () => {
 
   await localKoinos.deployKoinContract();
   await localKoinos.mintKoinDefaultAccounts();
+  await localKoinos.deployNameServiceContract();
+  const [genesis, koin] = localKoinos.getAccounts();
+  await localKoinos.setNameServiceRecord('koin', koin.address);
 });
 
 afterAll(async () => {
@@ -63,7 +66,9 @@ test("registration", async () => {
   res = await nameserviceContract.functions.register({
     name: 'doe.koin',
     duration_increments: 3,
-    owner: doedotkoinDomainAcct.address
+    owner: doedotkoinDomainAcct.address,
+    payment_from: doedotkoinDomainAcct.address,
+    payment_token_address: koin.address
   });
 
   await res.transaction?.wait();
@@ -79,7 +84,9 @@ test("registration", async () => {
   res = await nameserviceContract.functions.register({
     name: 'john.doe.koin',
     duration_increments: 3,
-    owner: user1.address
+    owner: user1.address,
+    payment_from: user1.address,
+    payment_token_address: koin.address
   });
 
   await res.transaction?.wait();
@@ -92,15 +99,4 @@ test("registration", async () => {
   expect(res?.result?.domain).toBe('doe.koin');
   expect(res?.result?.owner).toBe(user1.address);
 
-  // expect(result?.value).toBe('9');
-
-  // const signer = Signer.fromWif('L59UtJcTdNBnrH2QSBA5beSUhRufRu3g6tScDTite6Msuj7U93tM');
-  // signer.provider = localKoinos.getProvider();
-  // let tkn = new Token(localKoinos.koin.address(), signer);
-
-  // try {
-  //   await tkn.mint(signer.address, 40);
-  // } catch (error) {
-  //   expect(error.message).toContain('can only mint token with contract authority');
-  // }
 });
