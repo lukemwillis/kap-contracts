@@ -28,7 +28,6 @@ message get_name_arguments {
   string name = 1;
 }
 
-
 /* 
   @description Get contract metadata
   @read-only true

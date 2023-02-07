@@ -32,7 +32,7 @@
                                 "type": "string",
                                 "id": 1
                             },
-                            "durationIncrements": {
+                            "duration_increments": {
                                 "type": "uint32",
                                 "id": 2
                             },
@@ -43,14 +43,14 @@
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
-                            "paymentFrom": {
+                            "payment_from": {
                                 "type": "bytes",
                                 "id": 4,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
-                            "paymentTokenAddress": {
+                            "payment_token_address": {
                                 "type": "bytes",
                                 "id": 5,
                                 "options": {
@@ -75,11 +75,11 @@
                     },
                     "metadata_object": {
                         "fields": {
-                            "tlaRegistrationFee": {
+                            "tla_registration_fee": {
                                 "type": "uint64",
                                 "id": 1
                             },
-                            "kapTokenAddress": {
+                            "kap_token_address": {
                                 "type": "bytes",
                                 "id": 2,
                                 "options": {
@@ -124,7 +124,7 @@
                                 "type": "string",
                                 "id": 2
                             },
-                            "durationIncrements": {
+                            "duration_increments": {
                                 "type": "uint32",
                                 "id": 3
                             },
@@ -135,14 +135,14 @@
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
-                            "paymentFrom": {
+                            "payment_from": {
                                 "type": "bytes",
                                 "id": 5,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
-                            "paymentTokenAddress": {
+                            "payment_token_address": {
                                 "type": "bytes",
                                 "id": 6,
                                 "options": {
