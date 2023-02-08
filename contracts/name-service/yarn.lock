@@ -1054,10 +1054,10 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==
 
-"@roamin/local-koinos@^0.4.7":
-  version "0.4.7"
-  resolved "https://registry.yarnpkg.com/@roamin/local-koinos/-/local-koinos-0.4.7.tgz#1345e94c60405b87232c45f7f54a4cfd66e5dcab"
-  integrity sha512-qa63A8EmnWdJuLhi9Zdj7Kt+zIyZxZ79D7MyLk63kSXb2co8kvzxQkTMO6hUHNlGltM25VJATnQ7ar6UWcYRCA==
+"@roamin/local-koinos@^0.4.8":
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/@roamin/local-koinos/-/local-koinos-0.4.8.tgz#30b2ce1f6e655898fa0570fa516779cf26befa89"
+  integrity sha512-Iceim5b6wXnmVKhnwhVocGEdHCMaPNknbqLU1/A1gzMpPlABKNpjMVzl2qqF+qvDwEfYnrv8wg9ETvH4pJN3kw==
   dependencies:
     "@koinos/proto-js" "^1.0.3"
     amqplib "^0.9.1"
