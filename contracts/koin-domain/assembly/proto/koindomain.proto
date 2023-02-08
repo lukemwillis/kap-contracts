@@ -18,5 +18,6 @@ message authorize_mint_arguments {
 }
 
 message authorize_mint_result {
-  uint64 value = 1;
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
 }

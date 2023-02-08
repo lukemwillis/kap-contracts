@@ -1,3 +1,4 @@
+import { System, Protobuf, authority } from "@koinos/sdk-as";
 import { testdomain } from "./proto/testdomain";
 
 export class Testdomain {
@@ -11,9 +12,11 @@ export class Testdomain {
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
 
+    // YOUR CODE HERE
+
     const res = new testdomain.authorize_mint_result();
-    res.expiration = 1770429035203;
-    res.grace_period_end = 1770429035204;
+    // res.expiration = ;
+    // res.grace_period_end = ;
 
     return res;
   }
@@ -21,11 +24,12 @@ export class Testdomain {
   authorize_burn(
     args: testdomain.authorize_burn_arguments
   ): testdomain.authorize_burn_result {
-    const name = args.name;
-    
-    const res = new testdomain.authorize_burn_result();
+    // const name = args.name;
 
-    res.authorized = name!.name != 'cannot_burn.koin';
+    // YOUR CODE HERE
+
+    const res = new testdomain.authorize_burn_result();
+    // res.authorized = ;
 
     return res;
   }
@@ -38,9 +42,11 @@ export class Testdomain {
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
 
+    // YOUR CODE HERE
+
     const res = new testdomain.authorize_renewal_result();
-    res.expiration = 1770428796867;
-    res.grace_period_end = 1770428796869;
+    // res.expiration = ;
+    // res.grace_period_end = ;
 
     return res;
   }

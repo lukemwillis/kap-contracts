@@ -30,7 +30,7 @@
         },
         "get_name": {
             "argument": "nameservice.get_name_arguments",
-            "return": "nameservice.get_name_result",
+            "return": "nameservice.name_object",
             "description": "Get name object",
             "entry_point": 3842443798,
             "read_only": true
@@ -144,54 +144,6 @@
                             }
                         }
                     },
-                    "get_name_result": {
-                        "fields": {
-                            "domain": {
-                                "type": "string",
-                                "id": 1
-                            },
-                            "name": {
-                                "type": "string",
-                                "id": 2
-                            },
-                            "owner": {
-                                "type": "bytes",
-                                "id": 3,
-                                "options": {
-                                    "(koinos.btype)": "ADDRESS"
-                                }
-                            },
-                            "expiration": {
-                                "type": "uint64",
-                                "id": 4,
-                                "options": {
-                                    "jstype": "JS_STRING"
-                                }
-                            },
-                            "sub_names_count": {
-                                "type": "uint64",
-                                "id": 5,
-                                "options": {
-                                    "jstype": "JS_STRING"
-                                }
-                            },
-                            "locked_kap_tokens": {
-                                "type": "uint64",
-                                "id": 6,
-                                "options": {
-                                    "jstype": "JS_STRING"
-                                }
-                            },
-                            "has_expired": {
-                                "type": "bool",
-                                "id": 7
-                            },
-                            "can_be_reclaimed": {
-                                "type": "bool",
-                                "id": 8
-                            }
-                        }
-                    },
                     "get_names_arguments": {
                         "fields": {
                             "owner": {
@@ -207,7 +159,7 @@
                         "fields": {
                             "names": {
                                 "rule": "repeated",
-                                "type": "get_name_result",
+                                "type": "name_object",
                                 "id": 1
                             }
                         }
@@ -257,16 +209,23 @@
                                     "jstype": "JS_STRING"
                                 }
                             },
-                            "sub_names_count": {
+                            "grace_period_end": {
                                 "type": "uint64",
                                 "id": 5,
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
                             },
-                            "locked_kap_tokens": {
+                            "sub_names_count": {
                                 "type": "uint64",
                                 "id": 6,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "locked_kap_tokens": {
+                                "type": "uint64",
+                                "id": 7,
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
@@ -338,6 +297,10 @@
                             "expiration": {
                                 "type": "uint64",
                                 "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
                             }
                         }
                     },
@@ -388,6 +351,10 @@
                             "expiration": {
                                 "type": "uint64",
                                 "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
                             }
                         }
                     },

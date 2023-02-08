@@ -275,127 +275,6 @@ export namespace nameservice {
     }
   }
 
-  export class get_name_result {
-    static encode(message: get_name_result, writer: Writer): void {
-      if (message.domain.length != 0) {
-        writer.uint32(10);
-        writer.string(message.domain);
-      }
-
-      if (message.name.length != 0) {
-        writer.uint32(18);
-        writer.string(message.name);
-      }
-
-      if (message.owner.length != 0) {
-        writer.uint32(26);
-        writer.bytes(message.owner);
-      }
-
-      if (message.expiration != 0) {
-        writer.uint32(32);
-        writer.uint64(message.expiration);
-      }
-
-      if (message.sub_names_count != 0) {
-        writer.uint32(40);
-        writer.uint64(message.sub_names_count);
-      }
-
-      if (message.locked_kap_tokens != 0) {
-        writer.uint32(48);
-        writer.uint64(message.locked_kap_tokens);
-      }
-
-      if (message.has_expired != false) {
-        writer.uint32(56);
-        writer.bool(message.has_expired);
-      }
-
-      if (message.can_be_reclaimed != false) {
-        writer.uint32(64);
-        writer.bool(message.can_be_reclaimed);
-      }
-    }
-
-    static decode(reader: Reader, length: i32): get_name_result {
-      const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new get_name_result();
-
-      while (reader.ptr < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1:
-            message.domain = reader.string();
-            break;
-
-          case 2:
-            message.name = reader.string();
-            break;
-
-          case 3:
-            message.owner = reader.bytes();
-            break;
-
-          case 4:
-            message.expiration = reader.uint64();
-            break;
-
-          case 5:
-            message.sub_names_count = reader.uint64();
-            break;
-
-          case 6:
-            message.locked_kap_tokens = reader.uint64();
-            break;
-
-          case 7:
-            message.has_expired = reader.bool();
-            break;
-
-          case 8:
-            message.can_be_reclaimed = reader.bool();
-            break;
-
-          default:
-            reader.skipType(tag & 7);
-            break;
-        }
-      }
-
-      return message;
-    }
-
-    domain: string;
-    name: string;
-    owner: Uint8Array;
-    expiration: u64;
-    sub_names_count: u64;
-    locked_kap_tokens: u64;
-    has_expired: bool;
-    can_be_reclaimed: bool;
-
-    constructor(
-      domain: string = "",
-      name: string = "",
-      owner: Uint8Array = new Uint8Array(0),
-      expiration: u64 = 0,
-      sub_names_count: u64 = 0,
-      locked_kap_tokens: u64 = 0,
-      has_expired: bool = false,
-      can_be_reclaimed: bool = false
-    ) {
-      this.domain = domain;
-      this.name = name;
-      this.owner = owner;
-      this.expiration = expiration;
-      this.sub_names_count = sub_names_count;
-      this.locked_kap_tokens = locked_kap_tokens;
-      this.has_expired = has_expired;
-      this.can_be_reclaimed = can_be_reclaimed;
-    }
-  }
-
   export class get_names_arguments {
     static encode(message: get_names_arguments, writer: Writer): void {
       if (message.owner.length != 0) {
@@ -437,7 +316,7 @@ export namespace nameservice {
       for (let i = 0; i < unique_name_names.length; ++i) {
         writer.uint32(10);
         writer.fork();
-        get_name_result.encode(unique_name_names[i], writer);
+        name_object.encode(unique_name_names[i], writer);
         writer.ldelim();
       }
     }
@@ -450,7 +329,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.names.push(get_name_result.decode(reader, reader.uint32()));
+            message.names.push(name_object.decode(reader, reader.uint32()));
             break;
 
           default:
@@ -462,9 +341,9 @@ export namespace nameservice {
       return message;
     }
 
-    names: Array<get_name_result>;
+    names: Array<name_object>;
 
-    constructor(names: Array<get_name_result> = []) {
+    constructor(names: Array<name_object> = []) {
       this.names = names;
     }
   }
@@ -586,13 +465,18 @@ export namespace nameservice {
         writer.uint64(message.expiration);
       }
 
-      if (message.sub_names_count != 0) {
+      if (message.grace_period_end != 0) {
         writer.uint32(40);
+        writer.uint64(message.grace_period_end);
+      }
+
+      if (message.sub_names_count != 0) {
+        writer.uint32(48);
         writer.uint64(message.sub_names_count);
       }
 
       if (message.locked_kap_tokens != 0) {
-        writer.uint32(48);
+        writer.uint32(56);
         writer.uint64(message.locked_kap_tokens);
       }
     }
@@ -621,10 +505,14 @@ export namespace nameservice {
             break;
 
           case 5:
-            message.sub_names_count = reader.uint64();
+            message.grace_period_end = reader.uint64();
             break;
 
           case 6:
+            message.sub_names_count = reader.uint64();
+            break;
+
+          case 7:
             message.locked_kap_tokens = reader.uint64();
             break;
 
@@ -641,6 +529,7 @@ export namespace nameservice {
     name: string;
     owner: Uint8Array;
     expiration: u64;
+    grace_period_end: u64;
     sub_names_count: u64;
     locked_kap_tokens: u64;
 
@@ -649,6 +538,7 @@ export namespace nameservice {
       name: string = "",
       owner: Uint8Array = new Uint8Array(0),
       expiration: u64 = 0,
+      grace_period_end: u64 = 0,
       sub_names_count: u64 = 0,
       locked_kap_tokens: u64 = 0
     ) {
@@ -656,6 +546,7 @@ export namespace nameservice {
       this.name = name;
       this.owner = owner;
       this.expiration = expiration;
+      this.grace_period_end = grace_period_end;
       this.sub_names_count = sub_names_count;
       this.locked_kap_tokens = locked_kap_tokens;
     }
@@ -850,6 +741,11 @@ export namespace nameservice {
         writer.uint32(8);
         writer.uint64(message.expiration);
       }
+
+      if (message.grace_period_end != 0) {
+        writer.uint32(16);
+        writer.uint64(message.grace_period_end);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_mint_res {
@@ -863,6 +759,10 @@ export namespace nameservice {
             message.expiration = reader.uint64();
             break;
 
+          case 2:
+            message.grace_period_end = reader.uint64();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -873,9 +773,11 @@ export namespace nameservice {
     }
 
     expiration: u64;
+    grace_period_end: u64;
 
-    constructor(expiration: u64 = 0) {
+    constructor(expiration: u64 = 0, grace_period_end: u64 = 0) {
       this.expiration = expiration;
+      this.grace_period_end = grace_period_end;
     }
   }
 
@@ -1036,6 +938,11 @@ export namespace nameservice {
         writer.uint32(8);
         writer.uint64(message.expiration);
       }
+
+      if (message.grace_period_end != 0) {
+        writer.uint32(16);
+        writer.uint64(message.grace_period_end);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_renewal_res {
@@ -1049,6 +956,10 @@ export namespace nameservice {
             message.expiration = reader.uint64();
             break;
 
+          case 2:
+            message.grace_period_end = reader.uint64();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -1059,9 +970,11 @@ export namespace nameservice {
     }
 
     expiration: u64;
+    grace_period_end: u64;
 
-    constructor(expiration: u64 = 0) {
+    constructor(expiration: u64 = 0, grace_period_end: u64 = 0) {
       this.expiration = expiration;
+      this.grace_period_end = grace_period_end;
     }
   }
 

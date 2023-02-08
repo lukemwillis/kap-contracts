@@ -55,7 +55,7 @@ export function main(): i32 {
         ProtoNamespace.get_name_arguments.decode
       );
       const res = c.get_name(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.get_name_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.name_object.encode);
       break;
     }
 

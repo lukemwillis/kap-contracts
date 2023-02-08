@@ -101,9 +101,14 @@ export namespace koindomain {
   @unmanaged
   export class authorize_mint_result {
     static encode(message: authorize_mint_result, writer: Writer): void {
-      if (message.value != 0) {
+      if (message.expiration != 0) {
         writer.uint32(8);
-        writer.uint64(message.value);
+        writer.uint64(message.expiration);
+      }
+
+      if (message.grace_period_end != 0) {
+        writer.uint32(16);
+        writer.uint64(message.grace_period_end);
       }
     }
 
@@ -115,7 +120,11 @@ export namespace koindomain {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.value = reader.uint64();
+            message.expiration = reader.uint64();
+            break;
+
+          case 2:
+            message.grace_period_end = reader.uint64();
             break;
 
           default:
@@ -127,10 +136,12 @@ export namespace koindomain {
       return message;
     }
 
-    value: u64;
+    expiration: u64;
+    grace_period_end: u64;
 
-    constructor(value: u64 = 0) {
-      this.value = value;
+    constructor(expiration: u64 = 0, grace_period_end: u64 = 0) {
+      this.expiration = expiration;
+      this.grace_period_end = grace_period_end;
     }
   }
 }

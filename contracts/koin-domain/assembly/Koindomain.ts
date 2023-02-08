@@ -21,11 +21,16 @@ export class Koindomain {
     // handle expiration
     const DAYS_PER_INCREMENT = 365;
     const MILLISECONDS_PER_DAY: u64 = 86400000; 
+    const GRACE_PERIOD = 30;
 
     const now = System.getHeadInfo().head_block_time;
     const expirationInDays = SafeMath.mul(args.duration_increments, DAYS_PER_INCREMENT);
     const expirationInMs = SafeMath.mul(expirationInDays, MILLISECONDS_PER_DAY);
+    const expiration = SafeMath.add(now, expirationInMs);
 
-    return new koindomain.authorize_mint_result(SafeMath.add(now, expirationInMs));
+    const gracePeriodEndInMs = SafeMath.mul(GRACE_PERIOD, MILLISECONDS_PER_DAY);
+    const gracePeriodEnd = SafeMath.add(expiration, gracePeriodEndInMs);
+
+    return new koindomain.authorize_mint_result(expiration, gracePeriodEnd);
   }
 }

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package testdomain;
 
+import "koinos/options.proto"; 
+
 /* 
   @description Authorize the mint of a name
   @read-only false
@@ -17,6 +19,7 @@ message authorize_mint_arguments {
 
 message authorize_mint_result {
   uint64 expiration = 1;
+  uint64 grace_period_end = 2;
 }
 
 /* 
@@ -44,16 +47,15 @@ message authorize_renewal_arguments {
 
 message authorize_renewal_result {
   uint64 expiration = 1;
+  uint64 grace_period_end = 2;
 }
 
-/* 
-  @description Authorize the reclaim of a name
-  @read-only false
-*/
-message authorize_reclaim_arguments {
-  name_object name = 1;
-}
-
-message authorize_reclaim_result {
-  bool authorized = 1;
+message name_object {
+  string domain = 1;
+  string name = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  uint64 expiration = 4 [jstype = JS_STRING];
+  uint64 grace_period_end = 5 [jstype = JS_STRING];
+  uint64 sub_names_count = 6 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 7  [jstype = JS_STRING];
 }

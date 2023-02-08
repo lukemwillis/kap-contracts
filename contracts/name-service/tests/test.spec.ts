@@ -41,11 +41,11 @@ test("registration", async () => {
 
   // deploy koindomain  
   // @ts-ignore abi is compatible
-  const koindomainContract = await localKoinos.deployContract(koinDomainAcct.wif, '../koin-domain/build/debug/contract.wasm', abi);
+  const koindomainContract = await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
 
   // deploy doe.koin  
   // @ts-ignore abi is compatible
-  const doedotkoinDomainContract = await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../koin-domain/build/debug/contract.wasm', abi);
+  const doedotkoinDomainContract = await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
 
 
   let res = await nameserviceContract.functions.mint({
@@ -62,6 +62,7 @@ test("registration", async () => {
   expect(res?.result?.name).toBe('koin');
   expect(res?.result?.owner).toBe(koinDomainAcct.address);
   expect(res?.result?.expiration).toBe('0');
+  expect(res?.result?.grace_period_end).toBe('0');
 
   res = await nameserviceContract.functions.mint({
     name: 'doe.koin',

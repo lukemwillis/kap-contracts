@@ -1,5 +1,5 @@
 import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
-import { AUTHORIZE_RECLAIM_ENTRYPOINT, AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT } from "./Constants";
+import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT } from "./Constants";
 import { nameservice } from "./proto/nameservice";
 import { Addresses } from "./state/Addresses";
 import { Metadata } from "./state/Metadata";
@@ -57,7 +57,7 @@ export class Nameservice {
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
     domainContractId: Uint8Array
-  ): u64 {
+  ): nameservice.authorize_mint_res {
     const authArgs = new nameservice.authorize_mint_args(
       name,
       domain,
@@ -70,7 +70,8 @@ export class Nameservice {
     const callRes = System.call(domainContractId, AUTHORIZE_MINT_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_mint_args.encode));
     System.require(callRes.code == 0, 'failed to authorize mint');
     const decodedCallRes = Protobuf.decode<nameservice.authorize_mint_res>(callRes.res.object, nameservice.authorize_mint_res.decode);
-    return decodedCallRes.expiration;
+
+    return decodedCallRes;
   }
 
   /**
@@ -87,6 +88,7 @@ export class Nameservice {
     const callRes = System.call(domainContractId, AUTHORIZE_BURN_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_burn_args.encode));
     System.require(callRes.code == 0, 'failed to authorize burn');
     const decodedCallRes = Protobuf.decode<nameservice.authorize_burn_res>(callRes.res.object, nameservice.authorize_burn_res.decode);
+
     return decodedCallRes.authorized;
   }
 
@@ -100,7 +102,7 @@ export class Nameservice {
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
     domainContractId: Uint8Array
-  ): u64 {
+  ): nameservice.authorize_renewal_res {
     const authArgs = new nameservice.authorize_renewal_args(
       nameObj,
       durationIncrements,
@@ -111,24 +113,8 @@ export class Nameservice {
     const callRes = System.call(domainContractId, AUTHORIZE_RENEWAL_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_renewal_args.encode));
     System.require(callRes.code == 0, 'failed to authorize reclaim');
     const decodedCallRes = Protobuf.decode<nameservice.authorize_renewal_res>(callRes.res.object, nameservice.authorize_renewal_res.decode);
-    return decodedCallRes.expiration;
-  }
 
-  /**
-   * Call a domain contract to check if the reclaim of a name is allowed
-   */
-  private autorizeReclaim(
-    nameObj: nameservice.name_object,
-    domainContractId: Uint8Array
-  ): bool {
-    const authArgs = new nameservice.authorize_reclaim_args(
-      nameObj
-    );
-
-    const callRes = System.call(domainContractId, AUTHORIZE_RECLAIM_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_reclaim_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize reclaim');
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_reclaim_res>(callRes.res.object, nameservice.authorize_reclaim_res.decode);
-    return decodedCallRes.authorized;
+    return decodedCallRes;
   }
 
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
@@ -183,36 +169,26 @@ export class Nameservice {
 
       // if name is already taken, check expiration and/or if it can be reclaimed
       if (nameObj != null) {
-        // check expiration
         const now = System.getHeadInfo().head_block_time;
-
+        // check expiration
         if (nameObj.expiration == 0 || nameObj.expiration > now) {
           System.revert(`name "${name}" is already taken`);
-        } else {
-          // otherwise, it is expired, so check reclaim
-          // call the "autorize_reclaim" entrypoint of the contract hosted at "owner" address
-          // if this call doesn't revert the transaction and return true,
-          // proceed with the mint
-          const authorized = this.autorizeReclaim(
-            nameObj,
-            domainObj!.owner
-          );
-
-          if (!authorized) {
-            System.revert(`cannot reclaim name "${name}"`);
-          }
+        }
+        // check grace period
+        else if (nameObj.grace_period_end > now) {
+          System.revert(`grace period for name "${name}" has not ended yet`);
         }
       } else {
         nameObj = new nameservice.name_object(nameKey.domain, nameKey.name);
       }
 
       // call the "autorize_mint" entrypoint of the contract hosted at "owner" address
-      // this call must return the name expiration as uint64
+      // this call must return the name expiration as uint64 and the grace period end as uint64
       // by default, nobody can mint a name on a domain because:
       // if there is no contract at "owner", then the system.call will fail
       // if the "autorize_mint" entrypoint is not setup  in the contract, then the system.call will fail
       // this means that "owner" has to setup a contract in order to manage its name mints
-      const expiration = this.autorizeMint(
+      const autorizeMintResult = this.autorizeMint(
         nameKey.name,
         nameKey.domain,
         duration_increments,
@@ -222,7 +198,8 @@ export class Nameservice {
         domainObj!.owner
       );
 
-      nameObj.expiration = expiration;
+      nameObj.expiration = autorizeMintResult.expiration;
+      nameObj.grace_period_end = autorizeMintResult.grace_period_end;
 
       // update domain's sub_names_count
       domainObj!.sub_names_count = SafeMath.add(domainObj!.sub_names_count, 1);
@@ -409,7 +386,7 @@ export class Nameservice {
     // call the "autorize_renewal" entrypoint of the contract hosted at "owner" address
     // if this call doesn't revert the transaction,
     // proceed with the renewal
-    const expiration = this.autorizeRenewal(
+    const autorizeRenewalResult = this.autorizeRenewal(
       nameObj!,
       duration_increments,
       payment_from,
@@ -417,13 +394,14 @@ export class Nameservice {
       domainObj.owner
     );
 
-    nameObj!.expiration = expiration;
+    nameObj!.expiration = autorizeRenewalResult.expiration;
+    nameObj!.grace_period_end = autorizeRenewalResult.grace_period_end;
     names.put(nameKey, nameObj!);
 
     return new nameservice.empty_object();
   }
 
-  get_name(args: nameservice.get_name_arguments): nameservice.get_name_result {
+  get_name(args: nameservice.get_name_arguments): nameservice.name_object {
     // parseName will fail if args.name has an invalid format
     const nameKey = this.parseName(args.name);
 
@@ -435,40 +413,20 @@ export class Nameservice {
       // check expiration
       const now = System.getHeadInfo().head_block_time;
 
-      const result = new nameservice.get_name_result(
-        nameObj.domain,
-        nameObj.name,
-        nameObj.owner,
-        nameObj.expiration,
-        nameObj.sub_names_count,
-        nameObj.locked_kap_tokens
-      );
-
-      // if expired
-      if (nameObj.expiration != 0 && nameObj.expiration <= now) {
-        result.has_expired = true;
-
-        // call the "autorize_reclaim" entrypoint of the contract hosted at "owner" address
-        // if this call doesn't revert the transaction and return true,
-        const domainKey = this.parseName(nameKey.domain);
-        const domainObj = names.get(domainKey);
-
-        result.can_be_reclaimed = this.autorizeReclaim(
-          nameObj,
-          domainObj!.owner
-        );
-
-        // if the name can be reclaimed
-        // it means that the name has expired and the grace period has ended
-        if (result.can_be_reclaimed) {
-          result.owner = new Uint8Array(0);
-        }
+      // if expired and grace period has ended
+      if (
+        nameObj.expiration != 0
+        && nameObj.expiration <= now
+        && nameObj.grace_period_end <= now
+      ) {
+        // clear the owner
+        nameObj.owner = new Uint8Array(0);
       }
 
-      return result;
+      return nameObj;
     }
 
-    return new nameservice.get_name_result();
+    return new nameservice.name_object();
   }
 
   get_names(
@@ -489,9 +447,6 @@ export class Nameservice {
     let addressObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
     let tmpAddressKey: nameservice.address_key;
     let nameObj: nameservice.name_object;
-    let nameResult: nameservice.get_name_result;
-    let domainKey: nameservice.name_object;
-    let domainObj: nameservice.name_object;
 
     const now = System.getHeadInfo().head_block_time;
 
@@ -505,36 +460,13 @@ export class Nameservice {
           nameObj = names.get(addressObj.value)!;
 
           // check expiration
-          nameResult = new nameservice.get_name_result(
-            nameObj.domain,
-            nameObj.name,
-            nameObj.owner,
-            nameObj.expiration,
-            nameObj.sub_names_count,
-            nameObj.locked_kap_tokens
-          );
-
-          // if expired
-          if (nameObj.expiration != 0 && nameObj.expiration <= now) {
-            nameResult.has_expired = true;
-
-            // call the "autorize_reclaim" entrypoint of the contract hosted at "owner" address
-            // if this call doesn't revert the transaction and return true,
-            domainKey = this.parseName(nameObj.domain);
-            domainObj = names.get(domainKey)!;
-
-            nameResult.can_be_reclaimed = this.autorizeReclaim(
-              nameObj,
-              domainObj.owner
-            );
-
-            // if the name cannot be reclaimed
-            // it means that the name has expired, but the grace period has not ended
-            if (!nameResult.can_be_reclaimed) {
-              res.names.push(nameResult);
-            }
-          } else {
-            res.names.push(nameResult);
+          // if has not expired and grace period has not ended
+          if (
+            nameObj.expiration == 0 ||
+            nameObj.expiration > now ||
+            nameObj.grace_period_end > now
+          ) {
+            res.names.push(nameObj);
           }
 
           addressKey = tmpAddressKey;

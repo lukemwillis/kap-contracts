@@ -50,20 +50,19 @@ export class Nameservice {
     return res;
   }
 
-  get_name(args: nameservice.get_name_arguments): nameservice.get_name_result {
+  get_name(args: nameservice.get_name_arguments): nameservice.name_object {
     // const name = args.name;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.get_name_result();
+    const res = new nameservice.name_object();
     // res.domain = ;
     // res.name = ;
     // res.owner = ;
     // res.expiration = ;
+    // res.grace_period_end = ;
     // res.sub_names_count = ;
     // res.locked_kap_tokens = ;
-    // res.has_expired = ;
-    // res.can_be_reclaimed = ;
 
     return res;
   }

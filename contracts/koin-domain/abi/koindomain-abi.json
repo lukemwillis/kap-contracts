@@ -51,9 +51,13 @@
                     },
                     "authorize_mint_result": {
                         "fields": {
-                            "value": {
+                            "expiration": {
                                 "type": "uint64",
                                 "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
                             }
                         }
                     }

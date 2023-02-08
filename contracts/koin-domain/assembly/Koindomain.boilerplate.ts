@@ -15,7 +15,8 @@ export class Koindomain {
     // YOUR CODE HERE
 
     const res = new koindomain.authorize_mint_result();
-    // res.value = ;
+    // res.expiration = ;
+    // res.grace_period_end = ;
 
     return res;
   }

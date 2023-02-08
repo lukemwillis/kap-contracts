@@ -53,20 +53,10 @@ message renew_arguments {
 /* 
   @description Get name object
   @read-only true
+  @result name_object
 */
 message get_name_arguments {
   string name = 1;
-}
-
-message get_name_result {
-  string domain = 1;
-  string name = 2;
-  bytes owner = 3 [(koinos.btype) = ADDRESS];
-  uint64 expiration = 4 [jstype = JS_STRING];
-  uint64 sub_names_count = 5 [jstype = JS_STRING];
-  uint64 locked_kap_tokens = 6  [jstype = JS_STRING];
-  bool has_expired = 7;
-  bool can_be_reclaimed = 8;
 }
 
 /* 
@@ -78,7 +68,7 @@ message get_names_arguments {
 }
 
 message get_names_result {
-  repeated get_name_result names = 1;
+  repeated name_object names = 1;
 }
 
 /* 
@@ -106,8 +96,9 @@ message name_object {
   string name = 2;
   bytes owner = 3 [(koinos.btype) = ADDRESS];
   uint64 expiration = 4 [jstype = JS_STRING];
-  uint64 sub_names_count = 5 [jstype = JS_STRING];
-  uint64 locked_kap_tokens = 6  [jstype = JS_STRING];
+  uint64 grace_period_end = 5 [jstype = JS_STRING];
+  uint64 sub_names_count = 6 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 7  [jstype = JS_STRING];
 }
 
 message address_object {
@@ -132,6 +123,7 @@ message authorize_mint_args {
 
 message authorize_mint_res {
   uint64 expiration = 1;
+  uint64 grace_period_end = 2;
 }
 
 message authorize_burn_args {
@@ -151,6 +143,7 @@ message authorize_renewal_args {
 
 message authorize_renewal_res {
   uint64 expiration = 1;
+  uint64 grace_period_end = 2;
 }
 
 message authorize_reclaim_args {
