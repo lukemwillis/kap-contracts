@@ -70,6 +70,18 @@ message get_name_result {
 }
 
 /* 
+  @description Get names that belong to an address
+  @read-only true
+*/
+message get_names_arguments {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+}
+
+message get_names_result {
+  repeated get_name_result names = 1;
+}
+
+/* 
   @description Get contract metadata
   @read-only true
   @result metadata_object
@@ -96,6 +108,15 @@ message name_object {
   uint64 expiration = 4 [jstype = JS_STRING];
   uint64 sub_names_count = 5 [jstype = JS_STRING];
   uint64 locked_kap_tokens = 6  [jstype = JS_STRING];
+}
+
+message address_object {
+  uint64 names_count = 1;
+}
+
+message address_key {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+  bytes name_hash = 2;
 }
 
 // External calls objects

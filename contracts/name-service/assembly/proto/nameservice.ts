@@ -396,6 +396,79 @@ export namespace nameservice {
     }
   }
 
+  export class get_names_arguments {
+    static encode(message: get_names_arguments, writer: Writer): void {
+      if (message.owner.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.owner);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): get_names_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new get_names_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.owner = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    owner: Uint8Array;
+
+    constructor(owner: Uint8Array = new Uint8Array(0)) {
+      this.owner = owner;
+    }
+  }
+
+  export class get_names_result {
+    static encode(message: get_names_result, writer: Writer): void {
+      const unique_name_names = message.names;
+      for (let i = 0; i < unique_name_names.length; ++i) {
+        writer.uint32(10);
+        writer.fork();
+        get_name_result.encode(unique_name_names[i], writer);
+        writer.ldelim();
+      }
+    }
+
+    static decode(reader: Reader, length: i32): get_names_result {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new get_names_result();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.names.push(get_name_result.decode(reader, reader.uint32()));
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    names: Array<get_name_result>;
+
+    constructor(names: Array<get_name_result> = []) {
+      this.names = names;
+    }
+  }
+
   @unmanaged
   export class get_metadata_arguments {
     static encode(message: get_metadata_arguments, writer: Writer): void {}
@@ -585,6 +658,91 @@ export namespace nameservice {
       this.expiration = expiration;
       this.sub_names_count = sub_names_count;
       this.locked_kap_tokens = locked_kap_tokens;
+    }
+  }
+
+  @unmanaged
+  export class address_object {
+    static encode(message: address_object, writer: Writer): void {
+      if (message.names_count != 0) {
+        writer.uint32(8);
+        writer.uint64(message.names_count);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): address_object {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new address_object();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.names_count = reader.uint64();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    names_count: u64;
+
+    constructor(names_count: u64 = 0) {
+      this.names_count = names_count;
+    }
+  }
+
+  export class address_key {
+    static encode(message: address_key, writer: Writer): void {
+      if (message.owner.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.owner);
+      }
+
+      if (message.name_hash.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.name_hash);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): address_key {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new address_key();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.owner = reader.bytes();
+            break;
+
+          case 2:
+            message.name_hash = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    owner: Uint8Array;
+    name_hash: Uint8Array;
+
+    constructor(
+      owner: Uint8Array = new Uint8Array(0),
+      name_hash: Uint8Array = new Uint8Array(0)
+    ) {
+      this.owner = owner;
+      this.name_hash = name_hash;
     }
   }
 

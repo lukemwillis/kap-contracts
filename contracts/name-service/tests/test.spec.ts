@@ -99,4 +99,23 @@ test("registration", async () => {
   expect(res?.result?.domain).toBe('doe.koin');
   expect(res?.result?.owner).toBe(user1.address);
 
+  try {
+    res = await nameserviceContract.functions.mint({
+      name: 'al.doe.koin',
+      duration_increments: 3,
+      owner: user1.address,
+      payment_from: user1.address,
+      payment_token_address: koin.address
+    });
+  
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+    });
+
+    console.log(res.result);
+  } catch (error) {
+    console.log(error);
+  }
 });

@@ -1,6 +1,7 @@
-import { authority, error, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
+import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
 import { AUTHORIZE_RECLAIM_ENTRYPOINT, AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT } from "./Constants";
 import { nameservice } from "./proto/nameservice";
+import { Addresses } from "./state/Addresses";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
 
@@ -231,9 +232,25 @@ export class Nameservice {
     // if the execution reaches this line, then the TLA or name are authorized
     // so we can proceed with saving it
 
+    // update addresses index
+    const addresses = new Addresses(this.contractId);
+
+    const nameKeyHash = System.hash(
+      Crypto.multicodec.sha2_256,
+      Protobuf.encode(nameKey, nameservice.name_object.encode)
+    );
+
+    // remove old record
+    let addressKey = new nameservice.address_key(nameObj.owner, nameKeyHash!);
+    addresses.remove(addressKey);
+
     // save new name
     nameObj.owner = owner;
     names.put(nameKey, nameObj);
+
+    // add new record
+    addressKey = new nameservice.address_key(owner, nameKeyHash!);
+    addresses.put(addressKey, nameKey);
 
     return new nameservice.empty_object();
   }
@@ -254,6 +271,15 @@ export class Nameservice {
 
     // verify ownership
     const callerData = System.getCaller();
+
+    // calculate nameKey hash
+    const addresses = new Addresses(this.contractId);
+    const nameKeyHash = System.hash(
+      Crypto.multicodec.sha2_256,
+      Protobuf.encode(nameKey, nameservice.name_object.encode)
+    );
+    const addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
+
     System.require(
       callerData.caller == nameObj!.owner
       || System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
@@ -261,10 +287,11 @@ export class Nameservice {
       error.error_code.authorization_failure
     );
 
+    // can only burn a name if no sub_names were setup
+    System.require(nameObj!.sub_names_count == 0, `name "${name}" cannot be burned because sub names exist`);
+
     // if TLA
     if (nameObj!.domain.length == 0) {
-      System.require(nameObj!.sub_names_count == 0, `name "${name}" cannot be burned because sub names exist`);
-
       // unlock $KAP tokens
       if (nameObj!.locked_kap_tokens > 0) {
         const metadata = new Metadata(this.contractId).get()!;
@@ -275,6 +302,9 @@ export class Nameservice {
 
       // remove TLA from state
       names.remove(nameKey);
+
+      // delete name from addresses
+      addresses.remove(addressKey);
     } else {
       // get domain object
       const domainKey = this.parseName(nameKey.domain);
@@ -291,6 +321,9 @@ export class Nameservice {
       if (authorized) {
         // delete name from the state
         names.remove(nameKey);
+
+        // delete name from addresses
+        addresses.remove(addressKey);
 
         // update domain sub_names_count
         domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
@@ -326,9 +359,24 @@ export class Nameservice {
       error.error_code.authorization_failure
     );
 
+    // calculate nameKey hash
+    const addresses = new Addresses(this.contractId);
+    const nameKeyHash = System.hash(
+      Crypto.multicodec.sha2_256,
+      Protobuf.encode(nameKey, nameservice.name_object.encode)
+    );
+
+    // remove old address record
+    let addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
+    addresses.remove(addressKey);
+
     // transfer ownership
     nameObj!.owner = to;
     names.put(nameKey, nameObj!);
+
+    // add new address record
+    addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
+    addresses.put(addressKey, nameKey);
 
     return new nameservice.empty_object();
   }
@@ -399,7 +447,7 @@ export class Nameservice {
       // if expired
       if (nameObj.expiration != 0 && nameObj.expiration <= now) {
         result.has_expired = true;
-        
+
         // call the "autorize_reclaim" entrypoint of the contract hosted at "owner" address
         // if this call doesn't revert the transaction and return true,
         const domainKey = this.parseName(nameKey.domain);
@@ -421,6 +469,85 @@ export class Nameservice {
     }
 
     return new nameservice.get_name_result();
+  }
+
+  get_names(
+    args: nameservice.get_names_arguments
+  ): nameservice.get_names_result {
+    const owner = args.owner;
+
+    const names = new Names(this.contractId);
+    const addresses = new Addresses(this.contractId);
+    let addressKey = new nameservice.address_key(
+      owner,
+      new Uint8Array(32).fill(0)
+    );
+
+    const res = new nameservice.get_names_result();
+
+    let done = false;
+    let addressObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
+    let tmpAddressKey: nameservice.address_key;
+    let nameObj: nameservice.name_object;
+    let nameResult: nameservice.get_name_result;
+    let domainKey: nameservice.name_object;
+    let domainObj: nameservice.name_object;
+
+    const now = System.getHeadInfo().head_block_time;
+
+    do {
+      addressObj = addresses.getNext(addressKey);
+
+      if (addressObj) {
+        tmpAddressKey = Protobuf.decode<nameservice.address_key>(addressObj.key!, nameservice.address_key.decode);
+
+        if (Arrays.equal(tmpAddressKey.owner, owner)) {
+          nameObj = names.get(addressObj.value)!;
+
+          // check expiration
+          nameResult = new nameservice.get_name_result(
+            nameObj.domain,
+            nameObj.name,
+            nameObj.owner,
+            nameObj.expiration,
+            nameObj.sub_names_count,
+            nameObj.locked_kap_tokens
+          );
+
+          // if expired
+          if (nameObj.expiration != 0 && nameObj.expiration <= now) {
+            nameResult.has_expired = true;
+
+            // call the "autorize_reclaim" entrypoint of the contract hosted at "owner" address
+            // if this call doesn't revert the transaction and return true,
+            domainKey = this.parseName(nameObj.domain);
+            domainObj = names.get(domainKey)!;
+
+            nameResult.can_be_reclaimed = this.autorizeReclaim(
+              nameObj,
+              domainObj.owner
+            );
+
+            // if the name cannot be reclaimed
+            // it means that the name has expired, but the grace period has not ended
+            if (!nameResult.can_be_reclaimed) {
+              res.names.push(nameResult);
+            }
+          } else {
+            res.names.push(nameResult);
+          }
+
+          addressKey = tmpAddressKey;
+        } else {
+          done = true;
+        }
+      } else {
+        done = true;
+      }
+
+    } while (!done);
+
+    return res;
   }
 
   get_metadata(

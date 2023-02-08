@@ -35,6 +35,13 @@
             "entry_point": 3842443798,
             "read_only": true
         },
+        "get_names": {
+            "argument": "nameservice.get_names_arguments",
+            "return": "nameservice.get_names_result",
+            "description": "Get names that belong to an address",
+            "entry_point": 3445384472,
+            "read_only": true
+        },
         "get_metadata": {
             "argument": "nameservice.get_metadata_arguments",
             "return": "nameservice.metadata_object",
@@ -185,6 +192,26 @@
                             }
                         }
                     },
+                    "get_names_arguments": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "get_names_result": {
+                        "fields": {
+                            "names": {
+                                "rule": "repeated",
+                                "type": "get_name_result",
+                                "id": 1
+                            }
+                        }
+                    },
                     "get_metadata_arguments": {
                         "fields": {}
                     },
@@ -243,6 +270,29 @@
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
+                            }
+                        }
+                    },
+                    "address_object": {
+                        "fields": {
+                            "names_count": {
+                                "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "address_key": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "name_hash": {
+                                "type": "bytes",
+                                "id": 2
                             }
                         }
                     },

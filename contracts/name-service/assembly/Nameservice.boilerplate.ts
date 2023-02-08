@@ -68,6 +68,19 @@ export class Nameservice {
     return res;
   }
 
+  get_names(
+    args: nameservice.get_names_arguments
+  ): nameservice.get_names_result {
+    // const owner = args.owner;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.get_names_result();
+    // res.names = ;
+
+    return res;
+  }
+
   get_metadata(
     args: nameservice.get_metadata_arguments
   ): nameservice.metadata_object {

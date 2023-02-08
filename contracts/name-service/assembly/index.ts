@@ -59,6 +59,16 @@ export function main(): i32 {
       break;
     }
 
+    case 0xcd5c6518: {
+      const args = Protobuf.decode<ProtoNamespace.get_names_arguments>(
+        contractArgs.args,
+        ProtoNamespace.get_names_arguments.decode
+      );
+      const res = c.get_names(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.get_names_result.encode);
+      break;
+    }
+
     case 0xfcf7a68f: {
       const args = Protobuf.decode<ProtoNamespace.get_metadata_arguments>(
         contractArgs.args,
