@@ -49,8 +49,8 @@ export class Testdomain {
     } else if (name == 'grace-period') {
       const now = System.getHeadInfo().head_block_time;
 
-      res.expiration = now;
-      res.grace_period_end = now;
+      res.expiration = duration_increments * now;
+      res.grace_period_end = duration_increments * now;
     } else if (name == 'never-expires') {
       res.expiration = 0;
     }

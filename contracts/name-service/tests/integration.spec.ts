@@ -44,7 +44,8 @@ describe('mint', () => {
       nameserviceAcct,
       koinDomainAcct,
       doedotkoinDomainAcct,
-      user1
+      user1,
+      user2
     ] = localKoinos.getAccounts();
 
     // deploy nameservice 
@@ -284,6 +285,48 @@ describe('mint', () => {
     expect(res?.result?.domain).toBe('koin');
     expect(res?.result?.name).toBe('kap');
     expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
+
+    // check that a name can be reclaimed when it is expired and the grace perdio has ended
+    // in test domain contract, expiration and grace_period_end are set to duration_increments * now
+    // so use duration_increments to change names's expiration and duration_increments
+    res = await nameserviceContract.functions.mint({
+      name: 'grace-period.koin',
+      duration_increments: 1,
+      owner: user1.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'grace-period.koin',
+    });
+
+    // should be reclaimable, meaning the name doesn't have an owner anymore
+    expect(res?.result?.domain).toBe('koin');
+    expect(res?.result?.name).toBe('grace-period');
+    expect(res?.result?.owner).toBe('');
+
+    // reclaim name
+    res = await nameserviceContract.functions.mint({
+      name: 'grace-period.koin',
+      duration_increments: 2,
+      owner: user2.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'grace-period.koin',
+    });
+
+    // owner should now be user2
+    expect(res?.result?.domain).toBe('koin');
+    expect(res?.result?.name).toBe('grace-period');
+    expect(res?.result?.owner).toBe(user2.address);
   });
 
   it("should not mint TLAs / names", async () => {
@@ -301,7 +344,15 @@ describe('mint', () => {
     const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
 
     // @ts-ignore assertions exists
-    expect.assertions(13);
+    expect.assertions(14);
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'koin',
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('missing "owner" argument');
+    } 
 
     // validate elements of a name
     try {
@@ -447,6 +498,9 @@ describe('mint', () => {
   });
 
   it("should lock KAP tokens when minting TLAs", async () => {
+    // @ts-ignore assertions exists
+    expect.assertions(10);
+
     const [
       genesis,
       koin,
@@ -502,5 +556,13 @@ describe('mint', () => {
     expect(res?.result?.sub_names_count).toBe('0');
     expect(res?.result?.locked_kap_tokens).toBe('10');
 
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'koin2',
+        owner: user1.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('argument "payment_from" is missing');
+    } 
   });
 });
