@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { LocalKoinos, Signer, interfaces } from '@roamin/local-koinos';
+import { LocalKoinos } from '@roamin/local-koinos';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore 
@@ -33,7 +33,7 @@ afterAll(async () => {
 });
 
 describe('mint', () => {
-  test("it should mint TLAs, names and sub names", async () => {
+  it("should mint TLAs, names and sub names", async () => {
     const [
       genesis,
       koin,
@@ -257,9 +257,192 @@ describe('mint', () => {
     expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
     expect(res?.result?.sub_names_count).toBe('0');
     expect(res?.result?.locked_kap_tokens).toBe('0');
+
+    // check payment_from and payment_token_address can be used within a domain contract
+    res = await nameserviceContract.functions.mint({
+      name: 'kap.koin',
+      duration_increments: durationIncrements,
+      owner: doedotkoinDomainAcct.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    }, {
+      beforeSend: async (tx) => {
+        await doedotkoinDomainAcct.signer.signTransaction(tx);
+      },
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'kap.koin',
+    });
+
+    expect(res?.result?.domain).toBe('koin');
+    expect(res?.result?.name).toBe('kap');
+    expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
   });
 
-  test("it should lock KAP tokens when minting TLAs", async () => {
+  it("should not mint TLAs / names", async () => {
+    const [
+      genesis,
+      koin,
+      nameserviceAcct,
+      koinDomainAcct,
+      doedotkoinDomainAcct,
+      user1
+    ] = localKoinos.getAccounts();
+
+    // deploy nameservice 
+    // @ts-ignore abi is compatible
+    const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
+
+    // @ts-ignore assertions exists
+    expect.assertions(13);
+
+    // validate elements of a name
+    try {
+      await nameserviceContract.functions.mint({
+        name: '-koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('element "-koin" cannot start with an hyphen (-)');
+    } 
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'koin-',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('element "koin-" cannot end with an hyphen (-)');
+    } 
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'doe--koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('element "doe--koin" cannot have consecutive hyphens (-)');
+    } 
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: '.koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('an element cannot be empty');
+    }
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: '-doe.koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('element "-doe" cannot start with an hyphen (-)');
+    } 
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'doe-.koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('element "doe-" cannot end with an hyphen (-)');
+    } 
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'john--doe.koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('element "john--doe" cannot have consecutive hyphens (-)');
+    } 
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: '.doe.koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('an element cannot be empty');
+    }
+
+    // check a TLA can only be regsitered once
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'koin',
+        owner: koinDomainAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "koin" is already taken');
+    }
+
+    // check that a domain contract can prevent a name from being minted
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'banned.koin',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "banned" cannot be used');
+    }
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'my.ogrex',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('domain "ogrex" does not exist');
+    }
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'doe.koin',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "doe.koin" is already taken');
+    }
+
+    let res = await nameserviceContract.functions.mint({
+      name: 'expired.koin',
+      duration_increments: 3,
+      owner: doedotkoinDomainAcct.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'expired.koin',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('grace period for name "expired.koin" has not ended yet');
+    }
+  });
+
+  it("should lock KAP tokens when minting TLAs", async () => {
     const [
       genesis,
       koin,
@@ -271,7 +454,6 @@ describe('mint', () => {
     // deploy nameservice 
     // @ts-ignore abi is compatible
     const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
-
 
     // deploy kap token
     const kapContract = await localKoinos.deployTokenContract(kapAcct.wif);
@@ -296,7 +478,7 @@ describe('mint', () => {
       owner: user1.address,
       payment_from: user1.address,
     }, {
-      beforeSend: async (tx: interfaces.TransactionJson, options?: interfaces.SendTransactionOptions) => {
+      beforeSend: async (tx) => {
         // add user1 signature to allow transfering tokens
         await user1.signer.signTransaction(tx);
       }

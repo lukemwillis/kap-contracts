@@ -167,7 +167,7 @@ export class Nameservice {
 
       System.require(domainObj != null, `domain "${nameKey.domain}" does not exist`);
 
-      // if name is already taken, check expiration and/or if it can be reclaimed
+      // if name is already taken, check expiration and/or if grace period has ended
       if (nameObj != null) {
         const now = System.getHeadInfo().head_block_time;
         // check expiration
@@ -505,7 +505,7 @@ export class Nameservice {
   ): nameservice.empty_object {
     // only this contract can set the meatadata for now
     System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
-    
+
     const tla_mint_fee = args.tla_mint_fee;
     const kap_token_address = args.kap_token_address;
 

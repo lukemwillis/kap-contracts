@@ -1,7 +1,9 @@
-import { System } from "@koinos/sdk-as";
+import { Arrays, System, Token } from "@koinos/sdk-as";
 import { testdomain } from "./proto/testdomain";
 
 export class Testdomain {
+  contractId: Uint8Array = System.getContractId();
+
   authorize_mint(
     args: testdomain.authorize_mint_arguments
   ): testdomain.authorize_mint_result {
@@ -12,6 +14,7 @@ export class Testdomain {
     const payment_from = args.payment_from;
     const payment_token_address = args.payment_token_address;
 
+    // test arguments are properly sent to domain contracts
     System.require(name.length > 0, 'name argument was not provided');
     System.require(domain.length > 0, 'domain argument was not provided');
     System.require(duration_increments > 0, 'duration_increments argument was not provided');
@@ -19,9 +22,38 @@ export class Testdomain {
     System.require(payment_from.length > 0, 'payment_from argument was not provided');
     System.require(payment_token_address.length > 0, 'payment_token_address argument was not provided');
 
+    // test that a domain contract can refuse a name to be minted
+    System.require(name != 'banned', 'name "banned" cannot be used');
+
+    // test payments from domain contract
+    // require Koin payment for the name kap
+    if (name == 'kap') {
+      const koinTokenAddr = System.getContractAddress('koin');
+      System.require(Arrays.equal(payment_token_address, koinTokenAddr), 'can only pay using Koin');
+      
+      const koin = new Token(payment_token_address);
+      System.require(koin.transfer(payment_from, this.contractId, 1), 'could not process Koin payment');
+    }
+
+    // test expiration and grace_period_end are properly sent back to nameservice contract
     const res = new testdomain.authorize_mint_result();
     res.expiration = 1770429035204 * 2 * duration_increments;
     res.grace_period_end = 1770429035204 * 3 * duration_increments;
+
+    // test expiration and grace_period_end are triggering errors when due
+    if (name == 'expired') {
+      const now = System.getHeadInfo().head_block_time;
+
+      res.expiration = now;
+      res.grace_period_end = now + 600000;
+    } else if (name == 'grace-period') {
+      const now = System.getHeadInfo().head_block_time;
+
+      res.expiration = now;
+      res.grace_period_end = now;
+    } else if (name == 'never-expires') {
+      res.expiration = 0;
+    }
 
     return res;
   }

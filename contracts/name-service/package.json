@@ -27,6 +27,6 @@
     "build:debug": "koinos-sdk-as-cli build-all debug 0 nameservice.proto",
     "build:release": "koinos-sdk-as-cli build-all release 0 nameservice.proto",
     "test": "koinos-sdk-as-cli run-tests",
-    "integration-tests": "yarn jest"
+    "ci": "yarn jest"
   }
 }
