@@ -69,6 +69,16 @@ export function main(): i32 {
       break;
     }
 
+    case 0x3d59af19: {
+      const args = Protobuf.decode<ProtoNamespace.set_metadata_arguments>(
+        contractArgs.args,
+        ProtoNamespace.set_metadata_arguments.decode
+      );
+      const res = c.set_metadata(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
+      break;
+    }
+
     case 0xfcf7a68f: {
       const args = Protobuf.decode<ProtoNamespace.get_metadata_arguments>(
         contractArgs.args,

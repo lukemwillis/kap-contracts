@@ -386,6 +386,55 @@ export namespace nameservice {
     }
   }
 
+  export class set_metadata_arguments {
+    static encode(message: set_metadata_arguments, writer: Writer): void {
+      if (message.tla_mint_fee != 0) {
+        writer.uint32(8);
+        writer.uint64(message.tla_mint_fee);
+      }
+
+      if (message.kap_token_address.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.kap_token_address);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): set_metadata_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new set_metadata_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.tla_mint_fee = reader.uint64();
+            break;
+
+          case 2:
+            message.kap_token_address = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    tla_mint_fee: u64;
+    kap_token_address: Uint8Array;
+
+    constructor(
+      tla_mint_fee: u64 = 0,
+      kap_token_address: Uint8Array = new Uint8Array(0)
+    ) {
+      this.tla_mint_fee = tla_mint_fee;
+      this.kap_token_address = kap_token_address;
+    }
+  }
+
   @unmanaged
   export class get_metadata_arguments {
     static encode(message: get_metadata_arguments, writer: Writer): void {}

@@ -83,6 +83,19 @@ export class Nameservice {
     return res;
   }
 
+  set_metadata(
+    args: nameservice.set_metadata_arguments
+  ): nameservice.empty_object {
+    // const tla_mint_fee = args.tla_mint_fee;
+    // const kap_token_address = args.kap_token_address;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.empty_object();
+
+    return res;
+  }
+
   get_metadata(
     args: nameservice.get_metadata_arguments
   ): nameservice.metadata_object {

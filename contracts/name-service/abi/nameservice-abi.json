@@ -42,6 +42,13 @@
             "entry_point": 3445384472,
             "read_only": true
         },
+        "set_metadata": {
+            "argument": "nameservice.set_metadata_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Set contract metadata",
+            "entry_point": 1029287705,
+            "read_only": false
+        },
         "get_metadata": {
             "argument": "nameservice.get_metadata_arguments",
             "return": "nameservice.metadata_object",
@@ -173,6 +180,21 @@
                                 "rule": "repeated",
                                 "type": "name_object",
                                 "id": 1
+                            }
+                        }
+                    },
+                    "set_metadata_arguments": {
+                        "fields": {
+                            "tla_mint_fee": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "kap_token_address": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
                             }
                         }
                     },
