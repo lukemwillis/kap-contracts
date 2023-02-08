@@ -226,7 +226,7 @@ export class Nameservice {
     names.put(nameKey, nameObj);
 
     // add new index record
-    addressKey = new nameservice.address_key(owner, nameKeyHash!);
+    addressKey = new nameservice.address_key(nameObj.owner, nameKeyHash!);
     addressesIndex.put(addressKey, nameKey);
 
     return new nameservice.empty_object();

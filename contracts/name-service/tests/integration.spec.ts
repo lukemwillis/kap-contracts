@@ -336,7 +336,8 @@ describe('mint', () => {
       nameserviceAcct,
       koinDomainAcct,
       doedotkoinDomainAcct,
-      user1
+      user1,
+      dummyToken
     ] = localKoinos.getAccounts();
 
     // deploy nameservice 
@@ -344,7 +345,7 @@ describe('mint', () => {
     const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
 
     // @ts-ignore assertions exists
-    expect.assertions(14);
+    expect.assertions(16);
 
     try {
       await nameserviceContract.functions.mint({
@@ -494,6 +495,55 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('grace period for name "expired.koin" has not ended yet');
+    }
+
+    // check that a name cannot be minted if a domain contract is not setup at the owner address
+
+    res = await nameserviceContract.functions.mint({
+      name: 'not-mintable.koin',
+      duration_increments: 3,
+      owner: user1.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'i-am.not-mintable.koin',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('contract does not exist');
+    }
+
+    // entry point does not exist
+    await localKoinos.deployTokenContract(dummyToken.wif);
+
+    res = await nameserviceContract.functions.mint({
+      name: 'still-not-mintable.koin',
+      duration_increments: 3,
+      owner: dummyToken.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'i-am.still-not-mintable.koin',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('exit error did not contain error data');
     }
   });
 
