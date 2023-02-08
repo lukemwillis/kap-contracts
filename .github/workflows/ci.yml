@@ -19,5 +19,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Build testdomain contract
+        run: cd contracts/test-domain && yarn --frozen-lockfile && yarn build:debug
       - name: Run name-service CI
-        run: cd contracts/name-service && yarn --frozen-lockfile && yarn ci
+        run: cd contracts/name-service && yarn --frozen-lockfile && yarn build:debug && yarn ci
