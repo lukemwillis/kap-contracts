@@ -152,6 +152,18 @@
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }
+                            },
+                            "name_offset": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "domain_offset": {
+                                "type": "string",
+                                "id": 3
+                            },
+                            "limit": {
+                                "type": "uint32",
+                                "id": 4
                             }
                         }
                     },

@@ -65,6 +65,9 @@ message get_name_arguments {
 */
 message get_names_arguments {
   bytes owner = 1 [(koinos.btype) = ADDRESS];
+  string name_offset = 2;
+  string domain_offset = 3;
+  uint32 limit = 4;
 }
 
 message get_names_result {

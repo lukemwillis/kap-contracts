@@ -1,7 +1,7 @@
 import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
 import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT } from "./Constants";
 import { nameservice } from "./proto/nameservice";
-import { Addresses } from "./state/Addresses";
+import { AddressesIndex } from "./state/AddressesIndex";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
 
@@ -210,24 +210,24 @@ export class Nameservice {
     // so we can proceed with saving it
 
     // update addresses index
-    const addresses = new Addresses(this.contractId);
+    const addressesIndex = new AddressesIndex(this.contractId);
 
     const nameKeyHash = System.hash(
       Crypto.multicodec.sha2_256,
       Protobuf.encode(nameKey, nameservice.name_object.encode)
     );
 
-    // remove old record
+    // remove old index record
     let addressKey = new nameservice.address_key(nameObj.owner, nameKeyHash!);
-    addresses.remove(addressKey);
+    addressesIndex.remove(addressKey);
 
     // save new name
     nameObj.owner = owner;
     names.put(nameKey, nameObj);
 
-    // add new record
+    // add new index record
     addressKey = new nameservice.address_key(owner, nameKeyHash!);
-    addresses.put(addressKey, nameKey);
+    addressesIndex.put(addressKey, nameKey);
 
     return new nameservice.empty_object();
   }
@@ -250,7 +250,7 @@ export class Nameservice {
     const callerData = System.getCaller();
 
     // calculate nameKey hash
-    const addresses = new Addresses(this.contractId);
+    const addressesIndex = new AddressesIndex(this.contractId);
     const nameKeyHash = System.hash(
       Crypto.multicodec.sha2_256,
       Protobuf.encode(nameKey, nameservice.name_object.encode)
@@ -280,8 +280,8 @@ export class Nameservice {
       // remove TLA from state
       names.remove(nameKey);
 
-      // delete name from addresses
-      addresses.remove(addressKey);
+      // delete index record
+      addressesIndex.remove(addressKey);
     } else {
       // get domain object
       const domainKey = this.parseName(nameKey.domain);
@@ -299,8 +299,8 @@ export class Nameservice {
         // delete name from the state
         names.remove(nameKey);
 
-        // delete name from addresses
-        addresses.remove(addressKey);
+        // delete index record
+        addressesIndex.remove(addressKey);
 
         // update domain sub_names_count
         domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
@@ -337,23 +337,23 @@ export class Nameservice {
     );
 
     // calculate nameKey hash
-    const addresses = new Addresses(this.contractId);
+    const addressesIndex = new AddressesIndex(this.contractId);
     const nameKeyHash = System.hash(
       Crypto.multicodec.sha2_256,
       Protobuf.encode(nameKey, nameservice.name_object.encode)
     );
 
-    // remove old address record
+    // remove old index record
     let addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
-    addresses.remove(addressKey);
+    addressesIndex.remove(addressKey);
 
     // transfer ownership
     nameObj!.owner = to;
     names.put(nameKey, nameObj!);
 
-    // add new address record
+    // add new index record
     addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
-    addresses.put(addressKey, nameKey);
+    addressesIndex.put(addressKey, nameKey);
 
     return new nameservice.empty_object();
   }
@@ -433,12 +433,30 @@ export class Nameservice {
     args: nameservice.get_names_arguments
   ): nameservice.get_names_result {
     const owner = args.owner;
+    const nameOffset = args.name_offset;
+    const domainOffset = args.domain_offset;
+    let limit = args.limit || 10;
 
     const names = new Names(this.contractId);
-    const addresses = new Addresses(this.contractId);
+    const addressesIndex = new AddressesIndex(this.contractId);
+
+    let nameObj: nameservice.name_object;
+    let nameKeyHash: Uint8Array;
+
+    // calculate offset address key if name_offset provided
+    if (nameOffset.length > 0) {
+      nameObj = new nameservice.name_object(domainOffset, nameOffset);
+      nameKeyHash = System.hash(
+        Crypto.multicodec.sha2_256,
+        Protobuf.encode(nameObj, nameservice.name_object.encode)
+      )!;
+    } else {
+      nameKeyHash = new Uint8Array(32).fill(0);
+    }
+
     let addressKey = new nameservice.address_key(
       owner,
-      new Uint8Array(32).fill(0)
+      nameKeyHash
     );
 
     const res = new nameservice.get_names_result();
@@ -446,12 +464,11 @@ export class Nameservice {
     let done = false;
     let addressObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
     let tmpAddressKey: nameservice.address_key;
-    let nameObj: nameservice.name_object;
 
     const now = System.getHeadInfo().head_block_time;
 
     do {
-      addressObj = addresses.getNext(addressKey);
+      addressObj = addressesIndex.getNext(addressKey);
 
       if (addressObj) {
         tmpAddressKey = Protobuf.decode<nameservice.address_key>(addressObj.key!, nameservice.address_key.decode);
@@ -467,6 +484,7 @@ export class Nameservice {
             nameObj.grace_period_end > now
           ) {
             res.names.push(nameObj);
+            limit--;
           }
 
           addressKey = tmpAddressKey;
@@ -477,7 +495,7 @@ export class Nameservice {
         done = true;
       }
 
-    } while (!done);
+    } while (!done && limit > 0);
 
     return res;
   }

@@ -281,6 +281,21 @@ export namespace nameservice {
         writer.uint32(10);
         writer.bytes(message.owner);
       }
+
+      if (message.name_offset.length != 0) {
+        writer.uint32(18);
+        writer.string(message.name_offset);
+      }
+
+      if (message.domain_offset.length != 0) {
+        writer.uint32(26);
+        writer.string(message.domain_offset);
+      }
+
+      if (message.limit != 0) {
+        writer.uint32(32);
+        writer.uint32(message.limit);
+      }
     }
 
     static decode(reader: Reader, length: i32): get_names_arguments {
@@ -294,6 +309,18 @@ export namespace nameservice {
             message.owner = reader.bytes();
             break;
 
+          case 2:
+            message.name_offset = reader.string();
+            break;
+
+          case 3:
+            message.domain_offset = reader.string();
+            break;
+
+          case 4:
+            message.limit = reader.uint32();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -304,9 +331,20 @@ export namespace nameservice {
     }
 
     owner: Uint8Array;
+    name_offset: string;
+    domain_offset: string;
+    limit: u32;
 
-    constructor(owner: Uint8Array = new Uint8Array(0)) {
+    constructor(
+      owner: Uint8Array = new Uint8Array(0),
+      name_offset: string = "",
+      domain_offset: string = "",
+      limit: u32 = 0
+    ) {
       this.owner = owner;
+      this.name_offset = name_offset;
+      this.domain_offset = domain_offset;
+      this.limit = limit;
     }
   }
 
