@@ -264,7 +264,6 @@ describe('mint', () => {
       genesis,
       koin,
       nameserviceAcct,
-      koinDomainAcct,
       kapAcct,
       user1
     ] = localKoinos.getAccounts();
@@ -294,7 +293,7 @@ describe('mint', () => {
 
     res = await nameserviceContract.functions.mint({
       name: 'notfree',
-      owner: koinDomainAcct.address,
+      owner: user1.address,
       payment_from: user1.address,
     }, {
       sendTransaction: false
@@ -312,7 +311,7 @@ describe('mint', () => {
 
     expect(res?.result?.domain).toBe(undefined);
     expect(res?.result?.name).toBe('notfree');
-    expect(res?.result?.owner).toBe(koinDomainAcct.address);
+    expect(res?.result?.owner).toBe(user1.address);
     expect(res?.result?.expiration).toBe('0');
     expect(res?.result?.grace_period_end).toBe('0');
     expect(res?.result?.sub_names_count).toBe('0');
