@@ -33,8 +33,15 @@ afterAll(async () => {
 });
 
 describe('mint', () => {
-  test("it should mint names and sub names", async () => {
-    const [genesis, koin, nameserviceAcct, koinDomainAcct, doedotkoinDomainAcct, user1] = localKoinos.getAccounts();
+  test("it should mint TLAs, names and sub names", async () => {
+    const [
+      genesis,
+      koin,
+      nameserviceAcct,
+      koinDomainAcct,
+      doedotkoinDomainAcct,
+      user1
+    ] = localKoinos.getAccounts();
 
     // deploy nameservice 
     // @ts-ignore abi is compatible
@@ -141,7 +148,7 @@ describe('mint', () => {
     expect(res?.result?.sub_names_count).toBe('0');
     expect(res?.result?.locked_kap_tokens).toBe('0');
 
-    
+
     res = await nameserviceContract.functions.mint({
       name: '🔥.💎',
       duration_increments: 3,
@@ -206,7 +213,7 @@ describe('mint', () => {
     expect(res?.result?.sub_names_count).toBe('0');
     expect(res?.result?.locked_kap_tokens).toBe('0');
 
-    
+
     res = await nameserviceContract.functions.mint({
       name: '火.钻石',
       duration_increments: 3,
@@ -251,5 +258,65 @@ describe('mint', () => {
     expect(res?.result?.sub_names_count).toBe('0');
     expect(res?.result?.locked_kap_tokens).toBe('0');
   });
-});
 
+  test("it should lock KAP tokens when minting TLAs", async () => {
+    const [
+      genesis,
+      koin,
+      nameserviceAcct,
+      koinDomainAcct,
+      kapAcct,
+      user1
+    ] = localKoinos.getAccounts();
+
+    // deploy nameservice 
+    // @ts-ignore abi is compatible
+    const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
+
+
+    // deploy kap token
+    const kapContract = await localKoinos.deployTokenContract(kapAcct.wif);
+    let res = await kapContract.mint(user1.address, '1000');
+    await res.transaction?.wait();
+
+    // set nameservice metadata
+    res = await nameserviceContract.functions.set_metadata({
+      tla_mint_fee: '10',
+      kap_token_address: kapAcct.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_metadata({});
+
+    expect(res?.result?.tla_mint_fee).toBe('10');
+    expect(res?.result?.kap_token_address).toBe(kapAcct.address);
+
+    res = await nameserviceContract.functions.mint({
+      name: 'notfree',
+      owner: koinDomainAcct.address,
+      payment_from: user1.address,
+    }, {
+      sendTransaction: false
+    });
+
+    // add user1 signature to allow transfering tokens
+    const signedTx = await user1.signer.signTransaction(res.transaction);
+
+    const sendTxRes = await localKoinos.provider.sendTransaction(signedTx);
+    await sendTxRes.transaction.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'notfree',
+    });
+
+    expect(res?.result?.domain).toBe(undefined);
+    expect(res?.result?.name).toBe('notfree');
+    expect(res?.result?.owner).toBe(koinDomainAcct.address);
+    expect(res?.result?.expiration).toBe('0');
+    expect(res?.result?.grace_period_end).toBe('0');
+    expect(res?.result?.sub_names_count).toBe('0');
+    expect(res?.result?.locked_kap_tokens).toBe('10');    
+
+  });
+});
