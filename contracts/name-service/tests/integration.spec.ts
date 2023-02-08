@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { LocalKoinos, Token, Signer } from '@roamin/local-koinos';
+import { LocalKoinos, Signer, interfaces } from '@roamin/local-koinos';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore 
@@ -296,14 +296,13 @@ describe('mint', () => {
       owner: user1.address,
       payment_from: user1.address,
     }, {
-      sendTransaction: false
+      beforeSend: async (tx: interfaces.TransactionJson, options?: interfaces.SendTransactionOptions) => {
+        // add user1 signature to allow transfering tokens
+        await user1.signer.signTransaction(tx);
+      }
     });
 
-    // add user1 signature to allow transfering tokens
-    const signedTx = await user1.signer.signTransaction(res.transaction);
-
-    const sendTxRes = await localKoinos.provider.sendTransaction(signedTx);
-    await sendTxRes.transaction.wait();
+    await res.transaction.wait();
 
     res = await nameserviceContract.functions.get_name({
       name: 'notfree',
@@ -315,7 +314,7 @@ describe('mint', () => {
     expect(res?.result?.expiration).toBe('0');
     expect(res?.result?.grace_period_end).toBe('0');
     expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('10');    
+    expect(res?.result?.locked_kap_tokens).toBe('10');
 
   });
 });
