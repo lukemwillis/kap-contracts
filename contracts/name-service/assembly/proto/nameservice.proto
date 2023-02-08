@@ -75,6 +75,15 @@ message get_names_result {
 }
 
 /* 
+  @description Set contract metadata
+  @read-only false
+*/
+message metadata_object {
+  uint64 tla_mint_fee = 1;
+  bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
   @description Get contract metadata
   @read-only true
   @result metadata_object
