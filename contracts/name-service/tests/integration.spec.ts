@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Contract, LocalKoinos } from '@roamin/local-koinos';
+import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore 
@@ -35,6 +35,7 @@ const [
 ] = localKoinos.getAccounts();
 
 let nameserviceContract: Contract;
+let kapContract: Token;
 
 const durationIncrements = 3;
 
@@ -579,10 +580,10 @@ describe('mint', () => {
 
   it('should lock KAP tokens when minting TLAs', async () => {
     // @ts-ignore assertions exists
-    expect.assertions(5);
+    expect.assertions(7);
 
     // deploy kap token
-    const kapContract = await localKoinos.deployTokenContract(kapAcct.wif);
+    kapContract = await localKoinos.deployTokenContract(kapAcct.wif);
     let res = await kapContract.mint(user1.address, '1000');
     await res.transaction?.wait();
 
@@ -599,6 +600,9 @@ describe('mint', () => {
     expect(res?.result?.tla_mint_fee).toBe('10');
     expect(res?.result?.kap_token_address).toBe(kapAcct.address);
 
+    let bal = await kapContract.balanceOf(user1.address);
+    expect(bal).toStrictEqual('1000');
+
     res = await nameserviceContract.functions.mint({
       name: 'notfree',
       owner: user1.address,
@@ -611,6 +615,9 @@ describe('mint', () => {
     });
 
     await res.transaction.wait();
+
+    bal = await kapContract.balanceOf(user1.address);
+    expect(bal).toStrictEqual('990');
 
     res = await nameserviceContract.functions.get_name({
       name: 'notfree',
@@ -1055,6 +1062,158 @@ describe('transfer', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('name "expires-now.koin" does not exist');
+    }
+  });
+});
+
+describe('burn', () => {
+  it('should burn a name', async () => {
+    let res = await nameserviceContract.functions.mint({
+      name: 'burn.koin',
+      duration_increments: 3,
+      owner: user3.address,
+      payment_from: user3.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'burn.koin',
+    });
+
+    expect(res.result.owner).toStrictEqual(user3.address);
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user3.address,
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: 'koin',
+          name: 'burn',
+          owner: user3.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    res = await nameserviceContract.functions.burn({
+      name: 'burn.koin',
+    }, {
+      beforeSend: async (tx) => {
+        await user3.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'burn.koin',
+    });
+
+    expect(res.result).toStrictEqual(undefined);
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user3.address,
+    });
+
+    expect(res.result).toStrictEqual(undefined);
+
+    // check that TLA fees are returned
+    let bal = await kapContract.balanceOf(user1.address);
+    expect(bal).toStrictEqual('990');
+
+    res = await nameserviceContract.functions.burn({
+      name: 'notfree',
+      owner: user1.address,
+      payment_from: user1.address,
+    }, {
+      beforeSend: async (tx) => {
+        await user1.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction.wait();
+
+    bal = await kapContract.balanceOf(user1.address);
+    expect(bal).toStrictEqual('1000');
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'notfree',
+    });
+
+    expect(res?.result).toBe(undefined);
+  });
+
+  it('should not burn a name', async () => {
+    try {
+      await nameserviceContract.functions.burn({
+        name: 'i-dont-exist.koin',
+      }, {
+        beforeSend: async (tx) => {
+          await user3.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "i-dont-exist.koin" does not exist');
+    }
+
+    try {
+      await nameserviceContract.functions.burn({
+        name: 'transfer.koin',
+      }, {
+        beforeSend: async (tx) => {
+          await user3.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name owner has not authorized burn');
+    }
+
+    try {
+      await nameserviceContract.functions.burn({
+        name: 'koin',
+      }, {
+        beforeSend: async (tx) => {
+          await koinDomainAcct.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "koin" cannot be burned because sub names exist');
+    }
+
+    // check that domain contracts can prevent burning names
+    let res = await nameserviceContract.functions.mint({
+      name: 'cannot-burn.koin',
+      duration_increments: 3,
+      owner: user1.address,
+      payment_from: user1.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'cannot-burn.koin',
+    });
+
+    expect(res.result.owner).toStrictEqual(user1.address);
+
+    try {
+      await nameserviceContract.functions.burn({
+        name: 'cannot-burn.koin',
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "cannot-burn" cannot be burned');
     }
   });
 });

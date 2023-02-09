@@ -280,6 +280,7 @@ export class Nameservice {
       // get domain object
       const domainKey = this.parseName(nameKey.domain);
       // can burn names from expired domains
+      // this will always get the domain as a domain cannot be bburned when it has sub names
       const domainObj = this.names.get(domainKey)!;
 
       // call the "autorize_burn" entrypoint of the contract hosted at "owner" address
@@ -290,17 +291,17 @@ export class Nameservice {
         domainObj.owner
       );
 
-      if (authorized) {
-        // delete name from the state
-        this.names.remove(nameKey);
+      System.require(authorized == true, 'domain contract did not autorize burn');
 
-        // update owners index
-        this.ownersIndex.updateIndex(nameKey, nameObj!.owner);
+      // delete name from the state
+      this.names.remove(nameKey);
 
-        // update domain sub_names_count
-        domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
-        this.names.put(domainKey, domainObj);
-      }
+      // update owners index
+      this.ownersIndex.updateIndex(nameKey, nameObj!.owner);
+
+      // update domain sub_names_count
+      domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
+      this.names.put(domainKey, domainObj);
     }
 
     return new nameservice.empty_object();

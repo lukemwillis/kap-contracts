@@ -67,10 +67,13 @@ export class Testdomain {
     args: testdomain.authorize_burn_arguments
   ): testdomain.authorize_burn_result {
     const name = args.name;
-    
-    const res = new testdomain.authorize_burn_result();
 
-    res.authorized = name!.name != 'cannot_burn.koin';
+    System.require(name != null, 'name argument was not provided');
+    
+    const res = new testdomain.authorize_burn_result(true);
+
+    // test that a domain contract can refuse a name to be burned
+    System.require(name!.name != 'cannot-burn', 'name "cannot-burn" cannot be burned');
 
     return res;
   }
@@ -78,10 +81,19 @@ export class Testdomain {
   authorize_renewal(
     args: testdomain.authorize_renewal_arguments
   ): testdomain.authorize_renewal_result {
-    // const name = args.name;
-    // const duration_increments = args.duration_increments;
-    // const payment_from = args.payment_from;
-    // const payment_token_address = args.payment_token_address;
+    const name = args.name;
+    const duration_increments = args.duration_increments;
+    const payment_from = args.payment_from;
+    const payment_token_address = args.payment_token_address;
+
+    System.require(name != null, 'name argument was not provided');
+    System.require(duration_increments > 0, 'duration_increments argument was not provided');
+    System.require(payment_from.length > 0, 'payment_from argument was not provided');
+    System.require(payment_token_address.length > 0, 'payment_token_address argument was not provided');
+
+
+    // test that a domain contract can refuse a name to be renewed
+    System.require(name!.name != 'cannot-renew', 'name "cannot-renew" cannot be renewed');
 
     const res = new testdomain.authorize_renewal_result();
     res.expiration = 1770428796867;
