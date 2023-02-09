@@ -72,8 +72,8 @@ export class Nameservice {
   ): nameservice.get_names_result {
     // const owner = args.owner;
     // const name_offset = args.name_offset;
-    // const domain_offset = args.domain_offset;
     // const limit = args.limit;
+    // const descending = args.descending;
 
     // YOUR CODE HERE
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { LocalKoinos } from '@roamin/local-koinos';
+import { Contract, LocalKoinos } from '@roamin/local-koinos';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore 
@@ -19,6 +19,21 @@ if (process.env.ENV === 'LOCAL') {
   });
 }
 
+
+const [
+  genesis,
+  koin,
+  nameserviceAcct,
+  koinDomainAcct,
+  doedotkoinDomainAcct,
+  kapAcct,
+  user1,
+  user2,
+  dummyToken
+] = localKoinos.getAccounts();
+
+let nameserviceContract: Contract;
+
 beforeAll(async () => {
   // start local-koinos node
   await localKoinos.startNode();
@@ -27,7 +42,6 @@ beforeAll(async () => {
   await localKoinos.deployKoinContract();
   await localKoinos.mintKoinDefaultAccounts();
   await localKoinos.deployNameServiceContract();
-  const [genesis, koin] = localKoinos.getAccounts();
   await localKoinos.setNameServiceRecord('koin', koin.address);
 });
 
@@ -37,28 +51,18 @@ afterAll(async () => {
 });
 
 describe('mint', () => {
-  it("should mint TLAs, names and sub names", async () => {
-    const [
-      genesis,
-      koin,
-      nameserviceAcct,
-      koinDomainAcct,
-      doedotkoinDomainAcct,
-      user1,
-      user2
-    ] = localKoinos.getAccounts();
-
+  it('should mint TLAs, names and sub names', async () => {
     // deploy nameservice 
     // @ts-ignore abi is compatible
-    const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
+    nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
 
     // deploy koindomain  
     // @ts-ignore abi is compatible
-    const koindomainContract = await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
+    await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
 
     // deploy doe.koin  
     // @ts-ignore abi is compatible
-    const doedotkoinDomainContract = await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
+    await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
 
     // ASCII characters
     let res = await nameserviceContract.functions.mint({
@@ -73,12 +77,14 @@ describe('mint', () => {
     });
 
     expect(res?.result?.domain).toBe(undefined);
-    expect(res?.result?.name).toBe('koin');
-    expect(res?.result?.owner).toBe(koinDomainAcct.address);
-    expect(res?.result?.expiration).toBe('0');
-    expect(res?.result?.grace_period_end).toBe('0');
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      name: 'koin',
+      owner: koinDomainAcct.address,
+      expiration: '0',
+      grace_period_end: '0',
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     const durationIncrements = 3;
 
@@ -96,13 +102,15 @@ describe('mint', () => {
       name: 'doe.koin',
     });
 
-    expect(res?.result?.domain).toBe('koin');
-    expect(res?.result?.name).toBe('doe');
-    expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
-    expect(res?.result?.expiration).toBe(`${durationIncrements * 1770429035204 * 2}`);
-    expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      domain: 'koin',
+      name: 'doe',
+      owner: doedotkoinDomainAcct.address,
+      expiration: `${durationIncrements * 1770429035204 * 2}`,
+      grace_period_end: `${durationIncrements * 1770429035204 * 3}`,
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     // check sub_names_count incremented on koin domain
     res = await nameserviceContract.functions.get_name({
@@ -125,13 +133,15 @@ describe('mint', () => {
       name: 'john.doe.koin',
     });
 
-    expect(res?.result?.domain).toBe('doe.koin');
-    expect(res?.result?.name).toBe('john');
-    expect(res?.result?.owner).toBe(user1.address);
-    expect(res?.result?.expiration).toBe(`${durationIncrements * 1770429035204 * 2}`);
-    expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      domain: 'doe.koin',
+      name: 'john',
+      owner: user1.address,
+      expiration: `${durationIncrements * 1770429035204 * 2}`,
+      grace_period_end: `${durationIncrements * 1770429035204 * 3}`,
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     // emojis
     res = await nameserviceContract.functions.mint({
@@ -146,13 +156,14 @@ describe('mint', () => {
     });
 
     expect(res?.result?.domain).toBe(undefined);
-    expect(res?.result?.name).toBe('💎');
-    expect(res?.result?.owner).toBe(koinDomainAcct.address);
-    expect(res?.result?.expiration).toBe('0');
-    expect(res?.result?.grace_period_end).toBe('0');
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
-
+    expect(res.result).toStrictEqual({
+      name: '💎',
+      owner: koinDomainAcct.address,
+      expiration: '0',
+      grace_period_end: '0',
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     res = await nameserviceContract.functions.mint({
       name: '🔥.💎',
@@ -168,13 +179,15 @@ describe('mint', () => {
       name: '🔥.💎',
     });
 
-    expect(res?.result?.domain).toBe('💎');
-    expect(res?.result?.name).toBe('🔥');
-    expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
-    expect(res?.result?.expiration).toBe(`${durationIncrements * 1770429035204 * 2}`);
-    expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      domain: '💎',
+      name: '🔥',
+      owner: doedotkoinDomainAcct.address,
+      expiration: `${durationIncrements * 1770429035204 * 2}`,
+      grace_period_end: `${durationIncrements * 1770429035204 * 3}`,
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     res = await nameserviceContract.functions.mint({
       name: '❤️.🔥.💎',
@@ -190,13 +203,15 @@ describe('mint', () => {
       name: '❤️.🔥.💎',
     });
 
-    expect(res?.result?.domain).toBe('🔥.💎');
-    expect(res?.result?.name).toBe('❤️');
-    expect(res?.result?.owner).toBe(user1.address);
-    expect(res?.result?.expiration).toBe(`${durationIncrements * 1770429035204 * 2}`);
-    expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      domain: '🔥.💎',
+      name: '❤️',
+      owner: user1.address,
+      expiration: `${durationIncrements * 1770429035204 * 2}`,
+      grace_period_end: `${durationIncrements * 1770429035204 * 3}`,
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     // Chinese characters
     res = await nameserviceContract.functions.mint({
@@ -211,13 +226,14 @@ describe('mint', () => {
     });
 
     expect(res?.result?.domain).toBe(undefined);
-    expect(res?.result?.name).toBe('钻石');
-    expect(res?.result?.owner).toBe(koinDomainAcct.address);
-    expect(res?.result?.expiration).toBe('0');
-    expect(res?.result?.grace_period_end).toBe('0');
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
-
+    expect(res.result).toStrictEqual({
+      name: '钻石',
+      owner: koinDomainAcct.address,
+      expiration: '0',
+      grace_period_end: '0',
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     res = await nameserviceContract.functions.mint({
       name: '火.钻石',
@@ -233,13 +249,15 @@ describe('mint', () => {
       name: '火.钻石',
     });
 
-    expect(res?.result?.domain).toBe('钻石');
-    expect(res?.result?.name).toBe('火');
-    expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
-    expect(res?.result?.expiration).toBe(`${durationIncrements * 1770429035204 * 2}`);
-    expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      domain: '钻石',
+      name: '火',
+      owner: doedotkoinDomainAcct.address,
+      expiration: `${durationIncrements * 1770429035204 * 2}`,
+      grace_period_end: `${durationIncrements * 1770429035204 * 3}`,
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     res = await nameserviceContract.functions.mint({
       name: '心形物.火.钻石',
@@ -255,13 +273,15 @@ describe('mint', () => {
       name: '心形物.火.钻石',
     });
 
-    expect(res?.result?.domain).toBe('火.钻石');
-    expect(res?.result?.name).toBe('心形物');
-    expect(res?.result?.owner).toBe(user1.address);
-    expect(res?.result?.expiration).toBe(`${durationIncrements * 1770429035204 * 2}`);
-    expect(res?.result?.grace_period_end).toBe(`${durationIncrements * 1770429035204 * 3}`);
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('0');
+    expect(res.result).toStrictEqual({
+      domain: '火.钻石',
+      name: '心形物',
+      owner: user1.address,
+      expiration: `${durationIncrements * 1770429035204 * 2}`,
+      grace_period_end: `${durationIncrements * 1770429035204 * 3}`,
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
 
     // check payment_from and payment_token_address can be used within a domain contract
     res = await nameserviceContract.functions.mint({
@@ -329,21 +349,7 @@ describe('mint', () => {
     expect(res?.result?.owner).toBe(user2.address);
   });
 
-  it("should not mint TLAs / names", async () => {
-    const [
-      genesis,
-      koin,
-      nameserviceAcct,
-      koinDomainAcct,
-      doedotkoinDomainAcct,
-      user1,
-      dummyToken
-    ] = localKoinos.getAccounts();
-
-    // deploy nameservice 
-    // @ts-ignore abi is compatible
-    const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
-
+  it('should not mint TLAs / names', async () => {
     // @ts-ignore assertions exists
     expect.assertions(16);
 
@@ -353,7 +359,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('missing "owner" argument');
-    } 
+    }
 
     // validate elements of a name
     try {
@@ -363,7 +369,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('element "-koin" cannot start with an hyphen (-)');
-    } 
+    }
 
     try {
       await nameserviceContract.functions.mint({
@@ -372,7 +378,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('element "koin-" cannot end with an hyphen (-)');
-    } 
+    }
 
     try {
       await nameserviceContract.functions.mint({
@@ -381,7 +387,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('element "doe--koin" cannot have consecutive hyphens (-)');
-    } 
+    }
 
     try {
       await nameserviceContract.functions.mint({
@@ -399,7 +405,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('element "-doe" cannot start with an hyphen (-)');
-    } 
+    }
 
     try {
       await nameserviceContract.functions.mint({
@@ -408,7 +414,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('element "doe-" cannot end with an hyphen (-)');
-    } 
+    }
 
     try {
       await nameserviceContract.functions.mint({
@@ -417,7 +423,7 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('element "john--doe" cannot have consecutive hyphens (-)');
-    } 
+    }
 
     try {
       await nameserviceContract.functions.mint({
@@ -547,21 +553,9 @@ describe('mint', () => {
     }
   });
 
-  it("should lock KAP tokens when minting TLAs", async () => {
+  it('should lock KAP tokens when minting TLAs', async () => {
     // @ts-ignore assertions exists
-    expect.assertions(10);
-
-    const [
-      genesis,
-      koin,
-      nameserviceAcct,
-      kapAcct,
-      user1
-    ] = localKoinos.getAccounts();
-
-    // deploy nameservice 
-    // @ts-ignore abi is compatible
-    const nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
+    expect.assertions(5);
 
     // deploy kap token
     const kapContract = await localKoinos.deployTokenContract(kapAcct.wif);
@@ -599,12 +593,14 @@ describe('mint', () => {
     });
 
     expect(res?.result?.domain).toBe(undefined);
-    expect(res?.result?.name).toBe('notfree');
-    expect(res?.result?.owner).toBe(user1.address);
-    expect(res?.result?.expiration).toBe('0');
-    expect(res?.result?.grace_period_end).toBe('0');
-    expect(res?.result?.sub_names_count).toBe('0');
-    expect(res?.result?.locked_kap_tokens).toBe('10');
+    expect(res.result).toStrictEqual({
+      name: 'notfree',
+      owner: user1.address,
+      expiration: '0',
+      grace_period_end: '0',
+      sub_names_count: '0',
+      locked_kap_tokens: '10'
+    });
 
     try {
       await nameserviceContract.functions.mint({
@@ -613,6 +609,206 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('argument "payment_from" is missing');
-    } 
+    }
+  });
+
+  it('should get names by owner', async () => {
+    // ascending
+    let res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: '🔥.💎',
+          name: '❤️',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          domain: '火.钻石',
+          name: '心形物',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          name: 'notfree',
+          owner: user1.address,
+          expiration: '0',
+          grace_period_end: '0',
+          sub_names_count: '0',
+          locked_kap_tokens: '10'
+        },
+        {
+          domain: 'koin',
+          name: 'not-mintable',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          domain: 'doe.koin',
+          name: 'john',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+      name_offset: 'notfree',
+      limit: 1
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: 'koin',
+          name: 'not-mintable',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+      ]
+    });
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+      name_offset: 'doe.koin'
+    });
+
+    expect(res.result).toStrictEqual(undefined);
+
+    res = await nameserviceContract.functions.get_names({
+      owner: doedotkoinDomainAcct.address,
+      name_offset: 'expired.koin',
+      limit: 1
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: 'koin',
+          name: 'doe',
+          owner: doedotkoinDomainAcct.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '1',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    // descending
+    res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+      descending: true
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: 'doe.koin',
+          name: 'john',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          domain: 'koin',
+          name: 'not-mintable',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          name: 'notfree',
+          owner: user1.address,
+          expiration: '0',
+          grace_period_end: '0',
+          sub_names_count: '0',
+          locked_kap_tokens: '10'
+        },
+        {
+          domain: '火.钻石',
+          name: '心形物',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          domain: '🔥.💎',
+          name: '❤️',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+      name_offset: 'notfree',
+      limit: 1,
+      descending: true
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: '火.钻石',
+          name: '心形物',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    res = await nameserviceContract.functions.get_names({
+      owner: doedotkoinDomainAcct.address,
+      name_offset: 'expired.koin',
+      limit: 1,
+      descending: true
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: '💎',
+          name: '🔥',
+          owner: doedotkoinDomainAcct.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '1',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
   });
 });

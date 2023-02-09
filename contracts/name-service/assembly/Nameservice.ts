@@ -434,7 +434,7 @@ export class Nameservice {
   ): nameservice.get_names_result {
     const owner = args.owner;
     const nameOffset = args.name_offset;
-    const domainOffset = args.domain_offset;
+    const descending = args.descending;
     let limit = args.limit || 10;
 
     const names = new Names(this.contractId);
@@ -445,13 +445,17 @@ export class Nameservice {
 
     // calculate offset address key if name_offset provided
     if (nameOffset.length > 0) {
-      nameObj = new nameservice.name_object(domainOffset, nameOffset);
+      const nameOffsetKey = this.parseName(nameOffset);
+      nameObj = new nameservice.name_object(nameOffsetKey.domain, nameOffsetKey.name);
       nameKeyHash = System.hash(
         Crypto.multicodec.sha2_256,
         Protobuf.encode(nameObj, nameservice.name_object.encode)
       )!;
     } else {
-      nameKeyHash = new Uint8Array(32).fill(0);
+      // a sha256 multihash is 34 bytes long (2 bytes for the multihash code, and 32 bytes for the digest)
+      // to get the first element in the index, use a hash where all the bytes are set to 0
+      // to get the last element in the index, use a hash where all the bytes are set to 255
+      nameKeyHash = descending ? new Uint8Array(34).fill(u8.MAX_VALUE) : new Uint8Array(34).fill(u8.MIN_VALUE);
     }
 
     let addressKey = new nameservice.address_key(
@@ -468,7 +472,7 @@ export class Nameservice {
     const now = System.getHeadInfo().head_block_time;
 
     do {
-      addressObj = addressesIndex.getNext(addressKey);
+      addressObj = descending ? addressesIndex.getPrev(addressKey) : addressesIndex.getNext(addressKey);
 
       if (addressObj) {
         tmpAddressKey = Protobuf.decode<nameservice.address_key>(addressObj.key!, nameservice.address_key.decode);

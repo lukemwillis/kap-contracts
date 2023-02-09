@@ -287,14 +287,14 @@ export namespace nameservice {
         writer.string(message.name_offset);
       }
 
-      if (message.domain_offset.length != 0) {
-        writer.uint32(26);
-        writer.string(message.domain_offset);
+      if (message.limit != 0) {
+        writer.uint32(24);
+        writer.uint32(message.limit);
       }
 
-      if (message.limit != 0) {
+      if (message.descending != false) {
         writer.uint32(32);
-        writer.uint32(message.limit);
+        writer.bool(message.descending);
       }
     }
 
@@ -314,11 +314,11 @@ export namespace nameservice {
             break;
 
           case 3:
-            message.domain_offset = reader.string();
+            message.limit = reader.uint32();
             break;
 
           case 4:
-            message.limit = reader.uint32();
+            message.descending = reader.bool();
             break;
 
           default:
@@ -332,19 +332,19 @@ export namespace nameservice {
 
     owner: Uint8Array;
     name_offset: string;
-    domain_offset: string;
     limit: u32;
+    descending: bool;
 
     constructor(
       owner: Uint8Array = new Uint8Array(0),
       name_offset: string = "",
-      domain_offset: string = "",
-      limit: u32 = 0
+      limit: u32 = 0,
+      descending: bool = false
     ) {
       this.owner = owner;
       this.name_offset = name_offset;
-      this.domain_offset = domain_offset;
       this.limit = limit;
+      this.descending = descending;
     }
   }
 
