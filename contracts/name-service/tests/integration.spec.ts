@@ -27,12 +27,16 @@ const [
   koinDomainAcct,
   doedotkoinDomainAcct,
   kapAcct,
+  dummyToken,
   user1,
   user2,
-  dummyToken
+  user3,
+  user4,
 ] = localKoinos.getAccounts();
 
 let nameserviceContract: Contract;
+
+const durationIncrements = 3;
 
 beforeAll(async () => {
   // start local-koinos node
@@ -85,8 +89,6 @@ describe('mint', () => {
       sub_names_count: '0',
       locked_kap_tokens: '0'
     });
-
-    const durationIncrements = 3;
 
     res = await nameserviceContract.functions.mint({
       name: 'doe.koin',
@@ -349,7 +351,7 @@ describe('mint', () => {
 
   it('should not mint TLAs / names', async () => {
     // @ts-ignore assertions exists
-    expect.assertions(16);
+    expect.assertions(17);
 
     try {
       await nameserviceContract.functions.mint({
@@ -489,7 +491,7 @@ describe('mint', () => {
 
     await res.transaction?.wait();
 
-    // check that cannot mint if name is expired, grace_period has not ended yet
+    // check that cannot mint if name is expired and grace_period has not ended yet
     try {
       await nameserviceContract.functions.mint({
         name: 'expired.koin',
@@ -500,6 +502,29 @@ describe('mint', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('name "expired.koin" is already taken');
+    }
+
+    // check that cannot mint name on expired domain
+    res = await nameserviceContract.functions.mint({
+      name: 'expires-now.koin',
+      duration_increments: 3,
+      owner: doedotkoinDomainAcct.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'test.expires-now.koin',
+        duration_increments: 3,
+        owner: doedotkoinDomainAcct.address,
+        payment_from: doedotkoinDomainAcct.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('domain "expires-now.koin" does not exist');
     }
 
     // check that a name cannot be minted if a domain contract is not setup at the owner address
@@ -609,8 +634,16 @@ describe('mint', () => {
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('argument "payment_from" is missing');
     }
-  });
 
+    // revert changes in nameservice metadata
+    res = await nameserviceContract.functions.set_metadata({
+      tla_mint_fee: '0',
+      kap_token_address: kapAcct.address
+    });
+  });
+});
+
+describe('get_names', () => {
   it('should get names by owner', async () => {
     // ascending
     let res = await nameserviceContract.functions.get_names({
@@ -809,5 +842,219 @@ describe('mint', () => {
         }
       ]
     });
+  });
+
+  it('should not get names when expired', async () => {
+    let res = await nameserviceContract.functions.mint({
+      name: 'expires-now.koin',
+      duration_increments: 3,
+      owner: user1.address,
+      payment_from: doedotkoinDomainAcct.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user1.address,
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: '🔥.💎',
+          name: '❤️',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          domain: '火.钻石',
+          name: '心形物',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          name: 'notfree',
+          owner: user1.address,
+          expiration: '0',
+          grace_period_end: '0',
+          sub_names_count: '0',
+          locked_kap_tokens: '10'
+        },
+        {
+          domain: 'koin',
+          name: 'not-mintable',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        },
+        {
+          domain: 'doe.koin',
+          name: 'john',
+          owner: user1.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+  });
+});
+
+describe('transfer', () => {
+  it('should transfer a name', async () => {
+    let res = await nameserviceContract.functions.mint({
+      name: 'transfer.koin',
+      duration_increments: 3,
+      owner: user3.address,
+      payment_from: user3.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'transfer.koin',
+    });
+
+    expect(res.result.owner).toStrictEqual(user3.address);
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user3.address,
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: 'koin',
+          name: 'transfer',
+          owner: user3.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user4.address,
+    });
+
+    expect(res.result).toStrictEqual(undefined);
+
+    res = await nameserviceContract.functions.transfer({
+      name: 'transfer.koin',
+      to: user4.address
+    }, {
+      beforeSend: async (tx) => {
+        await user3.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'transfer.koin',
+    });
+
+    expect(res.result.owner).toStrictEqual(user4.address);
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user4.address,
+    });
+
+    expect(res.result).toStrictEqual({
+      names: [
+        {
+          domain: 'koin',
+          name: 'transfer',
+          owner: user4.address,
+          expiration: '10622574211224',
+          grace_period_end: '15933861316836',
+          sub_names_count: '0',
+          locked_kap_tokens: '0'
+        }
+      ]
+    });
+
+    res = await nameserviceContract.functions.get_names({
+      owner: user3.address,
+    });
+
+    expect(res.result).toStrictEqual(undefined);
+  });
+
+  it('should not transfer a name', async () => {
+    try {
+      await nameserviceContract.functions.transfer({
+        name: 'transfer.koin'
+      }, {
+        beforeSend: async (tx) => {
+          await user3.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('missing "to" argument');
+    }
+
+    try {
+      await nameserviceContract.functions.transfer({
+        name: 'i-dont-exist.koin',
+        to: user4.address
+      }, {
+        beforeSend: async (tx) => {
+          await user3.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "i-dont-exist.koin" does not exist');
+    }
+
+    try {
+      await nameserviceContract.functions.transfer({
+        name: 'transfer.koin',
+        to: user3.address
+      }, {
+        beforeSend: async (tx) => {
+          await user3.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name owner has not authorized transfer');
+    }
+
+    // when expired
+    let res = await nameserviceContract.functions.mint({
+      name: 'expires-now.koin',
+      duration_increments: 3,
+      owner: user4.address,
+      payment_from: user4.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction.wait();
+
+    try {
+      await nameserviceContract.functions.transfer({
+        name: 'expires-now.koin',
+        to: user4.address,
+      }, {
+        beforeSend: async (tx) => {
+          await doedotkoinDomainAcct.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "expires-now.koin" does not exist');
+    }
   });
 });

@@ -46,6 +46,11 @@ export class Testdomain {
 
       res.expiration = now;
       res.grace_period_end = now + 600000;
+    } else if (name == 'expires-now') {
+      const now = System.getHeadInfo().head_block_time;
+
+      res.expiration = now;
+      res.grace_period_end = now;
     } else if (name == 'grace-period') {
       const now = System.getHeadInfo().head_block_time;
 

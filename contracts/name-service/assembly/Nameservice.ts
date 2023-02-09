@@ -252,8 +252,8 @@ export class Nameservice {
     const callerData = System.getCaller();
 
     System.require(
-      Arrays.equal(callerData.caller, nameObj!.owner)
-      || System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
+      Arrays.equal(callerData.caller, nameObj!.owner) ||
+      System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
       'name owner has not authorized burn',
       error.error_code.authorization_failure
     );
@@ -315,17 +315,16 @@ export class Nameservice {
     const nameKey = this.parseName(name);
 
     // attempt to get name from state
+    // expired names cannot be transfered
     let nameObj = this.getName(nameKey);
 
-    if (nameObj == null) {
-      System.revert(`name "${name}" does not exist`);
-    }
+    System.require(nameObj != null, `name "${name}" does not exist`);
 
     // verify ownership
     const callerData = System.getCaller();
     System.require(
-      Arrays.equal(callerData.caller, nameObj!.owner)
-      || System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
+      Arrays.equal(callerData.caller, nameObj!.owner) ||
+      System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
       'name owner has not authorized transfer',
       error.error_code.authorization_failure
     );
@@ -357,28 +356,30 @@ export class Nameservice {
     System.require(nameObj!.expiration != 0, `cannot renew "${name}" because it cannot expire`);
 
     // if TLA, revert for now
-    System.require(nameObj!.domain.length > 0, 'TLAs cannot be renewed at the moment');
+    if (nameObj!.domain.length == 0) {
+      System.revert('TLAs cannot be renewed at the moment');
+    } else {
+      // get domain object
+      const domainKey = this.parseName(nameKey.domain);
 
-    // get domain object
-    const domainKey = this.parseName(nameKey.domain);
+      // cannot renew a name on an expired domain
+      const domainObj = this.getName(domainKey);
 
-    // cannot renew a name on an expired domain
-    const domainObj = this.getName(domainKey);
+      // call the "autorize_renewal" entrypoint of the contract hosted at "owner" address
+      // if this call doesn't revert the transaction,
+      // proceed with the renewal
+      const autorizeRenewalResult = this.autorizeRenewal(
+        nameObj!,
+        duration_increments,
+        payment_from,
+        payment_token_address,
+        domainObj!.owner
+      );
 
-    // call the "autorize_renewal" entrypoint of the contract hosted at "owner" address
-    // if this call doesn't revert the transaction,
-    // proceed with the renewal
-    const autorizeRenewalResult = this.autorizeRenewal(
-      nameObj!,
-      duration_increments,
-      payment_from,
-      payment_token_address,
-      domainObj!.owner
-    );
-
-    nameObj!.expiration = autorizeRenewalResult.expiration;
-    nameObj!.grace_period_end = autorizeRenewalResult.grace_period_end;
-    this.names.put(nameKey, nameObj!);
+      nameObj!.expiration = autorizeRenewalResult.expiration;
+      nameObj!.grace_period_end = autorizeRenewalResult.grace_period_end;
+      this.names.put(nameKey, nameObj!);
+    }
 
     return new nameservice.empty_object();
   }
@@ -406,7 +407,7 @@ export class Nameservice {
     const descending = args.descending;
     let limit = args.limit || 10;
 
-    let nameObj: nameservice.name_object;
+    let nameObj: nameservice.name_object | null;
     let nameKeyHash: Uint8Array;
 
     // calculate offset address key if name_offset provided
@@ -442,7 +443,7 @@ export class Nameservice {
         tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key!, nameservice.owner_index_key.decode);
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
-          nameObj = this.getName(ownerIndexObj.value)!;
+          nameObj = this.getName(ownerIndexObj.value);
 
           if (nameObj != null) {
             res.names.push(nameObj);
