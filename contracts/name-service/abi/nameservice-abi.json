@@ -274,7 +274,7 @@
                             }
                         }
                     },
-                    "address_key": {
+                    "owner_index_key": {
                         "fields": {
                             "owner": {
                                 "type": "bytes",

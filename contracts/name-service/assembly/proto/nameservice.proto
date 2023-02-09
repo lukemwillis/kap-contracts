@@ -118,7 +118,7 @@ message address_object {
   uint64 names_count = 1;
 }
 
-message address_key {
+message owner_index_key {
   bytes owner = 1 [(koinos.btype) = ADDRESS];
   bytes name_hash = 2;
 }

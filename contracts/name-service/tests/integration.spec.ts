@@ -323,10 +323,8 @@ describe('mint', () => {
       name: 'grace-period.koin',
     });
 
-    // should be reclaimable, meaning the name doesn't have an owner anymore
-    expect(res?.result?.domain).toBe('koin');
-    expect(res?.result?.name).toBe('grace-period');
-    expect(res?.result?.owner).toBe('');
+    // should be reclaimable, meaning get_name doesn't not return anything
+    expect(res?.result).toBe(undefined);
 
     // reclaim name
     res = await nameserviceContract.functions.mint({
@@ -491,6 +489,7 @@ describe('mint', () => {
 
     await res.transaction?.wait();
 
+    // check that cannot mint if name is expired, grace_period has not ended yet
     try {
       await nameserviceContract.functions.mint({
         name: 'expired.koin',
@@ -500,7 +499,7 @@ describe('mint', () => {
         payment_token_address: koin.address
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('grace period for name "expired.koin" has not ended yet');
+      expect(JSON.parse(error.message).error).toStrictEqual('name "expired.koin" is already taken');
     }
 
     // check that a name cannot be minted if a domain contract is not setup at the owner address

@@ -675,8 +675,8 @@ export namespace nameservice {
     }
   }
 
-  export class address_key {
-    static encode(message: address_key, writer: Writer): void {
+  export class owner_index_key {
+    static encode(message: owner_index_key, writer: Writer): void {
       if (message.owner.length != 0) {
         writer.uint32(10);
         writer.bytes(message.owner);
@@ -688,9 +688,9 @@ export namespace nameservice {
       }
     }
 
-    static decode(reader: Reader, length: i32): address_key {
+    static decode(reader: Reader, length: i32): owner_index_key {
       const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new address_key();
+      const message = new owner_index_key();
 
       while (reader.ptr < end) {
         const tag = reader.uint32();

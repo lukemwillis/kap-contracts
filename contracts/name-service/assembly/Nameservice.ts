@@ -1,12 +1,15 @@
 import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
 import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT } from "./Constants";
 import { nameservice } from "./proto/nameservice";
-import { AddressesIndex } from "./state/AddressesIndex";
+import { OwnersIndex } from "./state/OwnersIndex";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
 
 export class Nameservice {
   contractId: Uint8Array = System.getContractId();
+  names: Names = new Names(this.contractId);
+  ownersIndex: OwnersIndex = new OwnersIndex(this.contractId);
+  now: u64 = System.getHeadInfo().head_block_time;
 
   /**
     * Validate a name or domain
@@ -117,6 +120,25 @@ export class Nameservice {
     return decodedCallRes;
   }
 
+  /**
+  * Get a name from the Names space
+  * @return the name if found and it has not expired and the grace_peiod has not ended
+  */
+  getName(key: nameservice.name_object): nameservice.name_object | null {
+    const nameObj = this.names.get(key);
+
+    // if it exists and has not expired and the grace_period has not ended
+    if (nameObj != null && (
+      nameObj.expiration == 0 ||
+      nameObj.expiration > this.now ||
+      nameObj.grace_period_end > this.now
+    )) {
+      return nameObj;
+    }
+
+    return null;
+  }
+
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
     const name = args.name;
     const duration_increments = args.duration_increments;
@@ -129,16 +151,22 @@ export class Nameservice {
     // parseName will fail if name has an invalid format
     const nameKey = this.parseName(name);
 
-    // attempt to get name from state
-    const names = new Names(this.contractId);
-    let nameObj = names.get(nameKey);
+    // ensure TLA/Name is not minted yet
+    let nameObj = this.names.get(nameKey);
+
+    // if it already exists and has not expired and the grace_period has not ended
+    if (nameObj != null && (
+      nameObj.expiration == 0 ||
+      nameObj.expiration > this.now ||
+      nameObj.grace_period_end > this.now
+    )) {
+      System.revert(`name "${name}" is already taken`);
+    } else if (nameObj == null) {
+      nameObj = new nameservice.name_object(nameKey.domain, nameKey.name);
+    }
 
     // is the user trying to mint a TLA?
-    if (nameKey.domain.length == 0) {
-      // ensure TLA is not minted yet
-      System.require(nameObj == null, `name "${name}" is already taken`);
-      nameObj = new nameservice.name_object('', nameKey.name);
-
+    if (nameObj.domain.length == 0) {
       // only this contract can mint TLAs for now
       System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
       const metadata = new Metadata(this.contractId).get()!;
@@ -162,25 +190,11 @@ export class Nameservice {
       // then we need to get the domain for the name_object name: "sub" / domain: "koin"
       // if the user is trying to mint "john.subsub.sub.koin" 
       // then we need to get the domain for the name_object name: "subsub" / domain: "sub.koin"
-      const domainKey = this.parseName(nameKey.domain);
-      const domainObj = names.get(domainKey);
+      const domainKey = this.parseName(nameObj.domain);
+      const domainObj = this.getName(domainKey);
 
-      System.require(domainObj != null, `domain "${nameKey.domain}" does not exist`);
-
-      // if name is already taken, check expiration and/or if grace period has ended
-      if (nameObj != null) {
-        const now = System.getHeadInfo().head_block_time;
-        // check expiration
-        if (nameObj.expiration == 0 || nameObj.expiration > now) {
-          System.revert(`name "${name}" is already taken`);
-        }
-        // check grace period
-        else if (nameObj.grace_period_end > now) {
-          System.revert(`grace period for name "${name}" has not ended yet`);
-        }
-      } else {
-        nameObj = new nameservice.name_object(nameKey.domain, nameKey.name);
-      }
+      // should not allow minting if a domain does not exist or if the domain has expired
+      System.require(domainObj != null, `domain "${nameObj.domain}" does not exist`);
 
       // call the "autorize_mint" entrypoint of the contract hosted at "owner" address
       // this call must return the name expiration as uint64 and the grace period end as uint64
@@ -189,8 +203,8 @@ export class Nameservice {
       // if the "autorize_mint" entrypoint is not setup  in the contract, then the system.call will fail
       // this means that "owner" has to setup a contract in order to manage its name mints
       const autorizeMintResult = this.autorizeMint(
-        nameKey.name,
-        nameKey.domain,
+        nameObj.name,
+        nameObj.domain,
         duration_increments,
         owner,
         payment_from,
@@ -203,31 +217,18 @@ export class Nameservice {
 
       // update domain's sub_names_count
       domainObj!.sub_names_count = SafeMath.add(domainObj!.sub_names_count, 1);
-      names.put(domainKey, domainObj!);
+      this.names.put(domainKey, domainObj!);
     }
 
     // if the execution reaches this line, then the TLA or name are authorized
     // so we can proceed with saving it
 
-    // update addresses index
-    const addressesIndex = new AddressesIndex(this.contractId);
-
-    const nameKeyHash = System.hash(
-      Crypto.multicodec.sha2_256,
-      Protobuf.encode(nameKey, nameservice.name_object.encode)
-    );
-
-    // remove old index record
-    let addressKey = new nameservice.address_key(nameObj.owner, nameKeyHash!);
-    addressesIndex.remove(addressKey);
+    // update owners index
+    this.ownersIndex.updateIndex(nameKey, nameObj.owner, owner);
 
     // save new name
     nameObj.owner = owner;
-    names.put(nameKey, nameObj);
-
-    // add new index record
-    addressKey = new nameservice.address_key(nameObj.owner, nameKeyHash!);
-    addressesIndex.put(addressKey, nameKey);
+    this.names.put(nameKey, nameObj);
 
     return new nameservice.empty_object();
   }
@@ -239,8 +240,9 @@ export class Nameservice {
     const nameKey = this.parseName(name);
 
     // attempt to get name from state
-    const names = new Names(this.contractId);
-    let nameObj = names.get(nameKey);
+    // even expired names can be burned,
+    // so get the name_object no matter what
+    const nameObj = this.names.get(nameKey);
 
     if (nameObj == null) {
       System.revert(`name "${name}" does not exist`);
@@ -249,16 +251,8 @@ export class Nameservice {
     // verify ownership
     const callerData = System.getCaller();
 
-    // calculate nameKey hash
-    const addressesIndex = new AddressesIndex(this.contractId);
-    const nameKeyHash = System.hash(
-      Crypto.multicodec.sha2_256,
-      Protobuf.encode(nameKey, nameservice.name_object.encode)
-    );
-    const addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
-
     System.require(
-      callerData.caller == nameObj!.owner
+      Arrays.equal(callerData.caller, nameObj!.owner)
       || System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
       'name owner has not authorized burn',
       error.error_code.authorization_failure
@@ -278,14 +272,15 @@ export class Nameservice {
       }
 
       // remove TLA from state
-      names.remove(nameKey);
+      this.names.remove(nameKey);
 
-      // delete index record
-      addressesIndex.remove(addressKey);
+      // update owners index
+      this.ownersIndex.updateIndex(nameKey, nameObj!.owner);
     } else {
       // get domain object
       const domainKey = this.parseName(nameKey.domain);
-      const domainObj = names.get(domainKey)!;
+      // can burn names from expired domains
+      const domainObj = this.names.get(domainKey)!;
 
       // call the "autorize_burn" entrypoint of the contract hosted at "owner" address
       // if this call doesn't revert the transaction,
@@ -297,14 +292,14 @@ export class Nameservice {
 
       if (authorized) {
         // delete name from the state
-        names.remove(nameKey);
+        this.names.remove(nameKey);
 
-        // delete index record
-        addressesIndex.remove(addressKey);
+        // update owners index
+        this.ownersIndex.updateIndex(nameKey, nameObj!.owner);
 
         // update domain sub_names_count
         domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
-        names.put(domainKey, domainObj);
+        this.names.put(domainKey, domainObj);
       }
     }
 
@@ -320,8 +315,7 @@ export class Nameservice {
     const nameKey = this.parseName(name);
 
     // attempt to get name from state
-    const names = new Names(this.contractId);
-    let nameObj = names.get(nameKey);
+    let nameObj = this.getName(nameKey);
 
     if (nameObj == null) {
       System.revert(`name "${name}" does not exist`);
@@ -330,30 +324,18 @@ export class Nameservice {
     // verify ownership
     const callerData = System.getCaller();
     System.require(
-      callerData.caller == nameObj!.owner
+      Arrays.equal(callerData.caller, nameObj!.owner)
       || System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
       'name owner has not authorized transfer',
       error.error_code.authorization_failure
     );
 
-    // calculate nameKey hash
-    const addressesIndex = new AddressesIndex(this.contractId);
-    const nameKeyHash = System.hash(
-      Crypto.multicodec.sha2_256,
-      Protobuf.encode(nameKey, nameservice.name_object.encode)
-    );
-
-    // remove old index record
-    let addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
-    addressesIndex.remove(addressKey);
+    // update owners index
+    this.ownersIndex.updateIndex(nameKey, nameObj!.owner, to);
 
     // transfer ownership
     nameObj!.owner = to;
-    names.put(nameKey, nameObj!);
-
-    // add new index record
-    addressKey = new nameservice.address_key(nameObj!.owner, nameKeyHash!);
-    addressesIndex.put(addressKey, nameKey);
+    this.names.put(nameKey, nameObj!);
 
     return new nameservice.empty_object();
   }
@@ -368,20 +350,20 @@ export class Nameservice {
     const nameKey = this.parseName(name);
 
     // attempt to get name from state
-    const names = new Names(this.contractId);
-    let nameObj = names.get(nameKey);
+    // expired names must use the mint function to renew
+    let nameObj = this.getName(nameKey);
 
-    if (nameObj == null) {
-      System.revert(`name "${name}" does not exist`);
-    }
+    System.require(nameObj != null, `name "${name}" does not exist`);
+    System.require(nameObj!.expiration != 0, `cannot renew "${name}" because it cannot expire`);
 
-    if (nameObj!.domain.length == 0) {
-      System.revert('TLAs cannot be renewed at the moment');
-    }
+    // if TLA, revert for now
+    System.require(nameObj!.domain.length > 0, 'TLAs cannot be renewed at the moment');
 
     // get domain object
     const domainKey = this.parseName(nameKey.domain);
-    const domainObj = names.get(domainKey)!;
+
+    // cannot renew a name on an expired domain
+    const domainObj = this.getName(domainKey);
 
     // call the "autorize_renewal" entrypoint of the contract hosted at "owner" address
     // if this call doesn't revert the transaction,
@@ -391,12 +373,12 @@ export class Nameservice {
       duration_increments,
       payment_from,
       payment_token_address,
-      domainObj.owner
+      domainObj!.owner
     );
 
     nameObj!.expiration = autorizeRenewalResult.expiration;
     nameObj!.grace_period_end = autorizeRenewalResult.grace_period_end;
-    names.put(nameKey, nameObj!);
+    this.names.put(nameKey, nameObj!);
 
     return new nameservice.empty_object();
   }
@@ -405,24 +387,11 @@ export class Nameservice {
     // parseName will fail if args.name has an invalid format
     const nameKey = this.parseName(args.name);
 
-    const names = new Names(this.contractId);
-    const nameObj = names.get(nameKey);
+    // expired names don't return anything
+    const nameObj = this.getName(nameKey);
 
     // if name exists
     if (nameObj) {
-      // check expiration
-      const now = System.getHeadInfo().head_block_time;
-
-      // if expired and grace period has ended
-      if (
-        nameObj.expiration != 0
-        && nameObj.expiration <= now
-        && nameObj.grace_period_end <= now
-      ) {
-        // clear the owner
-        nameObj.owner = new Uint8Array(0);
-      }
-
       return nameObj;
     }
 
@@ -436,9 +405,6 @@ export class Nameservice {
     const nameOffset = args.name_offset;
     const descending = args.descending;
     let limit = args.limit || 10;
-
-    const names = new Names(this.contractId);
-    const addressesIndex = new AddressesIndex(this.contractId);
 
     let nameObj: nameservice.name_object;
     let nameKeyHash: Uint8Array;
@@ -458,7 +424,7 @@ export class Nameservice {
       nameKeyHash = descending ? new Uint8Array(34).fill(u8.MAX_VALUE) : new Uint8Array(34).fill(u8.MIN_VALUE);
     }
 
-    let addressKey = new nameservice.address_key(
+    let ownerIndexKey = new nameservice.owner_index_key(
       owner,
       nameKeyHash
     );
@@ -466,32 +432,24 @@ export class Nameservice {
     const res = new nameservice.get_names_result();
 
     let done = false;
-    let addressObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
-    let tmpAddressKey: nameservice.address_key;
-
-    const now = System.getHeadInfo().head_block_time;
+    let ownerIndexObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
+    let tmpOwnerIndexKey: nameservice.owner_index_key;
 
     do {
-      addressObj = descending ? addressesIndex.getPrev(addressKey) : addressesIndex.getNext(addressKey);
+      ownerIndexObj = descending ? this.ownersIndex.getPrev(ownerIndexKey) : this.ownersIndex.getNext(ownerIndexKey);
 
-      if (addressObj) {
-        tmpAddressKey = Protobuf.decode<nameservice.address_key>(addressObj.key!, nameservice.address_key.decode);
+      if (ownerIndexObj) {
+        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key!, nameservice.owner_index_key.decode);
 
-        if (Arrays.equal(tmpAddressKey.owner, owner)) {
-          nameObj = names.get(addressObj.value)!;
+        if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
+          nameObj = this.getName(ownerIndexObj.value)!;
 
-          // check expiration
-          // if has not expired and grace period has not ended
-          if (
-            nameObj.expiration == 0 ||
-            nameObj.expiration > now ||
-            nameObj.grace_period_end > now
-          ) {
+          if (nameObj != null) {
             res.names.push(nameObj);
             limit--;
           }
 
-          addressKey = tmpAddressKey;
+          ownerIndexKey = tmpOwnerIndexKey;
         } else {
           done = true;
         }
