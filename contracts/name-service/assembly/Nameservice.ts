@@ -366,6 +366,8 @@ export class Nameservice {
       // cannot renew a name on an expired domain
       const domainObj = this.getName(domainKey);
 
+      System.require(domainObj != null, `cannot renew name "${name}" because its domain has expired`);
+
       // call the "autorize_renewal" entrypoint of the contract hosted at "owner" address
       // if this call doesn't revert the transaction,
       // proceed with the renewal

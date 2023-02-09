@@ -1217,3 +1217,99 @@ describe('burn', () => {
     }
   });
 });
+
+describe('renew', () => {
+  it('should renew a name', async () => {
+    let res = await nameserviceContract.functions.get_name({
+      name: 'john.doe.koin',
+    });
+
+    expect(res?.result).toStrictEqual({
+      domain: 'doe.koin',
+      name: 'john',
+      owner: user1.address,
+      expiration: '10622574211224',
+      grace_period_end: '15933861316836',
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
+
+    res = await nameserviceContract.functions.renew({
+      name: 'john.doe.koin',
+      duration_increments: 3,
+      payment_from: user3.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: 'john.doe.koin',
+    });
+
+    expect(res?.result).toStrictEqual({
+      domain: 'doe.koin',
+      name: 'john',
+      owner: user1.address,
+      expiration: '1770428796867',
+      grace_period_end: '1770428796869',
+      sub_names_count: '0',
+      locked_kap_tokens: '0'
+    });
+  });
+
+  it('should not renew a name', async () => {
+    let res = await nameserviceContract.functions.mint({
+      name: 'cannot-renew.koin',
+      duration_increments: 3,
+      owner: user1.address,
+      payment_from: user1.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.functions.renew({
+        name: 'cannot-renew.koin',
+        duration_increments: 3,
+        payment_from: user1.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "cannot-renew" cannot be renewed');
+    }
+
+    try {
+      await nameserviceContract.functions.renew({
+        name: 'i-dont-exist.koin',
+        duration_increments: 3,
+        payment_from: user3.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('name "i-dont-exist.koin" does not exist');
+    }
+
+    res = await nameserviceContract.functions.mint({
+      name: 'never-expires.koin',
+      duration_increments: 3,
+      owner: user1.address,
+      payment_from: user1.address,
+      payment_token_address: koin.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.functions.renew({
+        name: 'never-expires.koin',
+        duration_increments: 3,
+        payment_from: user1.address,
+        payment_token_address: koin.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('cannot renew "never-expires.koin" because it cannot expire');
+    }
+  });
+});
