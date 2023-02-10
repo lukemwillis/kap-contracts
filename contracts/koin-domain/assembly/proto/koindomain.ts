@@ -565,9 +565,14 @@ export namespace koindomain {
   @unmanaged
   export class get_last_usd_price_res {
     static encode(message: get_last_usd_price_res, writer: Writer): void {
-      if (message.value != 0) {
+      if (message.price != 0) {
         writer.uint32(8);
-        writer.uint64(message.value);
+        writer.uint64(message.price);
+      }
+
+      if (message.timestamp != 0) {
+        writer.uint32(16);
+        writer.uint64(message.timestamp);
       }
     }
 
@@ -579,7 +584,11 @@ export namespace koindomain {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.value = reader.uint64();
+            message.price = reader.uint64();
+            break;
+
+          case 2:
+            message.timestamp = reader.uint64();
             break;
 
           default:
@@ -591,10 +600,12 @@ export namespace koindomain {
       return message;
     }
 
-    value: u64;
+    price: u64;
+    timestamp: u64;
 
-    constructor(value: u64 = 0) {
-      this.value = value;
+    constructor(price: u64 = 0, timestamp: u64 = 0) {
+      this.price = price;
+      this.timestamp = timestamp;
     }
   }
 

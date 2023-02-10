@@ -216,9 +216,13 @@
                     },
                     "get_last_usd_price_res": {
                         "fields": {
-                            "value": {
+                            "price": {
                                 "type": "uint64",
                                 "id": 1
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 2
                             }
                         }
                     },

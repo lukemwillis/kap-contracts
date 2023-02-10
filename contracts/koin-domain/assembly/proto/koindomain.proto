@@ -92,7 +92,8 @@ message get_last_usd_price_args {
 }
 
 message get_last_usd_price_res {
-  uint64 value = 1;
+  uint64 price = 1;
+  uint64 timestamp = 2;
 }
 
 // objects

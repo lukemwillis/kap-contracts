@@ -312,5 +312,72 @@ describe('mint', () => {
       ])
     })
 
+    // set the koin price in oracle to $1000
+    res = await usdOracleContract.functions.set_latest_price({
+      token_address: koin.address,
+      price: '100000000000' // $1000
+    });
+
+    await res.transaction?.wait();
+
+    // buy a 10 char name for 1 year (should cost $10x1=$10 => 10 Koin)
+    res = await nameserviceContract.functions.mint({
+      name: '1234567892.koin',
+      owner: user1.address,
+      duration_increments: 1, // 1 year
+      payment_from: user1.address,
+    }, {
+      beforeSend: async (tx) => {
+        await user1.signer.signTransaction(tx)
+      }
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: '1234567892.koin'
+    });
+
+    expect(res?.result?.domain).toEqual('koin');
+    expect(res?.result?.name).toEqual('1234567892');
+    expect(res?.result?.owner).toEqual(user1.address);
+
+    user1Bal = await localKoinos.koin.balanceOf(user1.address);
+    expect(user1Bal).toEqual('4998999000000');
+
+    koinDomainBal = await localKoinos.koin.balanceOf(koinDomainAcct.address);
+    expect(koinDomainBal).toEqual('6171001000000');
+
+    res = await koinDomainContract.functions.get_purchases({});
+
+    expect(res.result).toEqual({
+      purchases: expect.arrayContaining([
+        expect.objectContaining({
+          buyer: user1.address,
+          name: '1234567891',
+          usd_amount: '1000000000',
+        }),
+        expect.objectContaining({
+          buyer: user2.address,
+          name: '12345',
+          usd_amount: '20000000000',
+        }),
+        expect.objectContaining({
+          buyer: user3.address,
+          name: '12',
+          usd_amount: '150000000000',
+        }),
+        expect.objectContaining({
+          buyer: user4.address,
+          name: '1',
+          usd_amount: '1000000000000',
+        }),
+        expect.objectContaining({
+          buyer: user1.address,
+          name: '1234567892',
+          usd_amount: '1000000000',
+        }),
+      ])
+    })
   });
 });

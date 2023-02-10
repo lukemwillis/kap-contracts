@@ -1,5 +1,5 @@
 import { System, authority, Arrays, error, Protobuf, SafeMath, Token, u128 } from "@koinos/sdk-as";
-import { GET_LATEST_PRICE_ENTRYPOINT, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_DAY } from "./Constants";
+import { GET_LATEST_PRICE_ENTRYPOINT, GRACE_PERIOD_IN_MS, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_DAY, MILLISECONDS_PER_YEAR } from "./Constants";
 import { koindomain } from "./proto/koindomain";
 import { Metadata } from "./state/Metadata";
 import { Purchases } from "./state/Purchases";
@@ -21,7 +21,7 @@ export class Koindomain {
     System.require(callRes.code == 0, "failed to retrieve last USD price");
     const res = Protobuf.decode<koindomain.get_last_usd_price_res>(callRes.res.object, koindomain.get_last_usd_price_res.decode);
 
-    return res.value;
+    return res.price;
   }
 
   /**
@@ -83,10 +83,10 @@ export class Koindomain {
       System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
 
       // calculate expiration
-      const expiration = this.calulateExpiration(duration_increments);
+      const expiration = this.calculateExpiration(duration_increments);
 
       // calculate grace period
-      const gracePeriod = this.calulateGracePeriod(expiration);
+      const gracePeriod = this.calculateGracePeriod(expiration);
 
       return new koindomain.authorize_mint_result(expiration, gracePeriod);
     }
@@ -98,10 +98,9 @@ export class Koindomain {
     }
   }
 
-  private calulateExpiration(durationIncrements: u64, existingExpiration: u64 = 0): u64 {
-    const daysPerIncrement = 365; // 1 year increments
-    const expirationInDays = SafeMath.mul(durationIncrements, daysPerIncrement);
-    const expirationInMs = SafeMath.mul(expirationInDays, MILLISECONDS_PER_DAY);
+  private calculateExpiration(durationIncrements: u64, existingExpiration: u64 = 0): u64 {
+    // durationIncrements is per 1 year increments
+    const expirationInMs = SafeMath.mul(durationIncrements, MILLISECONDS_PER_YEAR);
 
     if (existingExpiration > 0) {
       return SafeMath.add(existingExpiration, expirationInMs);
@@ -110,11 +109,8 @@ export class Koindomain {
     return SafeMath.add(this.now, expirationInMs);
   }
 
-  private calulateGracePeriod(expiration: u64): u64 {
-    const gracePeriodInDays = 60;
-    const gracePeriodInMs = SafeMath.mul(gracePeriodInDays, MILLISECONDS_PER_DAY);
-
-    return SafeMath.add(expiration, gracePeriodInMs);
+  private calculateGracePeriod(expiration: u64): u64 {
+    return SafeMath.add(expiration, GRACE_PERIOD_IN_MS);
   }
 
   private calculateNumberOfTokensToTransfer(
@@ -122,10 +118,10 @@ export class Koindomain {
     pricePerIncrement: u64,
     durationIncrements: u64,
     buyer: Uint8Array,
-    oracle_address: Uint8Array
+    oracleAddress: Uint8Array
   ): u64 {
     const totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
-    const paymentTokenUSDPrice = this.getLatestUSDPrice(this.koinAddress, oracle_address);
+    const paymentTokenUSDPrice = this.getLatestUSDPrice(this.koinAddress, oracleAddress);
 
     // add purchase for $KAP airdrop
     this.purchases.put(
@@ -134,7 +130,7 @@ export class Koindomain {
     );
 
     return (
-      // multiply the amount of token by 10^8 since Koin is 8 decimals
+      // multiply the amount of tokens by 10^8 since Koin is 8 decimals
       //@ts-ignore can be done in AS
       u128.from(u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000) / u128.fromU64(paymentTokenUSDPrice)).toU64()
     );
@@ -157,7 +153,7 @@ export class Koindomain {
       // $10
       pricePerIncrement = 10_0000_0000;
     }
-    
+
     return pricePerIncrement;
   }
 
@@ -209,7 +205,7 @@ export class Koindomain {
     System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
 
     // calculate new expiration
-    const newExpiration = this.calulateExpiration(duration_increments, name!.expiration);
+    const newExpiration = this.calculateExpiration(duration_increments, name!.expiration);
 
     System.require(
       newExpiration <= nowPlus10Years,
@@ -217,7 +213,7 @@ export class Koindomain {
     );
 
     // calculate grace period
-    const gracePeriod = this.calulateGracePeriod(newExpiration);
+    const gracePeriod = this.calculateGracePeriod(newExpiration);
 
     return new koindomain.authorize_renewal_result(newExpiration, gracePeriod);
   }
