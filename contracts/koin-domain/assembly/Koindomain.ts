@@ -14,7 +14,7 @@ export class Koindomain {
   /**
     * Get the USD price of a token from the oracle contract
     */
-  getLatestUSDPrice(tokenAddress: Uint8Array, oracle_address: Uint8Array): u64 {
+  private getLatestUSDPrice(tokenAddress: Uint8Array, oracle_address: Uint8Array): u64 {
     const args = new koindomain.get_last_usd_price_args(tokenAddress);
 
     const callRes = System.call(oracle_address, GET_LATEST_PRICE_ENTRYPOINT, Protobuf.encode(args, koindomain.get_last_usd_price_args.encode));
@@ -27,7 +27,7 @@ export class Koindomain {
   /**
     * Check that the caller is the Nameservice contract
     */
-  requireNameserviceAuthority(nameserviceAddress: Uint8Array): void {
+  private requireNameserviceAuthority(nameserviceAddress: Uint8Array): void {
     const callerData = System.getCaller();
 
     System.require(
@@ -35,6 +35,65 @@ export class Koindomain {
       'only nameservice contract can perform this action',
       error.error_code.authorization_failure
     );
+  }
+
+  private calculateExpiration(durationIncrements: u64, existingExpiration: u64 = 0): u64 {
+    // durationIncrements is per 1 year increments
+    const expirationInMs = SafeMath.mul(durationIncrements, MILLISECONDS_PER_YEAR);
+
+    if (existingExpiration > 0) {
+      return SafeMath.add(existingExpiration, expirationInMs);
+    }
+
+    return SafeMath.add(this.now, expirationInMs);
+  }
+
+  private calculateGracePeriod(expiration: u64): u64 {
+    return SafeMath.add(expiration, GRACE_PERIOD_IN_MS);
+  }
+
+  private calculateNumberOfTokensToTransfer(
+    name: string,
+    pricePerIncrement: u64,
+    durationIncrements: u64,
+    buyer: Uint8Array,
+    oracleAddress: Uint8Array
+  ): u64 {
+    const totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
+    const paymentTokenUSDPrice = this.getLatestUSDPrice(this.koinAddress, oracleAddress);
+
+    // add purchase for $KAP airdrop
+    this.purchases.put(
+      new koindomain.purchase_key(name, this.now),
+      new koindomain.purchase_record(buyer, totalUSDPrice)
+    );
+
+    return (
+      // multiply the amount of tokens by 10^8 since Koin is 8 decimals
+      //@ts-ignore can be done in AS
+      u128.from(u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000) / u128.fromU64(paymentTokenUSDPrice)).toU64()
+    );
+  }
+
+  private getPricePerIncrement(nameLength: i32): u64 {
+    let pricePerIncrement: u64 = 0;
+
+    // price is in USD with 8 decimals
+    if (nameLength == 1) {
+      // $1000
+      pricePerIncrement = 1000_0000_0000;
+    } else if (nameLength >= 2 && nameLength <= 3) {
+      // $500
+      pricePerIncrement = 500_0000_0000;
+    } else if (nameLength >= 4 && nameLength <= 6) {
+      // $100
+      pricePerIncrement = 100_0000_0000;
+    } else {
+      // $10
+      pricePerIncrement = 10_0000_0000;
+    }
+
+    return pricePerIncrement;
   }
 
   authorize_mint(
@@ -96,65 +155,6 @@ export class Koindomain {
       // non-premuim accounts are free forever
       return new koindomain.authorize_mint_result(0, 0);
     }
-  }
-
-  private calculateExpiration(durationIncrements: u64, existingExpiration: u64 = 0): u64 {
-    // durationIncrements is per 1 year increments
-    const expirationInMs = SafeMath.mul(durationIncrements, MILLISECONDS_PER_YEAR);
-
-    if (existingExpiration > 0) {
-      return SafeMath.add(existingExpiration, expirationInMs);
-    }
-
-    return SafeMath.add(this.now, expirationInMs);
-  }
-
-  private calculateGracePeriod(expiration: u64): u64 {
-    return SafeMath.add(expiration, GRACE_PERIOD_IN_MS);
-  }
-
-  private calculateNumberOfTokensToTransfer(
-    name: string,
-    pricePerIncrement: u64,
-    durationIncrements: u64,
-    buyer: Uint8Array,
-    oracleAddress: Uint8Array
-  ): u64 {
-    const totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
-    const paymentTokenUSDPrice = this.getLatestUSDPrice(this.koinAddress, oracleAddress);
-
-    // add purchase for $KAP airdrop
-    this.purchases.put(
-      new koindomain.purchase_key(name, this.now),
-      new koindomain.purchase_record(buyer, totalUSDPrice)
-    );
-
-    return (
-      // multiply the amount of tokens by 10^8 since Koin is 8 decimals
-      //@ts-ignore can be done in AS
-      u128.from(u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000) / u128.fromU64(paymentTokenUSDPrice)).toU64()
-    );
-  }
-
-  private getPricePerIncrement(nameLength: i32): u64 {
-    let pricePerIncrement: u64 = 0;
-
-    // price is in USD with 8 decimals
-    if (nameLength == 1) {
-      // $1000
-      pricePerIncrement = 1000_0000_0000;
-    } else if (nameLength >= 2 && nameLength <= 3) {
-      // $500
-      pricePerIncrement = 500_0000_0000;
-    } else if (nameLength >= 4 && nameLength <= 6) {
-      // $100
-      pricePerIncrement = 100_0000_0000;
-    } else {
-      // $10
-      pricePerIncrement = 10_0000_0000;
-    }
-
-    return pricePerIncrement;
   }
 
   authorize_burn(
