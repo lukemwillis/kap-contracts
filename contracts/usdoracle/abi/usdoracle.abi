@@ -1,0 +1,12 @@
+{
+    "methods": {
+        "hello": {
+            "argument": "usdoracle.hello_arguments",
+            "return": "usdoracle.hello_result",
+            "description": "Says Hello!",
+            "entry-point": "0x2cf24dba",
+            "read-only": true
+        }
+    },
+    "types": "CoABCh5hc3NlbWJseS9wcm90by91c2RvcmFjbGUucHJvdG8SCXVzZG9yYWNsZSIlCg9oZWxsb19hcmd1bWVudHMSEgoEbmFtZRgBIAEoCVIEbmFtZSIkCgxoZWxsb19yZXN1bHQSFAoFdmFsdWUYASABKAlSBXZhbHVlYgZwcm90bzM="
+}

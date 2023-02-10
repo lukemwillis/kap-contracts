@@ -1,5 +1,5 @@
-import { System, authority, Arrays, error, Protobuf, SafeMath, Token } from "@koinos/sdk-as";
-import { GET_LAST_USD_RICE_ENTRYPOINT, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_DAY } from "./Constants";
+import { System, authority, Arrays, error, Protobuf, SafeMath, Token, u128 } from "@koinos/sdk-as";
+import { GET_LATEST_PRICE_ENTRYPOINT, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_DAY } from "./Constants";
 import { koindomain } from "./proto/koindomain";
 import { Metadata } from "./state/Metadata";
 import { Purchases } from "./state/Purchases";
@@ -17,7 +17,7 @@ export class Koindomain {
   getLastUSDPrice(tokenAddress: Uint8Array): u64 {
     const args = new koindomain.get_last_usd_price_args(tokenAddress);
 
-    const callRes = System.call(this.metadata.oracle_address, GET_LAST_USD_RICE_ENTRYPOINT, Protobuf.encode(args, koindomain.get_last_usd_price_args.encode));
+    const callRes = System.call(this.metadata.oracle_address, GET_LATEST_PRICE_ENTRYPOINT, Protobuf.encode(args, koindomain.get_last_usd_price_args.encode));
     System.require(callRes.code == 0, "failed to retrieve last USD price");
     const res = Protobuf.decode<koindomain.get_last_usd_price_res>(callRes.res.object, koindomain.get_last_usd_price_res.decode);
 
@@ -129,20 +129,29 @@ export class Koindomain {
       new koindomain.purchase_record(buyer, totalUSDPrice)
     );
 
-    return SafeMath.div(totalUSDPrice, paymentTokenUSDPrice);
+    return (
+      // multiply the amount of token by 10^8 
+      //@ts-ignore can be done in AS
+      u128.from(u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000) / u128.fromU64(paymentTokenUSDPrice)).toU64()
+    );
   }
 
   private getPricePerIncrement(nameLength: i32): u64 {
     let pricePerIncrement: u64 = 0;
 
+    // price is in USD with 8 decimals
     if (nameLength == 1) {
-      pricePerIncrement = 1000;
+      // $1000
+      pricePerIncrement = 1000_0000_0000;
     } else if (nameLength >= 2 && nameLength <= 3) {
-      pricePerIncrement = 500;
+      // $500
+      pricePerIncrement = 500_0000_0000;
     } else if (nameLength >= 4 && nameLength <= 6) {
-      pricePerIncrement = 100;
+      // $100
+      pricePerIncrement = 100_0000_0000;
     } else {
-      pricePerIncrement = 10;
+      // $10
+      pricePerIncrement = 10_0000_0000;
     }
     return pricePerIncrement;
   }

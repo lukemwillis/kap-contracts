@@ -1,0 +1,35 @@
+{
+    "methods": {
+        "hello": {
+            "argument": "usdoracle.hello_arguments",
+            "return": "usdoracle.hello_result",
+            "description": "Says Hello!",
+            "entry_point": 754077114,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "usdoracle": {
+                "nested": {
+                    "hello_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "hello_result": {
+                        "fields": {
+                            "value": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
