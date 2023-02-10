@@ -9,13 +9,23 @@ export function main(): i32 {
   const c = new ContractClass();
 
   switch (contractArgs.entry_point) {
-    case 0x2cf24dba: {
-      const args = Protobuf.decode<ProtoNamespace.hello_arguments>(
+    case 0xe6ae4302: {
+      const args = Protobuf.decode<ProtoNamespace.set_latest_price_arguments>(
         contractArgs.args,
-        ProtoNamespace.hello_arguments.decode
+        ProtoNamespace.set_latest_price_arguments.decode
       );
-      const res = c.hello(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.hello_result.encode);
+      const res = c.set_latest_price(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
+      break;
+    }
+
+    case 0x8d26b6d6: {
+      const args = Protobuf.decode<ProtoNamespace.get_latest_price_arguments>(
+        contractArgs.args,
+        ProtoNamespace.get_latest_price_arguments.decode
+      );
+      const res = c.get_latest_price(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.price_object.encode);
       break;
     }
 

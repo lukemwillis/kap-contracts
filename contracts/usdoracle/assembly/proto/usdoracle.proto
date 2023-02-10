@@ -2,12 +2,34 @@ syntax = "proto3";
 
 package usdoracle;
 
-// @description Says Hello!
-// @read-only true
-message hello_arguments {
-  string name = 1;
+import "koinos/options.proto"; 
+
+/* 
+  @description Set the latest USD price of a token
+  @read-only true
+  @result empty_object
+*/
+message set_latest_price_arguments {
+  bytes token_address = 1 [(koinos.btype) = CONTRACT_ID];
+  uint64 price = 2 [jstype = JS_STRING];
+
 }
 
-message hello_result {
-  string value = 1;
+/* 
+  @description Get the latest USD price of a token
+  @read-only true
+  @result price_object
+*/
+message get_latest_price_arguments {
+  bytes token_address = 1 [(koinos.btype) = CONTRACT_ID];
+}
+
+// objects
+message empty_object {
+
+}
+
+message price_object {
+  uint64 price = 1 [jstype = JS_STRING];
+  uint64 timestamp = 2 [jstype = JS_STRING];
 }

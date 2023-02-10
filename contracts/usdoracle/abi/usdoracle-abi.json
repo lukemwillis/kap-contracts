@@ -1,10 +1,17 @@
 {
     "methods": {
-        "hello": {
-            "argument": "usdoracle.hello_arguments",
-            "return": "usdoracle.hello_result",
-            "description": "Says Hello!",
-            "entry_point": 754077114,
+        "set_latest_price": {
+            "argument": "usdoracle.set_latest_price_arguments",
+            "return": "usdoracle.empty_object",
+            "description": "Set the latest USD price of a token",
+            "entry_point": 3870180098,
+            "read_only": true
+        },
+        "get_latest_price": {
+            "argument": "usdoracle.get_latest_price_arguments",
+            "return": "usdoracle.price_object",
+            "description": "Get the latest USD price of a token",
+            "entry_point": 2368124630,
             "read_only": true
         }
     },
@@ -12,19 +19,53 @@
         "nested": {
             "usdoracle": {
                 "nested": {
-                    "hello_arguments": {
+                    "set_latest_price_arguments": {
                         "fields": {
-                            "name": {
-                                "type": "string",
-                                "id": 1
+                            "token_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "price": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             }
                         }
                     },
-                    "hello_result": {
+                    "get_latest_price_arguments": {
                         "fields": {
-                            "value": {
-                                "type": "string",
-                                "id": 1
+                            "token_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "price_object": {
+                        "fields": {
+                            "price": {
+                                "type": "uint64",
+                                "id": 1,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             }
                         }
                     }
