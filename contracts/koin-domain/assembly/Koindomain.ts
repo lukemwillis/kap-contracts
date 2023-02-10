@@ -8,16 +8,16 @@ export class Koindomain {
   now: u64 = System.getHeadInfo().head_block_time;
   contractId: Uint8Array = System.getContractId();
   koinAddress: Uint8Array = System.getContractAddress('koin');
-  metadata: koindomain.metadata_object = new Metadata(this.contractId).get()!;
+  metadata: Metadata = new Metadata(this.contractId);
   purchases: Purchases = new Purchases(this.contractId);
 
   /**
     * Get the USD price of a token from the oracle contract
     */
-  getLastUSDPrice(tokenAddress: Uint8Array): u64 {
+  getLatestUSDPrice(tokenAddress: Uint8Array, oracle_address: Uint8Array): u64 {
     const args = new koindomain.get_last_usd_price_args(tokenAddress);
 
-    const callRes = System.call(this.metadata.oracle_address, GET_LATEST_PRICE_ENTRYPOINT, Protobuf.encode(args, koindomain.get_last_usd_price_args.encode));
+    const callRes = System.call(oracle_address, GET_LATEST_PRICE_ENTRYPOINT, Protobuf.encode(args, koindomain.get_last_usd_price_args.encode));
     System.require(callRes.code == 0, "failed to retrieve last USD price");
     const res = Protobuf.decode<koindomain.get_last_usd_price_res>(callRes.res.object, koindomain.get_last_usd_price_res.decode);
 
@@ -40,7 +40,9 @@ export class Koindomain {
   authorize_mint(
     args: koindomain.authorize_mint_arguments
   ): koindomain.authorize_mint_result {
-    this.requireNameserviceAuthority(this.metadata.nameservice_address);
+    const metadata = this.metadata.get()!;
+
+    this.requireNameserviceAuthority(metadata.nameservice_address);
 
     const name = args.name;
     // const domain = args.domain;
@@ -72,7 +74,8 @@ export class Koindomain {
         name,
         pricePerIncrement,
         duration_increments,
-        payment_from
+        payment_from,
+        metadata.oracle_address
       );
 
       // transfer tokens
@@ -118,10 +121,11 @@ export class Koindomain {
     name: string,
     pricePerIncrement: u64,
     durationIncrements: u64,
-    buyer: Uint8Array
+    buyer: Uint8Array,
+    oracle_address: Uint8Array
   ): u64 {
     const totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
-    const paymentTokenUSDPrice = this.getLastUSDPrice(this.koinAddress);
+    const paymentTokenUSDPrice = this.getLatestUSDPrice(this.koinAddress, oracle_address);
 
     // add purchase for $KAP airdrop
     this.purchases.put(
@@ -130,7 +134,7 @@ export class Koindomain {
     );
 
     return (
-      // multiply the amount of token by 10^8 
+      // multiply the amount of token by 10^8 since Koin is 8 decimals
       //@ts-ignore can be done in AS
       u128.from(u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000) / u128.fromU64(paymentTokenUSDPrice)).toU64()
     );
@@ -153,6 +157,7 @@ export class Koindomain {
       // $10
       pricePerIncrement = 10_0000_0000;
     }
+    
     return pricePerIncrement;
   }
 
@@ -167,7 +172,8 @@ export class Koindomain {
   authorize_renewal(
     args: koindomain.authorize_renewal_arguments
   ): koindomain.authorize_renewal_result {
-    this.requireNameserviceAuthority(this.metadata.nameservice_address);
+    const metadata = this.metadata.get()!
+    this.requireNameserviceAuthority(metadata.nameservice_address);
 
     const name = args.name;
     const duration_increments = args.duration_increments;
@@ -194,7 +200,8 @@ export class Koindomain {
       name!.name,
       pricePerIncrement,
       duration_increments,
-      payment_from
+      payment_from,
+      metadata.oracle_address
     );
 
     // transfer tokens
@@ -247,6 +254,7 @@ export class Koindomain {
           tmpKey.timestamp
         ));
 
+        startKey = tmpKey;
         limit--;
       } else {
         done = true;
@@ -266,8 +274,7 @@ export class Koindomain {
     const nameservice_address = args.nameservice_address;
     const oracle_address = args.oracle_address;
 
-    const metadata = new Metadata(this.contractId);
-    metadata.put(new koindomain.metadata_object(
+    this.metadata.put(new koindomain.metadata_object(
       nameservice_address,
       oracle_address
     ));
@@ -279,6 +286,6 @@ export class Koindomain {
     args: koindomain.get_metadata_arguments
   ): koindomain.metadata_object {
 
-    return this.metadata;
+    return this.metadata.get()!;
   }
 }

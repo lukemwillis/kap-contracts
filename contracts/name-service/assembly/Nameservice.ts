@@ -26,7 +26,7 @@ export class Nameservice {
     * e.g.: "name.domain" => obj.name = "name" and obj.domain = "domain"
     * e.g.: "name.subdomain.domain" => obj.name = "name" and obj.domain = "subdomain.domain"
    */
-  private parseName(name: string): nameservice.name_object {
+  parseName(name: string): nameservice.name_object {
     const splittedNameArr = name.toLowerCase().split('.');
 
     // validate first element only 

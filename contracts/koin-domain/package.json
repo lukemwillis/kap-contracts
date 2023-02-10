@@ -27,6 +27,8 @@
     "lint": "eslint --max-warnings 0 --ext ts \"*/assembly/**/*.ts\"",
     "build:debug": "koinos-sdk-as-cli build-all debug 0 koindomain.proto",
     "build:release": "koinos-sdk-as-cli build-all release 0 koindomain.proto",
-    "test": "koinos-sdk-as-cli run-tests"
+    "test": "koinos-sdk-as-cli run-tests",
+    "ci": "ENV=CI jest -i",
+    "local-ci": "ENV=LOCAL jest -i"
   }
 }

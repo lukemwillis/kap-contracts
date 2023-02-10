@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore 
 import * as abi from '../abi/nameservice-abi.json';
 
 // @ts-ignore koilib_types is needed when using koilib
@@ -81,7 +79,7 @@ describe('mint', () => {
       name: 'koin',
     });
 
-    expect(res?.result?.domain).toBe(undefined);
+    expect(res?.result?.domain).toEqual(undefined);
     expect(res.result).toStrictEqual({
       name: 'koin',
       owner: koinDomainAcct.address,
@@ -120,7 +118,7 @@ describe('mint', () => {
       name: 'koin',
     });
 
-    expect(res?.result?.sub_names_count).toBe('1');
+    expect(res?.result?.sub_names_count).toEqual('1');
 
     res = await nameserviceContract.functions.mint({
       name: 'john.doe.koin',
@@ -158,7 +156,7 @@ describe('mint', () => {
       name: '💎',
     });
 
-    expect(res?.result?.domain).toBe(undefined);
+    expect(res?.result?.domain).toEqual(undefined);
     expect(res.result).toStrictEqual({
       name: '💎',
       owner: koinDomainAcct.address,
@@ -228,7 +226,7 @@ describe('mint', () => {
       name: '钻石',
     });
 
-    expect(res?.result?.domain).toBe(undefined);
+    expect(res?.result?.domain).toEqual(undefined);
     expect(res.result).toStrictEqual({
       name: '钻石',
       owner: koinDomainAcct.address,
@@ -305,9 +303,9 @@ describe('mint', () => {
       name: 'kap.koin',
     });
 
-    expect(res?.result?.domain).toBe('koin');
-    expect(res?.result?.name).toBe('kap');
-    expect(res?.result?.owner).toBe(doedotkoinDomainAcct.address);
+    expect(res?.result?.domain).toEqual('koin');
+    expect(res?.result?.name).toEqual('kap');
+    expect(res?.result?.owner).toEqual(doedotkoinDomainAcct.address);
 
     // check that a name can be reclaimed when it is expired and the grace perdio has ended
     // in test domain contract, expiration and grace_period_end are set to duration_increments * now
@@ -327,7 +325,7 @@ describe('mint', () => {
     });
 
     // should be reclaimable, meaning get_name doesn't not return anything
-    expect(res?.result).toBe(undefined);
+    expect(res?.result).toEqual(undefined);
 
     // reclaim name
     res = await nameserviceContract.functions.mint({
@@ -345,9 +343,9 @@ describe('mint', () => {
     });
 
     // owner should now be user2
-    expect(res?.result?.domain).toBe('koin');
-    expect(res?.result?.name).toBe('grace-period');
-    expect(res?.result?.owner).toBe(user2.address);
+    expect(res?.result?.domain).toEqual('koin');
+    expect(res?.result?.name).toEqual('grace-period');
+    expect(res?.result?.owner).toEqual(user2.address);
   });
 
   it('should not mint TLAs / names', async () => {
@@ -597,8 +595,8 @@ describe('mint', () => {
 
     res = await nameserviceContract.functions.get_metadata({});
 
-    expect(res?.result?.tla_mint_fee).toBe('10');
-    expect(res?.result?.kap_token_address).toBe(kapAcct.address);
+    expect(res?.result?.tla_mint_fee).toEqual('10');
+    expect(res?.result?.kap_token_address).toEqual(kapAcct.address);
 
     let bal = await kapContract.balanceOf(user1.address);
     expect(bal).toStrictEqual('1000');
@@ -623,7 +621,7 @@ describe('mint', () => {
       name: 'notfree',
     });
 
-    expect(res?.result?.domain).toBe(undefined);
+    expect(res?.result?.domain).toEqual(undefined);
     expect(res.result).toStrictEqual({
       name: 'notfree',
       owner: user1.address,
@@ -1147,7 +1145,7 @@ describe('burn', () => {
       name: 'notfree',
     });
 
-    expect(res?.result).toBe(undefined);
+    expect(res?.result).toEqual(undefined);
   });
 
   it('should not burn a name', async () => {

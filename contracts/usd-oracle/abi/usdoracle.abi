@@ -5,7 +5,7 @@
             "return": "usdoracle.empty_object",
             "description": "Set the latest USD price of a token",
             "entry-point": "0xe6ae4302",
-            "read-only": true
+            "read-only": false
         },
         "get_latest_price": {
             "argument": "usdoracle.get_latest_price_arguments",

@@ -6,7 +6,7 @@ import "koinos/options.proto";
 
 /* 
   @description Set the latest USD price of a token
-  @read-only true
+  @read-only false
   @result empty_object
 */
 message set_latest_price_arguments {
