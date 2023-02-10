@@ -469,7 +469,7 @@ export class Nameservice {
   set_metadata(
     args: nameservice.set_metadata_arguments
   ): nameservice.empty_object {
-    // only this contract can set the meatadata for now
+    // only this contract can set the metadata for now
     System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
 
     const tla_mint_fee = args.tla_mint_fee;

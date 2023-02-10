@@ -6,6 +6,41 @@
             "description": "Authorize the mint of a name",
             "entry_point": 2261455260,
             "read_only": false
+        },
+        "authorize_burn": {
+            "argument": "koindomain.authorize_burn_arguments",
+            "return": "koindomain.authorize_burn_result",
+            "description": "Authorize the burn of a name",
+            "entry_point": 227923640,
+            "read_only": false
+        },
+        "authorize_renewal": {
+            "argument": "koindomain.authorize_renewal_arguments",
+            "return": "koindomain.authorize_renewal_result",
+            "description": "Authorize the renewal of a name",
+            "entry_point": 4233406847,
+            "read_only": false
+        },
+        "get_purchases": {
+            "argument": "koindomain.get_purchases_arguments",
+            "return": "koindomain.get_purchases_result",
+            "description": "Get purchases",
+            "entry_point": 2443088571,
+            "read_only": true
+        },
+        "set_metadata": {
+            "argument": "koindomain.set_metadata_arguments",
+            "return": "koindomain.empty_object",
+            "description": "Set contract metadata",
+            "entry_point": 1029287705,
+            "read_only": false
+        },
+        "get_metadata": {
+            "argument": "koindomain.get_metadata_arguments",
+            "return": "koindomain.metadata_object",
+            "description": "Get contract metadata",
+            "entry_point": 4244088463,
+            "read_only": true
         }
     },
     "types": {
@@ -58,6 +93,262 @@
                             "grace_period_end": {
                                 "type": "uint64",
                                 "id": 2
+                            }
+                        }
+                    },
+                    "authorize_burn_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_burn_result": {
+                        "fields": {
+                            "authorized": {
+                                "type": "bool",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_renewal_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_renewal_result": {
+                        "fields": {
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "get_purchases_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "limit": {
+                                "type": "uint32",
+                                "id": 3
+                            },
+                            "descending": {
+                                "type": "bool",
+                                "id": 4
+                            }
+                        }
+                    },
+                    "get_purchases_result": {
+                        "fields": {
+                            "purchases": {
+                                "rule": "repeated",
+                                "type": "purchase_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "set_metadata_arguments": {
+                        "fields": {
+                            "nameservice_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "oracle_address": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "get_metadata_arguments": {
+                        "fields": {}
+                    },
+                    "get_last_usd_price_args": {
+                        "fields": {
+                            "token_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "get_last_usd_price_res": {
+                        "fields": {
+                            "value": {
+                                "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "name_object": {
+                        "fields": {
+                            "domain": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 5,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "sub_names_count": {
+                                "type": "uint64",
+                                "id": 6,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "locked_kap_tokens": {
+                                "type": "uint64",
+                                "id": 7,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "metadata_object": {
+                        "fields": {
+                            "nameservice_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "oracle_address": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "purchase_object": {
+                        "fields": {
+                            "buyer": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "usd_amount": {
+                                "type": "uint64",
+                                "id": 3,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "purchase_key": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "purchase_record": {
+                        "fields": {
+                            "buyer": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "usd_amount": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             }
                         }
                     }

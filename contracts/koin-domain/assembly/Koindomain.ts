@@ -1,36 +1,275 @@
-import { System, SafeMath, Arrays } from "@koinos/sdk-as";
+import { System, authority, Arrays, error, Protobuf, SafeMath, Token } from "@koinos/sdk-as";
+import { GET_LAST_USD_RICE_ENTRYPOINT, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_DAY } from "./Constants";
 import { koindomain } from "./proto/koindomain";
+import { Metadata } from "./state/Metadata";
+import { Purchases } from "./state/Purchases";
 
 export class Koindomain {
+  now: u64 = System.getHeadInfo().head_block_time;
+  contractId: Uint8Array = System.getContractId();
+  koinAddress: Uint8Array = System.getContractAddress('koin');
+  metadata: koindomain.metadata_object = new Metadata(this.contractId).get()!;
+  purchases: Purchases = new Purchases(this.contractId);
+
+  /**
+    * Get the USD price of a token from the oracle contract
+    */
+  getLastUSDPrice(tokenAddress: Uint8Array): u64 {
+    const args = new koindomain.get_last_usd_price_args(tokenAddress);
+
+    const callRes = System.call(this.metadata.oracle_address, GET_LAST_USD_RICE_ENTRYPOINT, Protobuf.encode(args, koindomain.get_last_usd_price_args.encode));
+    System.require(callRes.code == 0, "failed to retrieve last USD price");
+    const res = Protobuf.decode<koindomain.get_last_usd_price_res>(callRes.res.object, koindomain.get_last_usd_price_res.decode);
+
+    return res.value;
+  }
+
+  /**
+    * Check that the caller is the Nameservice contract
+    */
+  requireNameserviceAuthority(nameserviceAddress: Uint8Array): void {
+    const callerData = System.getCaller();
+
+    System.require(
+      Arrays.equal(callerData.caller, nameserviceAddress),
+      'only nameservice contract can perform this action',
+      error.error_code.authorization_failure
+    );
+  }
+
   authorize_mint(
     args: koindomain.authorize_mint_arguments
   ): koindomain.authorize_mint_result {
-    // const name = args.name;
+    this.requireNameserviceAuthority(this.metadata.nameservice_address);
+
+    const name = args.name;
     // const domain = args.domain;
-    // const duration_increments = args.duration_increments;
+    const duration_increments = args.duration_increments;
     // const owner = args.owner;
     const payment_from = args.payment_from;
-    const payment_token_address = args.payment_token_address;
+    // const payment_token_address = args.payment_token_address;
 
-    // handle payment
-    System.require(payment_from.length > 0, 'argument "payment_from" is missing');
+    const nameLength = name.length;
 
-    const koinAddress = System.getContractAddress('koin');
-    System.require(Arrays.equal(payment_token_address, koinAddress), 'only Koin payments are supported at the moment');
-    
-    // handle expiration
-    const DAYS_PER_INCREMENT = 365;
-    const MILLISECONDS_PER_DAY: u64 = 86400000; 
-    const GRACE_PERIOD = 30;
+    // an account is considered premium if composed of 10 characters or less
+    // premium account handling 
+    if (nameLength <= 10) {
+      System.require(
+        payment_from.length > 0,
+        '"payment_from" argument is missing'
+      );
 
-    const now = System.getHeadInfo().head_block_time;
-    const expirationInDays = SafeMath.mul(args.duration_increments, DAYS_PER_INCREMENT);
+      System.require(
+        duration_increments > 0 && duration_increments <= 10,
+        'you can only buy a premium account for a period of 1 to 10 years'
+      );
+
+      // determine price per increment
+      const pricePerIncrement = this.getPricePerIncrement(nameLength);
+
+      // calculate number of tokens to transfer
+      const numberOfTokensToTransfer = this.calculateNumberOfTokensToTransfer(
+        name,
+        pricePerIncrement,
+        duration_increments,
+        payment_from
+      );
+
+      // transfer tokens
+      const tokenContract = new Token(this.koinAddress);
+      System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
+
+      // calculate expiration
+      const expiration = this.calulateExpiration(duration_increments);
+
+      // calculate grace period
+      const gracePeriod = this.calulateGracePeriod(expiration);
+
+      return new koindomain.authorize_mint_result(expiration, gracePeriod);
+    }
+    // non-premium accounts handling
+    else {
+      System.revert('free accounts are not available yet');
+      // non-premuim accounts are free forever
+      return new koindomain.authorize_mint_result(0, 0);
+    }
+  }
+
+  private calulateExpiration(durationIncrements: u64, existingExpiration: u64 = 0): u64 {
+    const daysPerIncrement = 365; // 1 year increments
+    const expirationInDays = SafeMath.mul(durationIncrements, daysPerIncrement);
     const expirationInMs = SafeMath.mul(expirationInDays, MILLISECONDS_PER_DAY);
-    const expiration = SafeMath.add(now, expirationInMs);
 
-    const gracePeriodEndInMs = SafeMath.mul(GRACE_PERIOD, MILLISECONDS_PER_DAY);
-    const gracePeriodEnd = SafeMath.add(expiration, gracePeriodEndInMs);
+    if (existingExpiration > 0) {
+      return SafeMath.add(existingExpiration, expirationInMs);
+    }
 
-    return new koindomain.authorize_mint_result(expiration, gracePeriodEnd);
+    return SafeMath.add(this.now, expirationInMs);
+  }
+
+  private calulateGracePeriod(expiration: u64): u64 {
+    const gracePeriodInDays = 60;
+    const gracePeriodInMs = SafeMath.mul(gracePeriodInDays, MILLISECONDS_PER_DAY);
+
+    return SafeMath.add(expiration, gracePeriodInMs);
+  }
+
+  private calculateNumberOfTokensToTransfer(
+    name: string,
+    pricePerIncrement: u64,
+    durationIncrements: u64,
+    buyer: Uint8Array
+  ): u64 {
+    const totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
+    const paymentTokenUSDPrice = this.getLastUSDPrice(this.koinAddress);
+
+    // add purchase for $KAP airdrop
+    this.purchases.put(
+      new koindomain.purchase_key(name, this.now),
+      new koindomain.purchase_record(buyer, totalUSDPrice)
+    );
+
+    return SafeMath.div(totalUSDPrice, paymentTokenUSDPrice);
+  }
+
+  private getPricePerIncrement(nameLength: i32): u64 {
+    let pricePerIncrement: u64 = 0;
+
+    if (nameLength == 1) {
+      pricePerIncrement = 1000;
+    } else if (nameLength >= 2 && nameLength <= 3) {
+      pricePerIncrement = 500;
+    } else if (nameLength >= 4 && nameLength <= 6) {
+      pricePerIncrement = 100;
+    } else {
+      pricePerIncrement = 10;
+    }
+    return pricePerIncrement;
+  }
+
+  authorize_burn(
+    args: koindomain.authorize_burn_arguments
+  ): koindomain.authorize_burn_result {
+
+    // no restrictions on name burn
+    return new koindomain.authorize_burn_result(true);
+  }
+
+  authorize_renewal(
+    args: koindomain.authorize_renewal_arguments
+  ): koindomain.authorize_renewal_result {
+    this.requireNameserviceAuthority(this.metadata.nameservice_address);
+
+    const name = args.name;
+    const duration_increments = args.duration_increments;
+    const payment_from = args.payment_from;
+    // const payment_token_address = args.payment_token_address;
+
+    System.require(
+      payment_from.length > 0,
+      '"payment_from" argument is missing'
+    );
+
+    System.require(
+      duration_increments > 0 && duration_increments <= 10,
+      'you can only buy a premium account for a period of 1 to 10 years'
+    );
+
+    const nowPlus10Years = SafeMath.add(this.now, MILLISECONDS_IN_10_YEARS);
+
+    // determine price per increment
+    const pricePerIncrement = this.getPricePerIncrement(name!.name.length);
+
+    // calculate number of tokens to transfer
+    const numberOfTokensToTransfer = this.calculateNumberOfTokensToTransfer(
+      name!.name,
+      pricePerIncrement,
+      duration_increments,
+      payment_from
+    );
+
+    // transfer tokens
+    const tokenContract = new Token(this.koinAddress);
+    System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
+
+    // calculate new expiration
+    const newExpiration = this.calulateExpiration(duration_increments, name!.expiration);
+
+    System.require(
+      newExpiration <= nowPlus10Years,
+      'new expiration cannot exceed 10 years'
+    );
+
+    // calculate grace period
+    const gracePeriod = this.calulateGracePeriod(newExpiration);
+
+    return new koindomain.authorize_renewal_result(newExpiration, gracePeriod);
+  }
+
+  get_purchases(
+    args: koindomain.get_purchases_arguments
+  ): koindomain.get_purchases_result {
+    const name = args.name;
+    const timestamp = args.timestamp;
+    const descending = args.descending;
+    let limit = args.limit || 10;
+
+    const res = new koindomain.get_purchases_result();
+
+    let startKey = new koindomain.purchase_key(
+      name,
+      timestamp
+    );
+
+    let done = false;
+    let purchaseRec: System.ProtoDatabaseObject<koindomain.purchase_record> | null;
+    let tmpKey: koindomain.purchase_key;
+
+    do {
+      purchaseRec = descending ? this.purchases.getPrev(startKey) : this.purchases.getNext(startKey);
+
+      if (purchaseRec) {
+        tmpKey = Protobuf.decode<koindomain.purchase_key>(purchaseRec.key!, koindomain.purchase_key.decode);
+
+        res.purchases.push(new koindomain.purchase_object(
+          purchaseRec.value.buyer,
+          tmpKey.name,
+          purchaseRec.value.usd_amount,
+          tmpKey.timestamp
+        ));
+
+        limit--;
+      } else {
+        done = true;
+      }
+
+    } while (!done && limit > 0);
+
+    return res;
+  }
+
+  set_metadata(
+    args: koindomain.set_metadata_arguments
+  ): koindomain.empty_object {
+    // only this contract can set the metadata for now
+    System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
+
+    const nameservice_address = args.nameservice_address;
+    const oracle_address = args.oracle_address;
+
+    const metadata = new Metadata(this.contractId);
+    metadata.put(new koindomain.metadata_object(
+      nameservice_address,
+      oracle_address
+    ));
+
+    return new koindomain.empty_object();
+  }
+
+  get_metadata(
+    args: koindomain.get_metadata_arguments
+  ): koindomain.metadata_object {
+
+    return this.metadata;
   }
 }
