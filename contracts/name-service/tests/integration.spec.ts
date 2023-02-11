@@ -40,12 +40,25 @@ const durationIncrements = 3;
 beforeAll(async () => {
   // start local-koinos node
   await localKoinos.startNode();
-  await localKoinos.startBlockProduction();
 
-  await localKoinos.deployKoinContract();
-  await localKoinos.mintKoinDefaultAccounts();
-  await localKoinos.deployNameServiceContract();
-  await localKoinos.setNameServiceRecord('koin', koin.address);
+  await localKoinos.deployKoinContract({ mode: 'manual' });
+  await localKoinos.mintKoinDefaultAccounts({ mode: 'manual' });
+  await localKoinos.deployNameServiceContract({ mode: 'manual' });
+  await localKoinos.setNameServiceRecord('koin', koin.address, { mode: 'manual' });
+
+  // deploy nameservice 
+  // @ts-ignore abi is compatible
+  nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi, { mode: 'manual' });
+
+  // deploy koindomain  
+  // @ts-ignore abi is compatible
+  await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi, { mode: 'manual' });
+
+  // deploy doe.koin  
+  // @ts-ignore abi is compatible
+  await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi, { mode: 'manual' });
+
+  await localKoinos.startBlockProduction();
 });
 
 afterAll(async () => {
@@ -55,18 +68,6 @@ afterAll(async () => {
 
 describe('mint', () => {
   it('should mint TLAs, names and sub names', async () => {
-    // deploy nameservice 
-    // @ts-ignore abi is compatible
-    nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi);
-
-    // deploy koindomain  
-    // @ts-ignore abi is compatible
-    await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
-
-    // deploy doe.koin  
-    // @ts-ignore abi is compatible
-    await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi);
-
     // ASCII characters
     let res = await nameserviceContract.functions.mint({
       name: 'koin',

@@ -43,12 +43,25 @@ let usdOracleContract: Contract;
 beforeAll(async () => {
   // start local-koinos node
   await localKoinos.startNode();
-  await localKoinos.startBlockProduction();
 
-  await localKoinos.deployKoinContract();
-  await localKoinos.mintKoinDefaultAccounts();
-  await localKoinos.deployNameServiceContract();
-  await localKoinos.setNameServiceRecord('koin', koin.address);
+  await localKoinos.deployKoinContract({ mode: 'manual' });
+  await localKoinos.mintKoinDefaultAccounts({ mode: 'manual' });
+  await localKoinos.deployNameServiceContract({ mode: 'manual' });
+  await localKoinos.setNameServiceRecord('koin', koin.address, { mode: 'manual' });
+
+  // deploy koin domain 
+  // @ts-ignore abi is compatible
+  koinDomainContract = await localKoinos.deployContract(koinDomainAcct.wif, './build/debug/contract.wasm', koindomainAbi, { mode: 'manual' });
+
+  // deploy nameservice  
+  // @ts-ignore abi is compatible
+  nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, '../name-service/build/debug/contract.wasm', nameserviceAbi, { mode: 'manual' });
+
+  // deploy usd oracle
+  // @ts-ignore abi is compatible
+  usdOracleContract = await localKoinos.deployContract(usdOracleAcct.wif, '../usd-oracle/build/debug/contract.wasm', usdOracleAbi, { mode: 'manual' });
+
+  await localKoinos.startBlockProduction();
 });
 
 afterAll(async () => {
@@ -58,18 +71,6 @@ afterAll(async () => {
 
 describe('mint', () => {
   it('should mint a .koin name', async () => {
-    // deploy koin domain 
-    // @ts-ignore abi is compatible
-    koinDomainContract = await localKoinos.deployContract(koinDomainAcct.wif, './build/debug/contract.wasm', koindomainAbi);
-
-    // deploy nameservice  
-    // @ts-ignore abi is compatible
-    nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, '../name-service/build/debug/contract.wasm', nameserviceAbi);
-
-    // deploy usd oracle
-    // @ts-ignore abi is compatible
-    usdOracleContract = await localKoinos.deployContract(usdOracleAcct.wif, '../usd-oracle/build/debug/contract.wasm', usdOracleAbi);
-
     // set koin domain contract metadata
     let res = await koinDomainContract.functions.set_metadata({
       nameservice_address: nameserviceAcct.address,

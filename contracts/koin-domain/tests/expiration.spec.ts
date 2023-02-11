@@ -49,6 +49,19 @@ beforeAll(async () => {
   await localKoinos.mintKoinDefaultAccounts({ mode: 'manual' });
   await localKoinos.deployNameServiceContract({ mode: 'manual' });
   await localKoinos.setNameServiceRecord('koin', koin.address, { mode: 'manual' });
+
+  // deploy koin domain 
+  // @ts-ignore abi is compatible
+  koinDomainContract = await localKoinos.deployContract(koinDomainAcct.wif, './build/debug/contract.wasm', koindomainAbi, { mode: 'manual' });
+
+  // deploy nameservice  
+  // @ts-ignore abi is compatible
+  nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, '../name-service/build/debug/contract.wasm', nameserviceAbi, { mode: 'manual' });
+
+  // deploy usd oracle
+  // @ts-ignore abi is compatible
+  usdOracleContract = await localKoinos.deployContract(usdOracleAcct.wif, '../usd-oracle/build/debug/contract.wasm', usdOracleAbi, { mode: 'manual' });
+
 });
 
 afterAll(async () => {
@@ -72,18 +85,6 @@ function addDays(date: Date, nbDays: number) {
 
 describe('mint', () => {
   it('should set the correct expiration and grace period', async () => {
-    // deploy koin domain 
-    // @ts-ignore abi is compatible
-    koinDomainContract = await localKoinos.deployContract(koinDomainAcct.wif, './build/debug/contract.wasm', koindomainAbi, { mode: 'manual' });
-
-    // deploy nameservice  
-    // @ts-ignore abi is compatible
-    nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, '../name-service/build/debug/contract.wasm', nameserviceAbi, { mode: 'manual' });
-
-    // deploy usd oracle
-    // @ts-ignore abi is compatible
-    usdOracleContract = await localKoinos.deployContract(usdOracleAcct.wif, '../usd-oracle/build/debug/contract.wasm', usdOracleAbi, { mode: 'manual' });
-
     // set koin domain contract metadata
     let res = await koinDomainContract.functions.set_metadata({
       nameservice_address: nameserviceAcct.address,
