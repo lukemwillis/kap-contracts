@@ -1,13 +1,13 @@
 import { Signer, Provider, Contract } from 'koilib';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as abi from '../contracts/usd-oracle/abi/usdoracle-abi.json';
+import * as abi from '../contracts/koin-domain/abi/koindomain-abi.json';
 require('dotenv').config();
 
-const CONTRACT_WASM_PATH = '../contracts/usd-oracle/build/release/contract.wasm';
-const CLI_ABI_PATH = '../contracts/usd-oracle/abi/usdoracle.abi';
+const CONTRACT_WASM_PATH = '../contracts/koin-domain/build/release/contract.wasm';
+const CLI_ABI_PATH = '../contracts/koin-domain/abi/koindomain.abi';
 
-const { USD_ORACLE_PRIVATE_KEY, RPC_URL } = process.env;
+const { KOIN_DOMAIN_PRIVATE_KEY, RPC_URL } = process.env;
 
 // @ts-ignore koilib_types is needed when using koilib
 abi.koilib_types = abi.types;
@@ -15,7 +15,7 @@ abi.koilib_types = abi.types;
 (async () => {
   // deploy contract
   const provider = new Provider(RPC_URL!);
-  const signer = Signer.fromWif(USD_ORACLE_PRIVATE_KEY!);
+  const signer = Signer.fromWif(KOIN_DOMAIN_PRIVATE_KEY!);
   signer.provider = provider;
 
   const bytecode = fs.readFileSync(path.resolve(__dirname, CONTRACT_WASM_PATH));

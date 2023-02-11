@@ -7,3 +7,4 @@ build
 *.spec.map
 *.spec.wat
 yarn-error.log
+.env
