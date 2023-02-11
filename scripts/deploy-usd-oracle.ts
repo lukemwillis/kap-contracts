@@ -5,6 +5,7 @@ import * as abi from '../contracts/usd-oracle/abi/usdoracle-abi.json';
 require('dotenv').config();
 
 const CONTRACT_WASM_PATH = './contracts/usd-oracle/build/release/contract.wasm';
+const CLI_ABI_PATH = './contracts/usd-oracle/abi/usdoracle-abi.abi';
 
 const { USD_ORACLE_PRIVATE_KEY, RPC_URL } = process.env;
 
@@ -27,7 +28,9 @@ abi.koilib_types = abi.types;
     bytecode
   });
 
-  const { transaction } = await contract.deploy();
+  const { transaction } = await contract.deploy({
+    abi: fs.readFileSync(path.resolve(__dirname, CLI_ABI_PATH)).toString(),
+  });
 
   await transaction?.wait();
 

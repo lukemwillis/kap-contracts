@@ -17,7 +17,7 @@
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 --ext ts \"contracts/*/assembly/**/*.ts\"",
-    "test-domain:build": "cd contracts/name-service && yarn install && yarn build:release",
+    "test-domain:build": "cd contracts/test-domain && yarn install && yarn build:release",
     "usd-oracle:build": "cd contracts/usd-oracle && yarn install && yarn build:release",
     "koin-domain:build": "cd contracts/koin-domain && yarn install && yarn build:release",
     "koin-domain:ci": "cd contracts/koin-domain && yarn ci",
