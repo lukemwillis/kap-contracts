@@ -15,6 +15,8 @@ describe("nameservice", () => {
     headBlock.header!.height = 10;
 
     MockVM.setBlock(headBlock);
+
+    MockVM.setHeadInfo(new chain.head_info(null, 123456789, 3));
   });
 
   it("should parse a name into a name object", () => {
