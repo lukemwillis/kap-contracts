@@ -24,7 +24,7 @@
     "name-service:build": "cd contracts/name-service && yarn install && yarn build:release && yarn test",
     "name-service:ci": "cd contracts/name-service && yarn ci",
     "all:build": "yarn test-domain:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build",
-    "all:ci": "koin-domain:ci && yarn name-service:ci",
+    "all:ci": "yarn koin-domain:ci && yarn name-service:ci",
     "ci": "yarn lint && yarn all:build && yarn all:ci"
   }
 }
