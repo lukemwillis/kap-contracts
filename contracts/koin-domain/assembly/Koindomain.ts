@@ -139,7 +139,7 @@ export class Koindomain {
 
       // transfer tokens
       const tokenContract = new Token(this.koinAddress);
-      System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
+      System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer Koin tokens');
 
       // calculate expiration
       const expiration = this.calculateExpiration(duration_increments);
@@ -183,7 +183,7 @@ export class Koindomain {
 
     System.require(
       duration_increments > 0 && duration_increments <= 10,
-      'you can only buy a premium account for a period of 1 to 10 years'
+      'you can only renew a premium account for a period of 1 to 10 years'
     );
 
     const nowPlus10Years = SafeMath.add(this.now, MILLISECONDS_IN_10_YEARS);
@@ -202,7 +202,7 @@ export class Koindomain {
 
     // transfer tokens
     const tokenContract = new Token(this.koinAddress);
-    System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer payment tokens to domain owner');
+    System.require(tokenContract.transfer(payment_from, this.contractId, numberOfTokensToTransfer), 'could not transfer Koin tokens');
 
     // calculate new expiration
     const newExpiration = this.calculateExpiration(duration_increments, name!.expiration);

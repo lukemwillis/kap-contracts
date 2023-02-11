@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
+import { Contract, LocalKoinos, Signer, Token } from '@roamin/local-koinos';
 
 // ABIs
 import * as koindomainAbi from '../abi/koindomain-abi.json';
@@ -380,5 +380,198 @@ describe('mint', () => {
         }),
       ])
     })
+  });
+
+  it('mint and renew endpoints should only be allowed for the nameservice contract', async () => {
+    expect.assertions(2);
+    try {
+      await koinDomainContract.functions.authorize_mint({});
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('only nameservice contract can perform this action');
+    }
+
+    try {
+      await koinDomainContract.functions.authorize_renewal({});
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('only nameservice contract can perform this action');
+    }
+  });
+
+  it('should not mint a .koin name', async () => {
+    expect.assertions(4);
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: '12345678910.koin',
+        owner: user1.address,
+        duration_increments: 1, // 1 year
+        payment_from: user1.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('free accounts are not available yet');
+    }
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'hello.koin',
+        owner: user1.address,
+        duration_increments: 1, // 1 year
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('"payment_from" argument is missing');
+    }
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'hello.koin',
+        owner: user1.address,
+        duration_increments: 11,
+        payment_from: user1.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('you can only buy a premium account for a period of 1 to 10 years');
+    }
+
+    const noKoiner = Signer.fromSeed('no koiner')
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'hello.koin',
+        owner: noKoiner.address,
+        duration_increments: 10,
+        payment_from: noKoiner.address,
+      }, {
+        beforeSend: async (tx) => {
+          await noKoiner.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('could not transfer Koin tokens');
+    }
+  });
+
+  it('should renew a .koin name', async () => {
+    // set the koin price in oracle to $1
+    let res = await usdOracleContract.functions.set_latest_price({
+      token_address: koin.address,
+      price: '100000000' // $1
+    });
+
+    await res.transaction?.wait();
+
+    // get a koin name info
+    res = await nameserviceContract.functions.get_name({
+      name: '1234567891.koin'
+    });
+
+    const currentExp = Number(res.result.expiration)
+
+    res = await nameserviceContract.functions.renew({
+      name: '1234567891.koin',
+      duration_increments: 2, // 2 years
+      payment_from: user1.address,
+    }, {
+      beforeSend: async (tx) => {
+        await user1.signer.signTransaction(tx)
+      }
+    });
+
+    await res.transaction?.wait();
+
+    res = await nameserviceContract.functions.get_name({
+      name: '1234567891.koin'
+    });
+
+    const MILLISECONDS_PER_DAY = 86_400_000;
+    const MILLISECONDS_PER_YEAR = MILLISECONDS_PER_DAY * 365;
+
+    const newExp = Number(res.result.expiration);
+    const newGracePeriod = Number(res.result.grace_period_end)
+
+    // newExp should be currentExp + 1 year
+    expect(newExp - currentExp).toEqual(MILLISECONDS_PER_YEAR * 2);
+    // newGracePeriod should be newExp + 60 days
+    expect(newGracePeriod - newExp).toEqual(MILLISECONDS_PER_DAY * 60);
+
+    const user1Bal = await localKoinos.koin.balanceOf(user1.address);
+    expect(user1Bal).toEqual('4996999000000');
+
+    const koinDomainBal = await localKoinos.koin.balanceOf(koinDomainAcct.address);
+    expect(koinDomainBal).toEqual('6173001000000');
+
+  });
+
+  it('should not renew a .koin name', async () => {
+    expect.assertions(4);
+
+    try {
+      await nameserviceContract.functions.renew({
+        name: '1234567891.koin',
+        owner: user1.address,
+        duration_increments: 10, // 10 years
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('"payment_from" argument is missing');
+    }
+
+    try {
+      await nameserviceContract.functions.renew({
+        name: '1234567891.koin',
+        owner: user1.address,
+        duration_increments: 11, // 11 year
+        payment_from: user1.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('you can only renew a premium account for a period of 1 to 10 years');
+    }
+
+    try {
+      await nameserviceContract.functions.renew({
+        name: '1234567891.koin',
+        owner: user1.address,
+        duration_increments: 10, // 10 years
+        payment_from: user1.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('new expiration cannot exceed 10 years');
+    }
+
+    const noKoiner = Signer.fromSeed('no koiner')
+    try {
+      await nameserviceContract.functions.renew({
+        name: '1234567891.koin',
+        duration_increments: 1,
+        payment_from: noKoiner.address,
+      }, {
+        beforeSend: async (tx) => {
+          await noKoiner.signTransaction(tx)
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('could not transfer Koin tokens');
+    }
   });
 });

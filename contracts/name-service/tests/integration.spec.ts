@@ -350,7 +350,6 @@ describe('mint', () => {
   });
 
   it('should not mint TLAs / names', async () => {
-    // @ts-ignore assertions exists
     expect.assertions(17);
 
     try {
@@ -578,7 +577,6 @@ describe('mint', () => {
   });
 
   it('should lock KAP tokens when minting TLAs', async () => {
-    // @ts-ignore assertions exists
     expect.assertions(7);
 
     // deploy kap token
