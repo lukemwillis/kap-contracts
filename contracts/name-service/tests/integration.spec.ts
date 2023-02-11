@@ -48,15 +48,15 @@ beforeAll(async () => {
 
   // deploy nameservice 
   // @ts-ignore abi is compatible
-  nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/debug/contract.wasm', abi, { mode: 'manual' });
+  nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/release/contract.wasm', abi, { mode: 'manual' });
 
   // deploy koindomain  
   // @ts-ignore abi is compatible
-  await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi, { mode: 'manual' });
+  await localKoinos.deployContract(koinDomainAcct.wif, '../test-domain/build/release/contract.wasm', abi, { mode: 'manual' });
 
   // deploy doe.koin  
   // @ts-ignore abi is compatible
-  await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/debug/contract.wasm', abi, { mode: 'manual' });
+  await localKoinos.deployContract(doedotkoinDomainAcct.wif, '../test-domain/build/release/contract.wasm', abi, { mode: 'manual' });
 
   await localKoinos.startBlockProduction();
 });

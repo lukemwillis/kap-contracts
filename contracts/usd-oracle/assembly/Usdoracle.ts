@@ -1,4 +1,4 @@
-import { System, Protobuf, authority } from "@koinos/sdk-as";
+import { System, authority } from "@koinos/sdk-as";
 import { usdoracle } from "./proto/usdoracle";
 import { Prices } from "./state/Prices";
 
@@ -19,7 +19,7 @@ export class Usdoracle {
 
     this.prices.put(token_address, new usdoracle.price_object(price, now));
 
-    return new usdoracle.empty_object();;
+    return new usdoracle.empty_object();
   }
 
   get_latest_price(

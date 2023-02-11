@@ -1,5 +1,5 @@
 import { System, authority, Arrays, error, Protobuf, SafeMath, Token, u128 } from "@koinos/sdk-as";
-import { GET_LATEST_PRICE_ENTRYPOINT, GRACE_PERIOD_IN_MS, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_DAY, MILLISECONDS_PER_YEAR } from "./Constants";
+import { GET_LATEST_PRICE_ENTRYPOINT, GRACE_PERIOD_IN_MS, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_YEAR } from "./Constants";
 import { koindomain } from "./proto/koindomain";
 import { Metadata } from "./state/Metadata";
 import { Purchases } from "./state/Purchases";
@@ -70,7 +70,7 @@ export class Koindomain {
 
     return (
       // multiply the amount of tokens by 10^8 since Koin is 8 decimals
-      //@ts-ignore can be done in AS
+      // @ts-ignore can be done in AS
       u128.from(u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000) / u128.fromU64(paymentTokenUSDPrice)).toU64()
     );
   }
@@ -168,7 +168,7 @@ export class Koindomain {
   authorize_renewal(
     args: koindomain.authorize_renewal_arguments
   ): koindomain.authorize_renewal_result {
-    const metadata = this.metadata.get()!
+    const metadata = this.metadata.get()!;
     this.requireNameserviceAuthority(metadata.nameservice_address);
 
     const name = args.name;
