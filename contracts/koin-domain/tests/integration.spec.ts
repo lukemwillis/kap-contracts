@@ -131,7 +131,7 @@ describe('mint', () => {
       payment_from: user1.address,
     }, {
       beforeSend: async (tx) => {
-        await user1.signer.signTransaction(tx)
+        await user1.signer.signTransaction(tx);
       }
     });
 
@@ -161,7 +161,7 @@ describe('mint', () => {
           usd_amount: '1000000000',
         })
       ])
-    })
+    });
 
     // buy a 5 char name for 2 years (should cost $100x2=$200 => 200 Koin)
     res = await nameserviceContract.functions.mint({
@@ -171,7 +171,7 @@ describe('mint', () => {
       payment_from: user2.address,
     }, {
       beforeSend: async (tx) => {
-        await user2.signer.signTransaction(tx)
+        await user2.signer.signTransaction(tx);
       }
     });
 
@@ -206,7 +206,7 @@ describe('mint', () => {
           usd_amount: '20000000000',
         })
       ])
-    })
+    });
 
     // buy a 2 char name for 3 years (should cost $500x3=$1500 => 1500 Koin)
     res = await nameserviceContract.functions.mint({
@@ -216,7 +216,7 @@ describe('mint', () => {
       payment_from: user3.address,
     }, {
       beforeSend: async (tx) => {
-        await user3.signer.signTransaction(tx)
+        await user3.signer.signTransaction(tx);
       }
     });
 
@@ -256,7 +256,7 @@ describe('mint', () => {
           usd_amount: '150000000000',
         })
       ])
-    })
+    });
 
     // buy a 1 char name for 10 years (should cost $1000x10=$10000 => 1000 Koin)
     res = await nameserviceContract.functions.mint({
@@ -266,7 +266,7 @@ describe('mint', () => {
       payment_from: user4.address,
     }, {
       beforeSend: async (tx) => {
-        await user4.signer.signTransaction(tx)
+        await user4.signer.signTransaction(tx);
       }
     });
 
@@ -311,7 +311,7 @@ describe('mint', () => {
           usd_amount: '1000000000000',
         })
       ])
-    })
+    });
 
     // set the koin price in oracle to $1000
     res = await usdOracleContract.functions.set_latest_price({
@@ -329,7 +329,7 @@ describe('mint', () => {
       payment_from: user1.address,
     }, {
       beforeSend: async (tx) => {
-        await user1.signer.signTransaction(tx)
+        await user1.signer.signTransaction(tx);
       }
     });
 
@@ -379,7 +379,7 @@ describe('mint', () => {
           usd_amount: '1000000000',
         }),
       ])
-    })
+    });
   });
 
   it('mint and renew endpoints should only be allowed for the nameservice contract', async () => {
@@ -408,7 +408,7 @@ describe('mint', () => {
         payment_from: user1.address,
       }, {
         beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx)
+          await user1.signer.signTransaction(tx);
         }
       });
     } catch (error) {
@@ -422,7 +422,7 @@ describe('mint', () => {
         duration_increments: 1, // 1 year
       }, {
         beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx)
+          await user1.signer.signTransaction(tx);
         }
       });
     } catch (error) {
@@ -437,14 +437,14 @@ describe('mint', () => {
         payment_from: user1.address,
       }, {
         beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx)
+          await user1.signer.signTransaction(tx);
         }
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('you can only buy a premium account for a period of 1 to 10 years');
     }
 
-    const noKoiner = Signer.fromSeed('no koiner')
+    const noKoiner = Signer.fromSeed('no koiner');
     try {
       await nameserviceContract.functions.mint({
         name: 'hello.koin',
@@ -453,7 +453,7 @@ describe('mint', () => {
         payment_from: noKoiner.address,
       }, {
         beforeSend: async (tx) => {
-          await noKoiner.signTransaction(tx)
+          await noKoiner.signTransaction(tx);
         }
       });
     } catch (error) {
@@ -475,7 +475,7 @@ describe('mint', () => {
       name: '1234567891.koin'
     });
 
-    const currentExp = Number(res.result.expiration)
+    const currentExp = Number(res.result.expiration);
 
     res = await nameserviceContract.functions.renew({
       name: '1234567891.koin',
@@ -483,7 +483,7 @@ describe('mint', () => {
       payment_from: user1.address,
     }, {
       beforeSend: async (tx) => {
-        await user1.signer.signTransaction(tx)
+        await user1.signer.signTransaction(tx);
       }
     });
 
@@ -497,7 +497,7 @@ describe('mint', () => {
     const MILLISECONDS_PER_YEAR = MILLISECONDS_PER_DAY * 365;
 
     const newExp = Number(res.result.expiration);
-    const newGracePeriod = Number(res.result.grace_period_end)
+    const newGracePeriod = Number(res.result.grace_period_end);
 
     // newExp should be currentExp + 1 year
     expect(newExp - currentExp).toEqual(MILLISECONDS_PER_YEAR * 2);
@@ -522,7 +522,7 @@ describe('mint', () => {
         duration_increments: 10, // 10 years
       }, {
         beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx)
+          await user1.signer.signTransaction(tx);
         }
       });
     } catch (error) {
@@ -537,7 +537,7 @@ describe('mint', () => {
         payment_from: user1.address,
       }, {
         beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx)
+          await user1.signer.signTransaction(tx);
         }
       });
     } catch (error) {
@@ -552,14 +552,14 @@ describe('mint', () => {
         payment_from: user1.address,
       }, {
         beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx)
+          await user1.signer.signTransaction(tx);
         }
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('new expiration cannot exceed 10 years');
     }
 
-    const noKoiner = Signer.fromSeed('no koiner')
+    const noKoiner = Signer.fromSeed('no koiner');
     try {
       await nameserviceContract.functions.renew({
         name: '1234567891.koin',
@@ -567,11 +567,51 @@ describe('mint', () => {
         payment_from: noKoiner.address,
       }, {
         beforeSend: async (tx) => {
-          await noKoiner.signTransaction(tx)
+          await noKoiner.signTransaction(tx);
         }
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('could not transfer Koin tokens');
     }
+  });
+});
+
+describe('authorizations', () => {
+  it('should update the contract authorizations', async () => {
+    expect.assertions(2);
+
+    // override authorizations
+    let res = await koinDomainContract.deploy({
+      authorizesCallContract: true,
+      authorizesTransactionApplication: true,
+      authorizesUploadContract: true
+    });
+
+    await res.transaction?.wait();
+
+    // change contract owner
+    res = await koinDomainContract.functions.set_metadata({
+      nameservice_address: nameserviceAcct.address,
+      oracle_address: usdOracleAcct.address,
+      owner: user1.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await koinDomainContract.deploy();
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual(`account ${koinDomainAcct.address} has not authorized transaction`);
+    }
+
+    // change contract signer to new owner
+    koinDomainContract.signer = user1.signer;
+
+    // try to update contract
+    res = await koinDomainContract.deploy();
+
+    await res.transaction?.wait();
+    expect(res.receipt).toBeDefined();
+
   });
 });

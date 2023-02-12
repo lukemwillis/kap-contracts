@@ -7,6 +7,13 @@
             "entry_point": 2261455260,
             "read_only": false
         },
+        "authorize": {
+            "argument": "koinos.chain.authorize_arguments",
+            "return": "koinos.chain.authorize_result",
+            "description": "Check if authorized",
+            "entry_point": 1244511632,
+            "read_only": false
+        },
         "authorize_burn": {
             "argument": "koindomain.authorize_burn_arguments",
             "return": "koindomain.authorize_burn_result",
@@ -197,6 +204,13 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
                             }
                         }
                     },
@@ -291,6 +305,13 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
                             }
                         }
                     },
@@ -352,6 +373,69 @@
                                 "id": 2,
                                 "options": {
                                     "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "koinos": {
+                "nested": {
+                    "chain": {
+                        "options": {
+                            "go_package": "github.com/koinos/koinos-proto-golang/koinos/chain"
+                        },
+                        "nested": {
+                            "authorization_type": {
+                                "values": {
+                                    "contract_call": 0,
+                                    "transaction_application": 1,
+                                    "contract_upload": 2
+                                }
+                            },
+                            "call_target": {
+                                "fields": {
+                                    "contract_id": {
+                                        "type": "bytes",
+                                        "id": 1,
+                                        "options": {
+                                            "(btype)": "ADDRESS"
+                                        }
+                                    },
+                                    "entry_point": {
+                                        "type": "uint32",
+                                        "id": 2
+                                    }
+                                }
+                            },
+                            "authorize_arguments": {
+                                "oneofs": {
+                                    "_call": {
+                                        "oneof": [
+                                            "call"
+                                        ]
+                                    }
+                                },
+                                "fields": {
+                                    "type": {
+                                        "type": "authorization_type",
+                                        "id": 1
+                                    },
+                                    "call": {
+                                        "type": "call_target",
+                                        "id": 2,
+                                        "options": {
+                                            "proto3_optional": true
+                                        }
+                                    }
+                                }
+                            },
+                            "authorize_result": {
+                                "fields": {
+                                    "value": {
+                                        "type": "bool",
+                                        "id": 1
+                                    }
                                 }
                             }
                         }

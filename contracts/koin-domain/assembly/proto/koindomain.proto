@@ -75,6 +75,7 @@ message get_purchases_result {
 message set_metadata_arguments {
   bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
   bytes oracle_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
 }
 
 /* 
@@ -114,6 +115,7 @@ message name_object {
 message metadata_object {
   bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
   bytes oracle_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
 }
 
 message purchase_object{

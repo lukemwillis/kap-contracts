@@ -1,4 +1,4 @@
-import { System, authority, Arrays, error, Protobuf, SafeMath, Token, u128 } from "@koinos/sdk-as";
+import { System, authority, Arrays, error, Protobuf, SafeMath, Token, u128, value, Crypto } from "@koinos/sdk-as";
 import { GET_LATEST_PRICE_ENTRYPOINT, GRACE_PERIOD_IN_MS, MILLISECONDS_IN_10_YEARS, MILLISECONDS_PER_YEAR } from "./Constants";
 import { koindomain } from "./proto/koindomain";
 import { Metadata } from "./state/Metadata";
@@ -94,6 +94,40 @@ export class Koindomain {
     }
 
     return pricePerIncrement;
+  }
+
+  authorize(args: authority.authorize_arguments): authority.authorize_result {
+    const metadata = this.metadata.get()!;
+
+    // if the owner is not this contract id, then check authority of owner
+    if (metadata.owner.length > 0 && !Arrays.equal(this.contractId, metadata.owner)) {
+      return new authority.authorize_result(
+        System.checkAuthority(
+          args.type, 
+          metadata.owner
+        )
+      );
+    } else {
+      // otherwise check transaction signatures
+      const transactionId = System.getTransactionField('id')!.bytes_value;
+      const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
+      
+      let signature: Uint8Array;
+      let recoveredKey: Uint8Array;
+      let addr: Uint8Array;
+
+      for (let i = 0; i < signatures.values.length; i++) {
+        signature = signatures.values[i].bytes_value;
+        recoveredKey = System.recoverPublicKey(signature, transactionId)!;
+        addr = Crypto.addressFromPublicKey(recoveredKey);
+
+        if (Arrays.equal(addr, this.contractId)) {
+          return new authority.authorize_result(true);
+        }
+      }
+    }
+
+    return new authority.authorize_result(false);
   }
 
   authorize_mint(
@@ -269,10 +303,12 @@ export class Koindomain {
 
     const nameservice_address = args.nameservice_address;
     const oracle_address = args.oracle_address;
+    const owner = args.owner;
 
     this.metadata.put(new koindomain.metadata_object(
       nameservice_address,
-      oracle_address
+      oracle_address,
+      owner
     ));
 
     return new koindomain.empty_object();

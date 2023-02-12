@@ -2,6 +2,18 @@ import { System, Protobuf, authority } from "@koinos/sdk-as";
 import { koindomain } from "./proto/koindomain";
 
 export class Koindomain {
+  authorize(args: authority.authorize_arguments): authority.authorize_result {
+    // const call = args.call;
+    // const type = args.type;
+
+    // YOUR CODE HERE
+
+    const res = new authority.authorize_result();
+    res.value = true;
+
+    return res;
+  }
+
   authorize_mint(
     args: koindomain.authorize_mint_arguments
   ): koindomain.authorize_mint_result {
@@ -72,6 +84,7 @@ export class Koindomain {
   ): koindomain.empty_object {
     // const nameservice_address = args.nameservice_address;
     // const oracle_address = args.oracle_address;
+    // const owner = args.owner;
 
     // YOUR CODE HERE
 
@@ -88,6 +101,7 @@ export class Koindomain {
     const res = new koindomain.metadata_object();
     // res.nameservice_address = ;
     // res.oracle_address = ;
+    // res.owner = ;
 
     return res;
   }

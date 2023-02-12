@@ -466,6 +466,11 @@ export namespace koindomain {
         writer.uint32(18);
         writer.bytes(message.oracle_address);
       }
+
+      if (message.owner.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.owner);
+      }
     }
 
     static decode(reader: Reader, length: i32): set_metadata_arguments {
@@ -483,6 +488,10 @@ export namespace koindomain {
             message.oracle_address = reader.bytes();
             break;
 
+          case 3:
+            message.owner = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -494,13 +503,16 @@ export namespace koindomain {
 
     nameservice_address: Uint8Array;
     oracle_address: Uint8Array;
+    owner: Uint8Array;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
-      oracle_address: Uint8Array = new Uint8Array(0)
+      oracle_address: Uint8Array = new Uint8Array(0),
+      owner: Uint8Array = new Uint8Array(0)
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
+      this.owner = owner;
     }
   }
 
@@ -752,6 +764,11 @@ export namespace koindomain {
         writer.uint32(18);
         writer.bytes(message.oracle_address);
       }
+
+      if (message.owner.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.owner);
+      }
     }
 
     static decode(reader: Reader, length: i32): metadata_object {
@@ -769,6 +786,10 @@ export namespace koindomain {
             message.oracle_address = reader.bytes();
             break;
 
+          case 3:
+            message.owner = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -780,13 +801,16 @@ export namespace koindomain {
 
     nameservice_address: Uint8Array;
     oracle_address: Uint8Array;
+    owner: Uint8Array;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
-      oracle_address: Uint8Array = new Uint8Array(0)
+      oracle_address: Uint8Array = new Uint8Array(0),
+      owner: Uint8Array = new Uint8Array(0)
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
+      this.owner = owner;
     }
   }
 
