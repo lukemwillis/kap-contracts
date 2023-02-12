@@ -397,6 +397,11 @@ export namespace nameservice {
         writer.uint32(18);
         writer.bytes(message.kap_token_address);
       }
+
+      if (message.owner.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.owner);
+      }
     }
 
     static decode(reader: Reader, length: i32): set_metadata_arguments {
@@ -414,6 +419,10 @@ export namespace nameservice {
             message.kap_token_address = reader.bytes();
             break;
 
+          case 3:
+            message.owner = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -425,13 +434,16 @@ export namespace nameservice {
 
     tla_mint_fee: u64;
     kap_token_address: Uint8Array;
+    owner: Uint8Array;
 
     constructor(
       tla_mint_fee: u64 = 0,
-      kap_token_address: Uint8Array = new Uint8Array(0)
+      kap_token_address: Uint8Array = new Uint8Array(0),
+      owner: Uint8Array = new Uint8Array(0)
     ) {
       this.tla_mint_fee = tla_mint_fee;
       this.kap_token_address = kap_token_address;
+      this.owner = owner;
     }
   }
 
@@ -492,6 +504,11 @@ export namespace nameservice {
         writer.uint32(18);
         writer.bytes(message.kap_token_address);
       }
+
+      if (message.owner.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.owner);
+      }
     }
 
     static decode(reader: Reader, length: i32): metadata_object {
@@ -509,6 +526,10 @@ export namespace nameservice {
             message.kap_token_address = reader.bytes();
             break;
 
+          case 3:
+            message.owner = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -520,13 +541,16 @@ export namespace nameservice {
 
     tla_mint_fee: u64;
     kap_token_address: Uint8Array;
+    owner: Uint8Array;
 
     constructor(
       tla_mint_fee: u64 = 0,
-      kap_token_address: Uint8Array = new Uint8Array(0)
+      kap_token_address: Uint8Array = new Uint8Array(0),
+      owner: Uint8Array = new Uint8Array(0)
     ) {
       this.tla_mint_fee = tla_mint_fee;
       this.kap_token_address = kap_token_address;
+      this.owner = owner;
     }
   }
 

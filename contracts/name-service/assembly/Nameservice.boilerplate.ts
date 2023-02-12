@@ -2,6 +2,18 @@ import { System, Protobuf, authority } from "@koinos/sdk-as";
 import { nameservice } from "./proto/nameservice";
 
 export class Nameservice {
+  authorize(args: authority.authorize_arguments): authority.authorize_result {
+    // const call = args.call;
+    // const type = args.type;
+
+    // YOUR CODE HERE
+
+    const res = new authority.authorize_result();
+    res.value = true;
+
+    return res;
+  }
+
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
     // const name = args.name;
     // const duration_increments = args.duration_increments;
@@ -88,6 +100,7 @@ export class Nameservice {
   ): nameservice.empty_object {
     // const tla_mint_fee = args.tla_mint_fee;
     // const kap_token_address = args.kap_token_address;
+    // const owner = args.owner;
 
     // YOUR CODE HERE
 
@@ -104,6 +117,7 @@ export class Nameservice {
     const res = new nameservice.metadata_object();
     // res.tla_mint_fee = ;
     // res.kap_token_address = ;
+    // res.owner = ;
 
     return res;
   }

@@ -82,6 +82,7 @@ message get_names_result {
 message set_metadata_arguments {
   uint64 tla_mint_fee = 1;
   bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
 }
 
 /* 
@@ -102,6 +103,7 @@ message empty_object {
 message metadata_object {
   uint64 tla_mint_fee = 1;
   bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
 }
 
 message name_object {

@@ -47,8 +47,13 @@ beforeAll(async () => {
   await localKoinos.setNameServiceRecord('koin', koin.address, { mode: 'manual' });
 
   // deploy nameservice 
-  // @ts-ignore abi is compatible
-  nameserviceContract = await localKoinos.deployContract(nameserviceAcct.wif, './build/release/contract.wasm', abi, { mode: 'manual' });
+  nameserviceContract = await localKoinos.deployContract(
+    nameserviceAcct.wif,
+    './build/release/contract.wasm',
+    // @ts-ignore abi is compatible
+    abi,
+    { mode: 'manual' },
+  );
 
   // deploy koindomain  
   // @ts-ignore abi is compatible
@@ -1308,5 +1313,45 @@ describe('renew', () => {
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('cannot renew "never-expires.koin" because it cannot expire');
     }
+  });
+});
+
+describe('authorizations', () => {
+  it('should update the contract authorizations', async () => {
+    expect.assertions(2);
+
+    // override authorizations
+    let res = await nameserviceContract.deploy({
+      authorizesCallContract: true,
+      authorizesTransactionApplication: true,
+      authorizesUploadContract: true
+    });
+
+    await res.transaction?.wait();
+
+    // change contract owner
+    res = await nameserviceContract.functions.set_metadata({
+      tla_mint_fee: '0',
+      kap_token_address: kapAcct.address,
+      owner: user1.address
+    });
+
+    await res.transaction?.wait();
+
+    try {
+      await nameserviceContract.deploy();
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual(`account ${nameserviceAcct.address} has not authorized transaction`);
+    }
+
+    // change contract signer to new owner
+    nameserviceContract.signer = user1.signer;
+
+    // try to update contract
+    res = await nameserviceContract.deploy();
+
+    await res.transaction?.wait();
+    expect(res.receipt).toBeDefined();
+
   });
 });

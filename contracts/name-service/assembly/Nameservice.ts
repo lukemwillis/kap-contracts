@@ -1,4 +1,4 @@
-import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token } from "@koinos/sdk-as";
+import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token, value } from "@koinos/sdk-as";
 import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT } from "./Constants";
 import { nameservice } from "./proto/nameservice";
 import { OwnersIndex } from "./state/OwnersIndex";
@@ -7,6 +7,7 @@ import { Names } from "./state/Names";
 
 export class Nameservice {
   contractId: Uint8Array = System.getContractId();
+  metadata: Metadata = new Metadata(this.contractId);
   names: Names = new Names(this.contractId);
   ownersIndex: OwnersIndex = new OwnersIndex(this.contractId);
   now: u64 = System.getHeadInfo().head_block_time;
@@ -139,6 +140,41 @@ export class Nameservice {
     return null;
   }
 
+
+  authorize(args: authority.authorize_arguments): authority.authorize_result {
+    const metadata = this.metadata.get()!;
+
+    // if the owner is not this contract id, then check authority of owner
+    if (metadata.owner.length > 0 && !Arrays.equal(this.contractId, metadata.owner)) {
+      return new authority.authorize_result(
+        System.checkAuthority(
+          args.type, 
+          metadata.owner
+        )
+      );
+    } else {
+      // otherwise check transaction signatures
+      const transactionId = System.getTransactionField('id')!.bytes_value;
+      const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
+      
+      let signature: Uint8Array;
+      let recoveredKey: Uint8Array;
+      let addr: Uint8Array;
+
+      for (let i = 0; i < signatures.values.length; i++) {
+        signature = signatures.values[i].bytes_value;
+        recoveredKey = System.recoverPublicKey(signature, transactionId)!;
+        addr = Crypto.addressFromPublicKey(recoveredKey);
+
+        if (Arrays.equal(addr, this.contractId)) {
+          return new authority.authorize_result(true);
+        }
+      }
+    }
+
+    return new authority.authorize_result(false);
+  }
+
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
     const name = args.name;
     const duration_increments = args.duration_increments;
@@ -167,9 +203,9 @@ export class Nameservice {
 
     // is the user trying to mint a TLA?
     if (nameObj.domain.length == 0) {
-      // only this contract can mint TLAs for now
+      // only this contract owner can mint TLAs for now
       System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
-      const metadata = new Metadata(this.contractId).get()!;
+      const metadata = this.metadata.get()!;
 
       // lock $KAP tokens
       if (metadata.tla_mint_fee > 0) {
@@ -265,7 +301,7 @@ export class Nameservice {
     if (nameObj!.domain.length == 0) {
       // unlock $KAP tokens
       if (nameObj!.locked_kap_tokens > 0) {
-        const metadata = new Metadata(this.contractId).get()!;
+        const metadata = this.metadata.get()!;
         const tokenContract = new Token(metadata.kap_token_address);
 
         System.require(tokenContract.transfer(this.contractId, nameObj!.owner, nameObj!.locked_kap_tokens), 'could not unlock $KAP tokens');
@@ -469,16 +505,17 @@ export class Nameservice {
   set_metadata(
     args: nameservice.set_metadata_arguments
   ): nameservice.empty_object {
-    // only this contract can set the metadata for now
+    // only this contract owner can set the metadata
     System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
 
     const tla_mint_fee = args.tla_mint_fee;
     const kap_token_address = args.kap_token_address;
+    const owner = args.owner;
 
-    const metadata = new Metadata(this.contractId);
-    metadata.put(new nameservice.metadata_object(
+    this.metadata.put(new nameservice.metadata_object(
       tla_mint_fee,
-      kap_token_address
+      kap_token_address,
+      owner
     ));
 
     return new nameservice.empty_object();
@@ -487,8 +524,6 @@ export class Nameservice {
   get_metadata(
     args: nameservice.get_metadata_arguments
   ): nameservice.metadata_object {
-    const metadata = new Metadata(this.contractId);
-
-    return metadata.get()!;
+    return this.metadata.get()!;
   }
 }

@@ -9,6 +9,16 @@ export function main(): i32 {
   const c = new ContractClass();
 
   switch (contractArgs.entry_point) {
+    case 0x4a2dbd90: {
+      const args = Protobuf.decode<authority.authorize_arguments>(
+        contractArgs.args,
+        authority.authorize_arguments.decode
+      );
+      const res = c.authorize(args);
+      retbuf = Protobuf.encode(res, authority.authorize_result.encode);
+      break;
+    }
+
     case 0xdc6f17bb: {
       const args = Protobuf.decode<ProtoNamespace.mint_arguments>(
         contractArgs.args,
