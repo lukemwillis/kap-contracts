@@ -71,6 +71,9 @@ export class Multisig {
         signerToIgnore = removerSignerArgs.signer;
         numberOfAuthorizedSignaturesRequired -= 1;
       } else if (args.type == authority.authorization_type.transaction_application) {
+        // set buffer to 512kb so that we don't block contract uploads
+        System.setSystemBufferSize(512000);
+
         // if transaction_application
         // check all operations to get the signer to ignore
         // only 1 operation is allowed if one of them is remove_signer

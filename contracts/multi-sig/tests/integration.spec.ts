@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
 
-import * as abi from '../abi/multisig-abi.json';
+import * as multisigAbi from '../abi/multisig-abi.json';
+import * as koindomainAbi from '../../koin-domain/abi/koindomain-abi.json';
 
 // @ts-ignore koilib_types is needed when using koilib
-abi.koilib_types = abi.types;
+multisigAbi.koilib_types = multisigAbi.types;
+// @ts-ignore koilib_types is needed when using koilib
+koindomainAbi.koilib_types = koindomainAbi.types;
 
 jest.setTimeout(600000);
 
@@ -27,9 +30,12 @@ const [
   user2,
   user3,
   user4,
+  nameserviceAcct,
+  usdOracleAcct
 ] = localKoinos.getAccounts();
 
 let multisigContract: Contract;
+let koinDomainContract: Contract;
 
 beforeAll(async () => {
   // start local-koinos node
@@ -45,7 +51,7 @@ beforeAll(async () => {
     multisigAcct.wif,
     './build/release/contract.wasm',
     // @ts-ignore abi is compatible
-    abi,
+    multisigAbi,
     { mode: 'manual' },
     // override authorizations
     {
@@ -56,12 +62,18 @@ beforeAll(async () => {
   );
 
   // deploy koindomain  
-  await localKoinos.deployContract(
+  koinDomainContract = await localKoinos.deployContract(
     koinDomainAcct.wif,
     '../koin-domain/build/release/contract.wasm',
     // @ts-ignore abi is compatible
-    abi,
-    { mode: 'manual' }
+    koindomainAbi,
+    { mode: 'manual' },
+    // override authorizations
+    {
+      authorizesCallContract: true,
+      authorizesTransactionApplication: true,
+      authorizesUploadContract: true
+    }
   );
 
   await localKoinos.startBlockProduction();
@@ -299,5 +311,164 @@ describe('signers management', () => {
       expect(JSON.parse(error.message).error).toStrictEqual('signer being removed is not an authorized signer');
     }
   });
+});
 
+describe('multi-sig contract ownership', () => {
+  it('requires multi-sig when used as owner', async () => {
+    expect.assertions(15);
+
+    // set koin domain contract metadata
+    let res = await koinDomainContract.functions.set_metadata({
+      nameservice_address: nameserviceAcct.address,
+      oracle_address: usdOracleAcct.address,
+      owner: multisigAcct.address
+    });
+
+    await res.transaction?.wait();
+
+    res = await koinDomainContract.functions.get_metadata({});
+
+    expect(res?.result?.nameservice_address).toEqual(nameserviceAcct.address);
+    expect(res?.result?.oracle_address).toEqual(usdOracleAcct.address);
+    expect(res?.result?.owner).toEqual(multisigAcct.address);
+
+    // can consume mana and call a contract using multi-sig
+    res = await koinDomainContract.functions.set_metadata({
+      nameservice_address: nameserviceAcct.address,
+      oracle_address: user4.address,
+      owner: multisigAcct.address
+    }, {
+      beforeSend: async (tx) => {
+        tx.signatures = [];
+        await user1.signer.signTransaction(tx);
+        await user2.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    res = await koinDomainContract.functions.get_metadata({});
+
+    expect(res?.result?.nameservice_address).toEqual(nameserviceAcct.address);
+    expect(res?.result?.oracle_address).toEqual(user4.address);
+    expect(res?.result?.owner).toEqual(multisigAcct.address);
+
+    // can upload a contract using multi-sig
+    res = await koinDomainContract.deploy({
+      authorizesCallContract: true,
+      authorizesTransactionApplication: true,
+      authorizesUploadContract: true,
+      beforeSend: async (tx) => {
+        tx.signatures = [];
+        await user1.signer.signTransaction(tx);
+        await user2.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+    expect(res.receipt).not.toBeUndefined();
+
+    // can transfer tokens
+    res = await localKoinos.koin.transfer(
+      koinDomainAcct.address,
+      user4.address,
+      '1'
+      , {
+        payer: koinDomainAcct.address,
+        beforeSend: async (tx) => {
+          tx.signatures = [];
+          await user1.signer.signTransaction(tx);
+          await user2.signer.signTransaction(tx);
+        }
+      });
+
+
+    await res.transaction?.wait();
+
+    const user4Bal = await localKoinos.koin.balanceOf(user4.address);
+    expect(user4Bal).toEqual('5000000000001');
+
+    const koinDomainBal = await localKoinos.koin.balanceOf(koinDomainAcct.address);
+    expect(koinDomainBal).toEqual('4999999999999');
+
+    try {
+      // cannot consume mana
+      await koinDomainContract.functions.set_metadata({
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: user4.address,
+        owner: multisigAcct.address
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('multi-signature verification failed, only 1/2 valid signatures provided');
+    }
+
+    try {
+      // cannot consume mana
+      await koinDomainContract.functions.set_metadata({
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: user4.address,
+        owner: multisigAcct.address
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual(`account ${koinDomainAcct.address} has not authorized transaction`);
+    }
+
+    try {
+      // cannot upload contract
+      await koinDomainContract.deploy({
+        authorizesCallContract: true,
+        authorizesTransactionApplication: true,
+        authorizesUploadContract: true,
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('multi-signature verification failed, only 1/2 valid signatures provided');
+    }
+
+    try {
+      // cannot upload contract
+      await koinDomainContract.deploy({
+        authorizesCallContract: true,
+        authorizesTransactionApplication: true,
+        authorizesUploadContract: true
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual(`account ${koinDomainAcct.address} has not authorized transaction`);
+    }
+
+    try {
+      // cannot transfer tokens
+      await localKoinos.koin.transfer(
+        koinDomainAcct.address,
+        user4.address,
+        '1'
+        , {
+          payer: koinDomainAcct.address,
+          beforeSend: async (tx) => {
+            await user1.signer.signTransaction(tx);
+          }
+        });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('multi-signature verification failed, only 1/2 valid signatures provided');
+    }
+
+    try {
+      // cannot transfer tokens
+      await localKoinos.koin.transfer(
+        koinDomainAcct.address,
+        user4.address,
+        '1'
+        , {
+          payer: koinDomainAcct.address
+        });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual(`account ${koinDomainAcct.address} has not authorized transaction`);
+    }
+  });
 });
