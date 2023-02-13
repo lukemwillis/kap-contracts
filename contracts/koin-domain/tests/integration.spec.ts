@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Contract, LocalKoinos, Signer, Token } from '@roamin/local-koinos';
+import { Contract, LocalKoinos, Signer } from '@roamin/local-koinos';
 
 // ABIs
 import * as koindomainAbi from '../abi/koindomain-abi.json';

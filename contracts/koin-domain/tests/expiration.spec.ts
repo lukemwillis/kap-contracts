@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import fs from 'fs';
-import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
+import { Contract, LocalKoinos } from '@roamin/local-koinos';
 
 // ABIs
 import * as koindomainAbi from '../abi/koindomain-abi.json';
@@ -136,12 +135,12 @@ describe('mint', () => {
       payment_from: user1.address,
     }, {
       beforeSend: async (tx) => {
-        await user1.signer.signTransaction(tx)
+        await user1.signer.signTransaction(tx);
       }
     });
 
-    let now = new Date()
-    let nowMs = now.getTime()
+    let now = new Date();
+    let nowMs = now.getTime();
 
     await localKoinos.produceBlock({
       blockHeader: {
@@ -154,9 +153,9 @@ describe('mint', () => {
     });
 
     // expiration is 1 year from now
-    let expiration = addYears(now, 1)
+    let expiration = addYears(now, 1);
     // grace period is expiration + 60 days
-    let gracePeriod = addDays(expiration, 60).getTime()
+    let gracePeriod = addDays(expiration, 60).getTime();
 
     expect(res?.result?.domain).toEqual('koin');
     expect(res?.result?.name).toEqual('1234567891');
@@ -171,7 +170,7 @@ describe('mint', () => {
       payment_from: user1.address,
     }, {
       beforeSend: async (tx) => {
-        await user1.signer.signTransaction(tx)
+        await user1.signer.signTransaction(tx);
       }
     });
 
@@ -182,9 +181,9 @@ describe('mint', () => {
     });
 
     // expiration is old expiration + 1 year
-    expiration = addYears(expiration, 1)
+    expiration = addYears(expiration, 1);
     // grace period is new expiration + 60 days
-    gracePeriod = addDays(expiration, 60).getTime()
+    gracePeriod = addDays(expiration, 60).getTime();
 
     expect(res?.result?.domain).toEqual('koin');
     expect(res?.result?.name).toEqual('1234567891');

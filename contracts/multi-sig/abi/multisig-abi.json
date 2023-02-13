@@ -1,0 +1,151 @@
+{
+    "methods": {
+        "add_signer": {
+            "argument": "multisig.add_signer_arguments",
+            "return": "multisig.empty_object",
+            "description": "Add a new signer",
+            "entry_point": 2735818586,
+            "read_only": false
+        },
+        "authorize": {
+            "argument": "koinos.chain.authorize_arguments",
+            "return": "koinos.chain.authorize_result",
+            "description": "Check if authorized",
+            "entry_point": 1244511632,
+            "read_only": false
+        },
+        "remove_signer": {
+            "argument": "multisig.remove_signer_arguments",
+            "return": "multisig.empty_object",
+            "description": "Remove a new signer",
+            "entry_point": 1592560268,
+            "read_only": false
+        },
+        "get_signers": {
+            "argument": "multisig.get_signers_arguments",
+            "return": "multisig.get_signers_result",
+            "description": "Get authorized signers",
+            "entry_point": 3589345977,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "multisig": {
+                "nested": {
+                    "add_signer_arguments": {
+                        "fields": {
+                            "signer": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "remove_signer_arguments": {
+                        "fields": {
+                            "signer": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "get_signers_arguments": {
+                        "fields": {}
+                    },
+                    "get_signers_result": {
+                        "fields": {
+                            "authorized_signers": {
+                                "rule": "repeated",
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "metadata_object": {
+                        "fields": {
+                            "number_authorized_signers": {
+                                "type": "uint32",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "koinos": {
+                "nested": {
+                    "chain": {
+                        "options": {
+                            "go_package": "github.com/koinos/koinos-proto-golang/koinos/chain"
+                        },
+                        "nested": {
+                            "authorization_type": {
+                                "values": {
+                                    "contract_call": 0,
+                                    "transaction_application": 1,
+                                    "contract_upload": 2
+                                }
+                            },
+                            "call_target": {
+                                "fields": {
+                                    "contract_id": {
+                                        "type": "bytes",
+                                        "id": 1,
+                                        "options": {
+                                            "(btype)": "ADDRESS"
+                                        }
+                                    },
+                                    "entry_point": {
+                                        "type": "uint32",
+                                        "id": 2
+                                    }
+                                }
+                            },
+                            "authorize_arguments": {
+                                "oneofs": {
+                                    "_call": {
+                                        "oneof": [
+                                            "call"
+                                        ]
+                                    }
+                                },
+                                "fields": {
+                                    "type": {
+                                        "type": "authorization_type",
+                                        "id": 1
+                                    },
+                                    "call": {
+                                        "type": "call_target",
+                                        "id": 2,
+                                        "options": {
+                                            "proto3_optional": true
+                                        }
+                                    }
+                                }
+                            },
+                            "authorize_result": {
+                                "fields": {
+                                    "value": {
+                                        "type": "bool",
+                                        "id": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

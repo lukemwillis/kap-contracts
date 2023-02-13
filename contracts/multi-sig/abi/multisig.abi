@@ -1,0 +1,26 @@
+{
+    "methods": {
+        "add_signer": {
+            "argument": "multisig.add_signer_arguments",
+            "return": "multisig.empty_object",
+            "description": "Add a new signer",
+            "entry-point": "0xa311475a",
+            "read-only": false
+        },
+        "remove_signer": {
+            "argument": "multisig.remove_signer_arguments",
+            "return": "multisig.empty_object",
+            "description": "Remove a new signer",
+            "entry-point": "0x5eec8a8c",
+            "read-only": false
+        },
+        "get_signers": {
+            "argument": "multisig.get_signers_arguments",
+            "return": "multisig.get_signers_result",
+            "description": "Get authorized signers",
+            "entry-point": "0xd5f112b9",
+            "read-only": true
+        }
+    },
+    "types": "CvkCCh1hc3NlbWJseS9wcm90by9tdWx0aXNpZy5wcm90bxIIbXVsdGlzaWcaFGtvaW5vcy9vcHRpb25zLnByb3RvIjQKFGFkZF9zaWduZXJfYXJndW1lbnRzEhwKBnNpZ25lchgBIAEoDEIEgLUYBlIGc2lnbmVyIjcKF3JlbW92ZV9zaWduZXJfYXJndW1lbnRzEhwKBnNpZ25lchgBIAEoDEIEgLUYBlIGc2lnbmVyIhcKFWdldF9zaWduZXJzX2FyZ3VtZW50cyJJChJnZXRfc2lnbmVyc19yZXN1bHQSMwoSYXV0aG9yaXplZF9zaWduZXJzGAEgAygMQgSAtRgGUhFhdXRob3JpemVkU2lnbmVycyIOCgxlbXB0eV9vYmplY3QiTQoPbWV0YWRhdGFfb2JqZWN0EjoKGW51bWJlcl9hdXRob3JpemVkX3NpZ25lcnMYASABKA1SF251bWJlckF1dGhvcml6ZWRTaWduZXJzYgZwcm90bzMK5wMKHGtvaW5vcy9jaGFpbi9hdXRob3JpdHkucHJvdG8SDGtvaW5vcy5jaGFpbhoUa29pbm9zL29wdGlvbnMucHJvdG8iVQoLY2FsbF90YXJnZXQSJQoLY29udHJhY3RfaWQYASABKAxCBIC1GAZSCmNvbnRyYWN0SWQSHwoLZW50cnlfcG9pbnQYAiABKA1SCmVudHJ5UG9pbnQiiAEKE2F1dGhvcml6ZV9hcmd1bWVudHMSNAoEdHlwZRgBIAEoDjIgLmtvaW5vcy5jaGFpbi5hdXRob3JpemF0aW9uX3R5cGVSBHR5cGUSMgoEY2FsbBgCIAEoCzIZLmtvaW5vcy5jaGFpbi5jYWxsX3RhcmdldEgAUgRjYWxsiAEBQgcKBV9jYWxsIigKEGF1dGhvcml6ZV9yZXN1bHQSFAoFdmFsdWUYASABKAhSBXZhbHVlKlkKEmF1dGhvcml6YXRpb25fdHlwZRIRCg1jb250cmFjdF9jYWxsEAASGwoXdHJhbnNhY3Rpb25fYXBwbGljYXRpb24QARITCg9jb250cmFjdF91cGxvYWQQAkI0WjJnaXRodWIuY29tL2tvaW5vcy9rb2lub3MtcHJvdG8tZ29sYW5nL2tvaW5vcy9jaGFpbmIGcHJvdG8z"
+}
