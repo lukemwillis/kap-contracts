@@ -1,0 +1,499 @@
+{
+    "methods": {
+        "mint": {
+            "argument": "nameservice.mint_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Mint a name or TLA",
+            "entry_point": 3698268091,
+            "read_only": false
+        },
+        "authorize": {
+            "argument": "koinos.chain.authorize_arguments",
+            "return": "koinos.chain.authorize_result",
+            "description": "Check if authorized",
+            "entry_point": 1244511632,
+            "read_only": false
+        },
+        "burn": {
+            "argument": "nameservice.burn_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Burn a name or TLA",
+            "entry_point": 2241834181,
+            "read_only": false
+        },
+        "transfer": {
+            "argument": "nameservice.transfer_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Transfer ownership of a name or TLA",
+            "entry_point": 670398154,
+            "read_only": false
+        },
+        "renew": {
+            "argument": "nameservice.renew_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Renew a name",
+            "entry_point": 2741644513,
+            "read_only": false
+        },
+        "get_name": {
+            "argument": "nameservice.get_name_arguments",
+            "return": "nameservice.name_object",
+            "description": "Get name object",
+            "entry_point": 3842443798,
+            "read_only": true
+        },
+        "get_names": {
+            "argument": "nameservice.get_names_arguments",
+            "return": "nameservice.get_names_result",
+            "description": "Get names that belong to an address",
+            "entry_point": 3445384472,
+            "read_only": true
+        },
+        "set_metadata": {
+            "argument": "nameservice.set_metadata_arguments",
+            "return": "nameservice.empty_object",
+            "description": "Set contract metadata",
+            "entry_point": 1029287705,
+            "read_only": false
+        },
+        "get_metadata": {
+            "argument": "nameservice.get_metadata_arguments",
+            "return": "nameservice.metadata_object",
+            "description": "Get contract metadata",
+            "entry_point": 4244088463,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "nameservice": {
+                "nested": {
+                    "mint_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "burn_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "transfer_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "to": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "renew_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "get_name_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "get_names_arguments": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "name_offset": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "limit": {
+                                "type": "uint32",
+                                "id": 3
+                            },
+                            "descending": {
+                                "type": "bool",
+                                "id": 4
+                            }
+                        }
+                    },
+                    "get_names_result": {
+                        "fields": {
+                            "names": {
+                                "rule": "repeated",
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "set_metadata_arguments": {
+                        "fields": {
+                            "tla_mint_fee": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "kap_token_address": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "get_metadata_arguments": {
+                        "fields": {}
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "metadata_object": {
+                        "fields": {
+                            "tla_mint_fee": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "kap_token_address": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "name_object": {
+                        "fields": {
+                            "domain": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 5,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "sub_names_count": {
+                                "type": "uint64",
+                                "id": 6,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "locked_kap_tokens": {
+                                "type": "uint64",
+                                "id": 7,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "address_object": {
+                        "fields": {
+                            "names_count": {
+                                "type": "uint64",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "owner_index_key": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "name_hash": {
+                                "type": "bytes",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "authorize_mint_args": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "domain": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 3
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 6,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_mint_res": {
+                        "fields": {
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "authorize_burn_args": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_burn_res": {
+                        "fields": {
+                            "authorized": {
+                                "type": "bool",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_renewal_args": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_renewal_res": {
+                        "fields": {
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "authorize_reclaim_args": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_reclaim_res": {
+                        "fields": {
+                            "authorized": {
+                                "type": "bool",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "koinos": {
+                "nested": {
+                    "chain": {
+                        "options": {
+                            "go_package": "github.com/koinos/koinos-proto-golang/koinos/chain"
+                        },
+                        "nested": {
+                            "authorization_type": {
+                                "values": {
+                                    "contract_call": 0,
+                                    "transaction_application": 1,
+                                    "contract_upload": 2
+                                }
+                            },
+                            "call_target": {
+                                "fields": {
+                                    "contract_id": {
+                                        "type": "bytes",
+                                        "id": 1,
+                                        "options": {
+                                            "(btype)": "ADDRESS"
+                                        }
+                                    },
+                                    "entry_point": {
+                                        "type": "uint32",
+                                        "id": 2
+                                    }
+                                }
+                            },
+                            "authorize_arguments": {
+                                "oneofs": {
+                                    "_call": {
+                                        "oneof": [
+                                            "call"
+                                        ]
+                                    }
+                                },
+                                "fields": {
+                                    "type": {
+                                        "type": "authorization_type",
+                                        "id": 1
+                                    },
+                                    "call": {
+                                        "type": "call_target",
+                                        "id": 2,
+                                        "options": {
+                                            "proto3_optional": true
+                                        }
+                                    }
+                                }
+                            },
+                            "authorize_result": {
+                                "fields": {
+                                    "value": {
+                                        "type": "bool",
+                                        "id": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

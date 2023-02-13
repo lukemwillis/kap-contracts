@@ -1,0 +1,170 @@
+syntax = "proto3";
+
+package nameservice;
+
+import "koinos/options.proto"; 
+
+// Entrypoints
+
+/* 
+  @description Mint a name or TLA
+  @read-only false
+  @result empty_object
+*/
+message mint_arguments {
+  string name = 1;
+  uint32 duration_increments = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_from = 4 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 5 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
+  @description Burn a name or TLA
+  @read-only false
+  @result empty_object
+*/
+message burn_arguments {
+  string name = 1;
+}
+
+/* 
+  @description Transfer ownership of a name or TLA
+  @read-only false
+  @result empty_object
+*/
+message transfer_arguments {
+  string name = 1;
+  bytes to = 2 [(koinos.btype) = ADDRESS];
+}
+
+/* 
+  @description Renew a name
+  @read-only false
+  @result empty_object
+*/
+message renew_arguments {
+  string name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
+  @description Get name object
+  @read-only true
+  @result name_object
+*/
+message get_name_arguments {
+  string name = 1;
+}
+
+/* 
+  @description Get names that belong to an address
+  @read-only true
+*/
+message get_names_arguments {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+  string name_offset = 2;
+  uint32 limit = 3;
+  bool descending = 4;
+}
+
+message get_names_result {
+  repeated name_object names = 1;
+}
+
+/* 
+  @description Set contract metadata
+  @read-only false
+  @result empty_object
+*/
+message set_metadata_arguments {
+  uint64 tla_mint_fee = 1;
+  bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
+  @description Get contract metadata
+  @read-only true
+  @result metadata_object
+*/
+message get_metadata_arguments {
+}
+
+// Events
+
+// Objects
+message empty_object {
+
+}
+
+message metadata_object {
+  uint64 tla_mint_fee = 1;
+  bytes kap_token_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
+}
+
+message name_object {
+  string domain = 1;
+  string name = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  uint64 expiration = 4 [jstype = JS_STRING];
+  uint64 grace_period_end = 5 [jstype = JS_STRING];
+  uint64 sub_names_count = 6 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 7  [jstype = JS_STRING];
+}
+
+message address_object {
+  uint64 names_count = 1;
+}
+
+message owner_index_key {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+  bytes name_hash = 2;
+}
+
+// External calls objects
+
+message authorize_mint_args {
+  string name = 1;
+  string domain = 2;
+  uint32 duration_increments = 3;
+  bytes owner = 4 [(koinos.btype) = ADDRESS];
+  bytes payment_from = 5 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_mint_res {
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
+}
+
+message authorize_burn_args {
+  name_object name = 1;
+}
+
+message authorize_burn_res {
+  bool authorized = 1;
+}
+
+message authorize_renewal_args {
+  name_object name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_renewal_res {
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
+}
+
+message authorize_reclaim_args {
+  name_object name = 1;
+}
+
+message authorize_reclaim_res {
+  bool authorized = 1;
+}

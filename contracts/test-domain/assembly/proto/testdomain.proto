@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package testdomain;
+
+import "koinos/options.proto"; 
+
+/* 
+  @description Authorize the mint of a name
+  @read-only false
+*/
+message authorize_mint_arguments {
+  string name = 1;
+  string domain = 2;
+  uint32 duration_increments = 3;
+  bytes owner = 4 [(koinos.btype) = ADDRESS];
+  bytes payment_from = 5 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_mint_result {
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
+}
+
+/* 
+  @description Authorize the burn of a name
+  @read-only false
+*/
+message authorize_burn_arguments {
+  name_object name = 1;
+}
+
+message authorize_burn_result {
+  bool authorized = 1;
+}
+
+/* 
+  @description Authorize the renewal of a name
+  @read-only false
+*/
+message authorize_renewal_arguments {
+  name_object name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_renewal_result {
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
+}
+
+message name_object {
+  string domain = 1;
+  string name = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  uint64 expiration = 4 [jstype = JS_STRING];
+  uint64 grace_period_end = 5 [jstype = JS_STRING];
+  uint64 sub_names_count = 6 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 7  [jstype = JS_STRING];
+}

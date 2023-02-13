@@ -1,0 +1,19 @@
+{
+    "methods": {
+        "set_latest_price": {
+            "argument": "usdoracle.set_latest_price_arguments",
+            "return": "usdoracle.empty_object",
+            "description": "Set the latest USD price of a token",
+            "entry-point": "0xe6ae4302",
+            "read-only": false
+        },
+        "get_latest_price": {
+            "argument": "usdoracle.get_latest_price_arguments",
+            "return": "usdoracle.price_object",
+            "description": "Get the latest USD price of a token",
+            "entry-point": "0x8d26b6d6",
+            "read-only": true
+        }
+    },
+    "types": "CtECCh5hc3NlbWJseS9wcm90by91c2RvcmFjbGUucHJvdG8SCXVzZG9yYWNsZRoUa29pbm9zL29wdGlvbnMucHJvdG8iYQoac2V0X2xhdGVzdF9wcmljZV9hcmd1bWVudHMSKQoNdG9rZW5fYWRkcmVzcxgBIAEoDEIEgLUYBVIMdG9rZW5BZGRyZXNzEhgKBXByaWNlGAIgASgEQgIwAVIFcHJpY2UiRwoaZ2V0X2xhdGVzdF9wcmljZV9hcmd1bWVudHMSKQoNdG9rZW5fYWRkcmVzcxgBIAEoDEIEgLUYBVIMdG9rZW5BZGRyZXNzIg4KDGVtcHR5X29iamVjdCJKCgxwcmljZV9vYmplY3QSGAoFcHJpY2UYASABKARCAjABUgVwcmljZRIgCgl0aW1lc3RhbXAYAiABKARCAjABUgl0aW1lc3RhbXBiBnByb3RvMw=="
+}

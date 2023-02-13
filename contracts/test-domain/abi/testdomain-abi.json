@@ -1,0 +1,183 @@
+{
+    "methods": {
+        "authorize_mint": {
+            "argument": "testdomain.authorize_mint_arguments",
+            "return": "testdomain.authorize_mint_result",
+            "description": "Authorize the mint of a name",
+            "entry_point": 2261455260,
+            "read_only": false
+        },
+        "authorize_burn": {
+            "argument": "testdomain.authorize_burn_arguments",
+            "return": "testdomain.authorize_burn_result",
+            "description": "Authorize the burn of a name",
+            "entry_point": 227923640,
+            "read_only": false
+        },
+        "authorize_renewal": {
+            "argument": "testdomain.authorize_renewal_arguments",
+            "return": "testdomain.authorize_renewal_result",
+            "description": "Authorize the renewal of a name",
+            "entry_point": 4233406847,
+            "read_only": false
+        }
+    },
+    "types": {
+        "nested": {
+            "testdomain": {
+                "nested": {
+                    "authorize_mint_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "domain": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 3
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 6,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_mint_result": {
+                        "fields": {
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "authorize_burn_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_burn_result": {
+                        "fields": {
+                            "authorized": {
+                                "type": "bool",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "authorize_renewal_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "name_object",
+                                "id": 1
+                            },
+                            "duration_increments": {
+                                "type": "uint32",
+                                "id": 2
+                            },
+                            "payment_from": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "payment_token_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "authorize_renewal_result": {
+                        "fields": {
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 1
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "name_object": {
+                        "fields": {
+                            "domain": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 2
+                            },
+                            "owner": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "expiration": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "grace_period_end": {
+                                "type": "uint64",
+                                "id": 5,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "sub_names_count": {
+                                "type": "uint64",
+                                "id": 6,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "locked_kap_tokens": {
+                                "type": "uint64",
+                                "id": 7,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

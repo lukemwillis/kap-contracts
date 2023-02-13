@@ -1,0 +1,76 @@
+{
+    "methods": {
+        "set_latest_price": {
+            "argument": "usdoracle.set_latest_price_arguments",
+            "return": "usdoracle.empty_object",
+            "description": "Set the latest USD price of a token",
+            "entry_point": 3870180098,
+            "read_only": false
+        },
+        "get_latest_price": {
+            "argument": "usdoracle.get_latest_price_arguments",
+            "return": "usdoracle.price_object",
+            "description": "Get the latest USD price of a token",
+            "entry_point": 2368124630,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "usdoracle": {
+                "nested": {
+                    "set_latest_price_arguments": {
+                        "fields": {
+                            "token_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "price": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "get_latest_price_arguments": {
+                        "fields": {
+                            "token_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "price_object": {
+                        "fields": {
+                            "price": {
+                                "type": "uint64",
+                                "id": 1,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

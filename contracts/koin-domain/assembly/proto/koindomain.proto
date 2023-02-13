@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package koindomain;
+
+import "koinos/options.proto"; 
+
+// Entrypoints
+
+/* 
+  @description Authorize the mint of a name
+  @read-only false
+*/
+message authorize_mint_arguments {
+  string name = 1;
+  string domain = 2;
+  uint32 duration_increments = 3;
+  bytes owner = 4 [(koinos.btype) = ADDRESS];
+  bytes payment_from = 5 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_mint_result {
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
+}
+
+/* 
+  @description Authorize the burn of a name
+  @read-only false
+*/
+message authorize_burn_arguments {
+  name_object name = 1;
+}
+
+message authorize_burn_result {
+  bool authorized = 1;
+}
+
+/* 
+  @description Authorize the renewal of a name
+  @read-only false
+*/
+message authorize_renewal_arguments {
+  name_object name = 1;
+  uint32 duration_increments = 2;
+  bytes payment_from = 3 [(koinos.btype) = ADDRESS];
+  bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+}
+
+message authorize_renewal_result {
+  uint64 expiration = 1;
+  uint64 grace_period_end = 2;
+}
+
+/* 
+  @description Get purchases
+  @read-only true
+*/
+message get_purchases_arguments {
+  string name = 1;
+  uint64 timestamp = 2 [jstype = JS_STRING];
+  uint32 limit = 3;
+  bool descending = 4;
+}
+
+message get_purchases_result {
+  repeated purchase_object purchases = 1;
+}
+
+/* 
+  @description Set contract metadata
+  @read-only false
+  @result empty_object
+*/
+message set_metadata_arguments {
+  bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
+  bytes oracle_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
+  @description Get contract metadata
+  @read-only true
+  @result metadata_object
+*/
+message get_metadata_arguments {
+}
+
+// external calls
+// oracle
+message get_last_usd_price_args {
+  bytes token_address = 1 [(koinos.btype) = CONTRACT_ID];
+}
+
+message get_last_usd_price_res {
+  uint64 price = 1;
+  uint64 timestamp = 2;
+}
+
+// objects
+message empty_object {
+
+}
+
+message name_object {
+  string domain = 1;
+  string name = 2;
+  bytes owner = 3 [(koinos.btype) = ADDRESS];
+  uint64 expiration = 4 [jstype = JS_STRING];
+  uint64 grace_period_end = 5 [jstype = JS_STRING];
+  uint64 sub_names_count = 6 [jstype = JS_STRING];
+  uint64 locked_kap_tokens = 7  [jstype = JS_STRING];
+}
+
+message metadata_object {
+  bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
+  bytes oracle_address = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
+}
+
+message purchase_object{
+  bytes buyer = 1 [(koinos.btype) = ADDRESS];
+  string name = 2;
+  uint64 usd_amount = 3 [jstype = JS_STRING];
+  uint64 timestamp = 4 [jstype = JS_STRING];
+}
+
+message purchase_key {
+  string name = 1;
+  uint64 timestamp = 2 [jstype = JS_STRING];
+}
+
+message purchase_record {
+  bytes buyer = 1 [(koinos.btype) = ADDRESS];
+  uint64 usd_amount = 2 [jstype = JS_STRING];
+}
