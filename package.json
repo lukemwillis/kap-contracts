@@ -29,8 +29,10 @@
     "name-service:ci": "cd contracts/name-service && yarn ci",
     "name-service:deploy": "yarn ts-node ./scripts/deploy-name-service.ts",
     "name-service:set-metadata": "yarn ts-node ./scripts/set-metadata-name-service.ts",
-    "all:build": "yarn test-domain:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build",
-    "all:ci": "yarn koin-domain:ci && yarn name-service:ci",
+    "multi-sig:build": "cd contracts/multi-sig && yarn install && yarn build:release",
+    "multi-sig:ci": "cd contracts/multi-sig && yarn ci",
+    "all:build": "yarn test-domain:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && multi-sig:build",
+    "all:ci": "yarn koin-domain:ci && yarn name-service:ci && multi-sig:ci",
     "ci": "yarn lint && yarn all:build && yarn all:ci"
   }
 }
