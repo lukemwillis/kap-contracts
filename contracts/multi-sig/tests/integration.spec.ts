@@ -30,9 +30,6 @@ const [
 ] = localKoinos.getAccounts();
 
 let multisigContract: Contract;
-let koindomainContract: Contract;
-
-const durationIncrements = 3;
 
 beforeAll(async () => {
   // start local-koinos node
@@ -77,8 +74,6 @@ afterAll(async () => {
 
 describe('signers management', () => {
   it('should add and remove signers', async () => {
-    // expect.assertions(1);
-
     // add signer
     let res = await multisigContract.functions.add_signer({
       signer: user1.address
@@ -212,4 +207,97 @@ describe('signers management', () => {
 
     expect(res.result).toBeUndefined();
   });
+
+  it('should fail multi-sig verification', async () => {
+    expect.assertions(6);
+
+    // fails if don't have the contract acct sig when there are not authorized signers setup
+    try {
+      multisigContract.signer = user1.signer;
+      await multisigContract.functions.add_signer({
+        signer: user1.address,
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual(`account '${multisigAcct.address}' authorization failed`);
+    }
+
+    multisigContract.signer = multisigAcct.signer;
+    let res = await multisigContract.functions.add_signer({
+      signer: user1.address,
+    });
+
+    await res.transaction?.wait();
+
+    // fails if provide contract acct sig but no authorized signers
+    try {
+      await multisigContract.functions.add_signer({
+        signer: user1.address,
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('multi-signature verification failed, only 0/1 valid signatures provided');
+    }
+
+    res = await multisigContract.functions.add_signer({
+      signer: user2.address,
+    }, {
+      beforeSend: async (tx) => {
+        await user1.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    // fails if don't provide enough authorized signatures
+    try {
+      await multisigContract.functions.add_signer({
+        signer: user3.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('multi-signature verification failed, only 1/2 valid signatures provided');
+    }
+
+    try {
+      await multisigContract.functions.add_signer({
+        signer: user3.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+          await user3.signer.signTransaction(tx);
+          await user4.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('multi-signature verification failed, only 1/2 valid signatures provided');
+    }
+
+    try {
+      await multisigContract.functions.add_signer({
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+          await user2.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('missing "signer" argument');
+    }
+
+    try {
+      await multisigContract.functions.remove_signer({
+        signer: user3.address,
+      }, {
+        beforeSend: async (tx) => {
+          await user1.signer.signTransaction(tx);
+          await user2.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('signer being removed is not an authorized signer');
+    }
+  });
+
 });

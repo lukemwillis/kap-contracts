@@ -134,7 +134,7 @@ export class Multisig {
         // revert if not enough valid signatures were provided
         System.require(
           uniqueAuthorizedSignatures.keys().length >= numberOfAuthorizedSignaturesRequired,
-          `multisig failed, only ${uniqueAuthorizedSignatures.keys().length}/${numberOfAuthorizedSignaturesRequired} valid signatures provided`
+          `multi-signature verification failed, only ${uniqueAuthorizedSignatures.keys().length}/${numberOfAuthorizedSignaturesRequired} valid signatures provided`
         );
 
         return new authority.authorize_result(true);
@@ -174,16 +174,7 @@ export class Multisig {
     );
 
     // call authorize to check that all signers signed
-    // pass the signer being removed so that we don't require it when checking signatures
     System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
-
-    // System.require(
-    //   System.checkAuthority(
-    //     authority.authorization_type.contract_call,
-    //     this.contractId,
-    //   ),
-    //   'not authorized'
-    // );
 
     // update authorized signers state
     this.authorizedSigners.remove(signer);
