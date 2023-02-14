@@ -8,34 +8,26 @@ import "koinos/options.proto";
 
 // @description Returns the token's name
 // @read-only true
+// @result string_object
 message name_arguments {
-}
-message name_result {
-   string value = 1;
 }
 
 // @description Returns the token's symbol
 // @read-only true
+// @result string_object
 message symbol_arguments {
-}
-message symbol_result {
-   string value = 1;
 }
 
 // @description Returns the token's uri
 // @read-only true
+// @result string_object
 message uri_arguments {
-}
-message uri_result {
-   string value = 1;
 }
 
 // @description Gets the total number of minted tokens
 // @read-only true
+// @result uint64_object
 message total_supply_arguments {
-}
-message total_supply_result {
-   uint64 value = 1 [jstype = JS_STRING];
 }
 
 // @description Returns collection royalties
@@ -48,56 +40,44 @@ message royalties_result {
 
 // @description Unsupported
 // @read-only false
+// @result empty_object
 message set_royalties_arguments {
    repeated royalty_object value = 1;
-}
-message set_royalties_result {
-   bool value = 1;
 }
 
 // @description Returns collection owner
 // @read-only true
+// @result bytes_address_object
 message owner_arguments {
-}
-message owner_result {
-   bytes value = 1 [(koinos.btype) = ADDRESS];
 }
 
 // @description Unsupported
 // @read-only false
+// @result empty_object
 message transfer_ownership_arguments {
    bytes owner = 1 [(koinos.btype) = ADDRESS];
-}
-message transfer_ownership_result {
-   bool value = 1;
 }
 
 // @description Gets the balance of an owner
 // @read-only true
+// @result uint64_object
 message balance_of_arguments {
    bytes owner = 1 [(koinos.btype) = ADDRESS];
-}
-message balance_of_result {
-   uint64 value = 1 [jstype = JS_STRING];
 }
 
 // @description Gets approved address for a token
 // @read-only true
+// @result bytes_address_object
 message get_approved_arguments {
    string name = 1;
-}
-message get_approved_result {
-   bytes value = 1 [(koinos.btype) = ADDRESS];
 }
 
 // @description Checks if an operator is approved by an owner
 // @read-only true
+// @result bool_object
 message is_approved_for_all_arguments {
    bytes owner = 1 [(koinos.btype) = ADDRESS];
    bytes operator = 2 [(koinos.btype) = ADDRESS];
-}
-message is_approved_for_all_result {
-   bool value = 1;
 }
 
 /* 
@@ -125,24 +105,20 @@ message transfer_arguments {
 
 // @description Approves an address to transfer a token
 // @read-only false
+// @result empty_object
 message approve_arguments {
    bytes approver_address = 1 [(koinos.btype) = ADDRESS];
    bytes to = 2 [(koinos.btype) = ADDRESS];
    string name = 3;
 }
-message approve_result {
-   bool value = 1;
-}
 
 // @description Approves or revokes an address to operate on all tokens owned by caller
 // @read-only false
+// @result empty_object
 message set_approval_for_all_arguments {
    bytes approver_address = 1 [(koinos.btype) = ADDRESS];
    bytes operator_address = 2 [(koinos.btype) = ADDRESS];
    bool approved = 3;
-}
-message set_approval_for_all_result {
-   bool value = 1;
 }
 
 /* 
@@ -211,25 +187,22 @@ message get_metadata_arguments {
 
 // Events
 message mint_event {
-  bytes to = 1 [(koinos.btype) = ADDRESS];
-  string name = 2;
+  string name = 1;
+}
+
+message burn_event {
+  string name = 1;
 }
 
 message transfer_event {
-  bytes from = 1 [(koinos.btype) = ADDRESS];
-  bytes to = 2 [(koinos.btype) = ADDRESS];
   string name = 3;
 }
 
 message operator_approval_event {
-  bytes approver_address = 1 [(koinos.btype) = ADDRESS];
-  bytes operator_address = 2 [(koinos.btype) = ADDRESS];
-  bool approved = 3;
+  bool approved = 1;
 }
 
 message token_approval_event {
-  bytes approver_address = 1 [(koinos.btype) = ADDRESS];
-  bytes to = 2 [(koinos.btype) = ADDRESS];
   string name = 3;
 }
 
@@ -237,8 +210,20 @@ message token_approval_event {
 message empty_object {
 }
 
-message balance_object {
-   uint64 value = 1 [jstype = JS_STRING];
+message string_object {
+  string value = 1;
+}
+
+message uint64_object {
+  uint64 value = 1 [jstype = JS_STRING];
+}
+
+message bool_object {
+   bool value = 1;
+}
+
+message bytes_address_object {
+  bytes value = 2 [(koinos.btype) = ADDRESS];
 }
 
 message royalty_object {
@@ -248,6 +233,11 @@ message royalty_object {
 
 message token_approval_object {
    bytes address = 1 [(koinos.btype) = ADDRESS];
+}
+
+message operator_approval_key {
+  bytes approver = 1 [(koinos.btype) = ADDRESS];
+  bytes operator = 2 [(koinos.btype) = ADDRESS];
 }
 
 message operator_approval_object {

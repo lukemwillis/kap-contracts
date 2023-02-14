@@ -25,7 +25,7 @@ export function main(): i32 {
         ProtoNamespace.name_arguments.decode
       );
       const res = c.name(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.name_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.string_object.encode);
       break;
     }
 
@@ -35,7 +35,7 @@ export function main(): i32 {
         ProtoNamespace.symbol_arguments.decode
       );
       const res = c.symbol(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.symbol_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.string_object.encode);
       break;
     }
 
@@ -45,7 +45,7 @@ export function main(): i32 {
         ProtoNamespace.uri_arguments.decode
       );
       const res = c.uri(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.uri_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.string_object.encode);
       break;
     }
 
@@ -55,7 +55,7 @@ export function main(): i32 {
         ProtoNamespace.total_supply_arguments.decode
       );
       const res = c.total_supply(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.total_supply_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.uint64_object.encode);
       break;
     }
 
@@ -75,7 +75,7 @@ export function main(): i32 {
         ProtoNamespace.set_royalties_arguments.decode
       );
       const res = c.set_royalties(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.set_royalties_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
       break;
     }
 
@@ -85,7 +85,7 @@ export function main(): i32 {
         ProtoNamespace.owner_arguments.decode
       );
       const res = c.owner(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.owner_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.bytes_address_object.encode);
       break;
     }
 
@@ -95,10 +95,7 @@ export function main(): i32 {
         ProtoNamespace.transfer_ownership_arguments.decode
       );
       const res = c.transfer_ownership(args);
-      retbuf = Protobuf.encode(
-        res,
-        ProtoNamespace.transfer_ownership_result.encode
-      );
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
       break;
     }
 
@@ -108,7 +105,7 @@ export function main(): i32 {
         ProtoNamespace.balance_of_arguments.decode
       );
       const res = c.balance_of(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.balance_of_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.uint64_object.encode);
       break;
     }
 
@@ -118,7 +115,7 @@ export function main(): i32 {
         ProtoNamespace.get_approved_arguments.decode
       );
       const res = c.get_approved(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.get_approved_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.bytes_address_object.encode);
       break;
     }
 
@@ -129,10 +126,7 @@ export function main(): i32 {
           ProtoNamespace.is_approved_for_all_arguments.decode
         );
       const res = c.is_approved_for_all(args);
-      retbuf = Protobuf.encode(
-        res,
-        ProtoNamespace.is_approved_for_all_result.encode
-      );
+      retbuf = Protobuf.encode(res, ProtoNamespace.bool_object.encode);
       break;
     }
 
@@ -162,7 +156,7 @@ export function main(): i32 {
         ProtoNamespace.approve_arguments.decode
       );
       const res = c.approve(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.approve_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
       break;
     }
 
@@ -173,10 +167,7 @@ export function main(): i32 {
           ProtoNamespace.set_approval_for_all_arguments.decode
         );
       const res = c.set_approval_for_all(args);
-      retbuf = Protobuf.encode(
-        res,
-        ProtoNamespace.set_approval_for_all_result.encode
-      );
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
       break;
     }
 

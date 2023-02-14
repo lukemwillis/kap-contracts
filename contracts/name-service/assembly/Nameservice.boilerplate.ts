@@ -14,28 +14,28 @@ export class Nameservice {
     return res;
   }
 
-  name(args: nameservice.name_arguments): nameservice.name_result {
+  name(args: nameservice.name_arguments): nameservice.string_object {
     // YOUR CODE HERE
 
-    const res = new nameservice.name_result();
+    const res = new nameservice.string_object();
     // res.value = ;
 
     return res;
   }
 
-  symbol(args: nameservice.symbol_arguments): nameservice.symbol_result {
+  symbol(args: nameservice.symbol_arguments): nameservice.string_object {
     // YOUR CODE HERE
 
-    const res = new nameservice.symbol_result();
+    const res = new nameservice.string_object();
     // res.value = ;
 
     return res;
   }
 
-  uri(args: nameservice.uri_arguments): nameservice.uri_result {
+  uri(args: nameservice.uri_arguments): nameservice.string_object {
     // YOUR CODE HERE
 
-    const res = new nameservice.uri_result();
+    const res = new nameservice.string_object();
     // res.value = ;
 
     return res;
@@ -43,10 +43,10 @@ export class Nameservice {
 
   total_supply(
     args: nameservice.total_supply_arguments
-  ): nameservice.total_supply_result {
+  ): nameservice.uint64_object {
     // YOUR CODE HERE
 
-    const res = new nameservice.total_supply_result();
+    const res = new nameservice.uint64_object();
     // res.value = ;
 
     return res;
@@ -65,21 +65,20 @@ export class Nameservice {
 
   set_royalties(
     args: nameservice.set_royalties_arguments
-  ): nameservice.set_royalties_result {
+  ): nameservice.empty_object {
     // const value = args.value;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.set_royalties_result();
-    // res.value = ;
+    const res = new nameservice.empty_object();
 
     return res;
   }
 
-  owner(args: nameservice.owner_arguments): nameservice.owner_result {
+  owner(args: nameservice.owner_arguments): nameservice.bytes_address_object {
     // YOUR CODE HERE
 
-    const res = new nameservice.owner_result();
+    const res = new nameservice.bytes_address_object();
     // res.value = ;
 
     return res;
@@ -87,25 +86,24 @@ export class Nameservice {
 
   transfer_ownership(
     args: nameservice.transfer_ownership_arguments
-  ): nameservice.transfer_ownership_result {
+  ): nameservice.empty_object {
     // const owner = args.owner;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.transfer_ownership_result();
-    // res.value = ;
+    const res = new nameservice.empty_object();
 
     return res;
   }
 
   balance_of(
     args: nameservice.balance_of_arguments
-  ): nameservice.balance_of_result {
+  ): nameservice.uint64_object {
     // const owner = args.owner;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.balance_of_result();
+    const res = new nameservice.uint64_object();
     // res.value = ;
 
     return res;
@@ -113,12 +111,12 @@ export class Nameservice {
 
   get_approved(
     args: nameservice.get_approved_arguments
-  ): nameservice.get_approved_result {
+  ): nameservice.bytes_address_object {
     // const name = args.name;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.get_approved_result();
+    const res = new nameservice.bytes_address_object();
     // res.value = ;
 
     return res;
@@ -126,13 +124,13 @@ export class Nameservice {
 
   is_approved_for_all(
     args: nameservice.is_approved_for_all_arguments
-  ): nameservice.is_approved_for_all_result {
+  ): nameservice.bool_object {
     // const owner = args.owner;
     // const operator = args.operator;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.is_approved_for_all_result();
+    const res = new nameservice.bool_object();
     // res.value = ;
 
     return res;
@@ -163,30 +161,28 @@ export class Nameservice {
     return res;
   }
 
-  approve(args: nameservice.approve_arguments): nameservice.approve_result {
+  approve(args: nameservice.approve_arguments): nameservice.empty_object {
     // const approver_address = args.approver_address;
     // const to = args.to;
     // const name = args.name;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.approve_result();
-    // res.value = ;
+    const res = new nameservice.empty_object();
 
     return res;
   }
 
   set_approval_for_all(
     args: nameservice.set_approval_for_all_arguments
-  ): nameservice.set_approval_for_all_result {
+  ): nameservice.empty_object {
     // const approver_address = args.approver_address;
     // const operator_address = args.operator_address;
     // const approved = args.approved;
 
     // YOUR CODE HERE
 
-    const res = new nameservice.set_approval_for_all_result();
-    // res.value = ;
+    const res = new nameservice.empty_object();
 
     return res;
   }

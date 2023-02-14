@@ -27,7 +27,7 @@ export class Nameservice {
     if (metadata.owner.length > 0 && !Arrays.equal(this.contractId, metadata.owner)) {
       return new authority.authorize_result(
         System.checkAuthority(
-          args.type, 
+          args.type,
           metadata.owner
         )
       );
@@ -35,7 +35,7 @@ export class Nameservice {
       // otherwise check transaction signatures
       const transactionId = System.getTransactionField('id')!.bytes_value;
       const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
-      
+
       let signature: Uint8Array;
       let recoveredKey: Uint8Array;
       let addr: Uint8Array;
@@ -56,75 +56,62 @@ export class Nameservice {
 
   // KCS-2 nameservice STANDARD https://github.com/koinos/koinos-contract-standards/blob/master/KCSs/kcs-2.md
 
-  name(args: nameservice.name_arguments): nameservice.name_result {
-    return new nameservice.name_result(NAME);
+  name(args: nameservice.name_arguments): nameservice.string_object {
+    return new nameservice.string_object(NAME);
   }
 
-  symbol(args: nameservice.symbol_arguments): nameservice.symbol_result {
-    return new nameservice.symbol_result(SYMBOL);
+  symbol(args: nameservice.symbol_arguments): nameservice.string_object {
+    return new nameservice.string_object(SYMBOL);
   }
 
-  uri(args: nameservice.uri_arguments): nameservice.uri_result {
-    return new nameservice.uri_result(URI);
+  uri(args: nameservice.uri_arguments): nameservice.string_object {
+    return new nameservice.string_object(URI);
   }
-  
-  total_supply(args: nameservice.total_supply_arguments): nameservice.total_supply_result {
+
+  total_supply(args: nameservice.total_supply_arguments): nameservice.uint64_object {
     const supply = this.supply.get()!;
-    return new nameservice.total_supply_result(supply.value);
+    return new nameservice.uint64_object(supply.value);
   }
 
   royalties(args: nameservice.royalties_arguments): nameservice.royalties_result {
-    const res = new Array<nameservice.royalty_object>(1);
-    res[0] = new nameservice.royalty_object(ROYALTIES, this.contractId);
-    return new nameservice.royalties_result(res);
+    return new nameservice.royalties_result();
   }
 
-  set_royalties(args: nameservice.set_royalties_arguments): nameservice.set_royalties_result {
+  set_royalties(args: nameservice.set_royalties_arguments): nameservice.empty_object {
     // not supported
-    return new nameservice.set_royalties_result(false);
+    return new nameservice.empty_object();
   }
 
-  owner(args: nameservice.owner_arguments): nameservice.owner_result {
-    return new nameservice.owner_result(this.contractId);
+  owner(args: nameservice.owner_arguments): nameservice.bytes_address_object {
+    const metadata = this.metadata.get()!;
+    return new nameservice.bytes_address_object(metadata.owner);
   }
 
-  transfer_ownership(args: nameservice.transfer_ownership_arguments): nameservice.transfer_ownership_result {
-    // not supported
-    return new nameservice.transfer_ownership_result(false);
+  transfer_ownership(args: nameservice.transfer_ownership_arguments): nameservice.empty_object {
+    // only this contract owner can update the owner
+    System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
+
+    const owner = args.owner;
+    System.require(owner.length > 0, 'argument "owner" is missng');
+
+    const metadata = this.metadata.get()!;
+    metadata.owner = owner;
+
+    this.metadata.put(metadata);
+
+    return new nameservice.empty_object();
   }
 
-  balance_of(args: nameservice.balance_of_arguments): nameservice.balance_of_result {
-    const owner = args.owner as Uint8Array;
-
-    const balanceObj = this.balances.get(owner);
-
-    const res = new nameservice.balance_of_result();
-    if (balanceObj) {
-      res.value = balanceObj.value;
-    }
-
-    return res;
+  balance_of(args: nameservice.balance_of_arguments): nameservice.uint64_object {
+    return this.balances.get(args.owner)!;
   }
 
-  get_approved(args: nameservice.get_approved_arguments): nameservice.get_approved_result {
-    const name = args.name;
-    const res = new nameservice.get_approved_result();
-    const approval = this.tokenApprovals.get(name);
-    if (approval) {
-      res.value = approval.address;
-    }
-    return res;
+  get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
+    return this.tokenApprovals.get(args.name)!;
   }
 
-  is_approved_for_all(args: nameservice.is_approved_for_all_arguments): nameservice.is_approved_for_all_result {
-    const owner = args.owner as Uint8Array;
-    const operator = args.operator as Uint8Array;
-    const res = new nameservice.is_approved_for_all_result();
-    const approval = this.operatorApprovals.getApproval(owner, operator);
-    if (approval) {
-      res.value = approval.approved;
-    }
-    return res;
+  is_approved_for_all(args: nameservice.is_approved_for_all_arguments): nameservice.bool_object {
+    return this.operatorApprovals.getApproval(args.owner, args.operator)!;
   }
 
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
@@ -218,6 +205,17 @@ export class Nameservice {
     nameObj.owner = owner;
     this.names.put(nameKey, nameObj);
 
+    // emit event
+    const mintEvent = new nameservice.mint_event(
+      `${name}`
+    );
+
+    System.event(
+      "nameservice.mint_event",
+      Protobuf.encode(mintEvent, nameservice.mint_event.encode),
+      [nameObj.owner]
+    );
+
     return new nameservice.empty_object();
   }
 
@@ -247,6 +245,17 @@ export class Nameservice {
     // update owners index
     this.ownersIndex.updateIndex(nameKey, nameObj!.owner, to);
 
+    // emit event
+    const transferEvent = new nameservice.transfer_event(
+      `${name}`
+    );
+
+    System.event(
+      "nameservice.transfer_event",
+      Protobuf.encode(transferEvent, nameservice.transfer_event.encode),
+      [to, nameObj!.owner]
+    );
+
     // transfer ownership
     nameObj!.owner = to;
     this.names.put(nameKey, nameObj!);
@@ -254,11 +263,10 @@ export class Nameservice {
     return new nameservice.empty_object();
   }
 
-  approve(args: nameservice.approve_arguments): nameservice.approve_result {
-    const approver_address = args.approver_address as Uint8Array;
-    const to = args.to as Uint8Array;
+  approve(args: nameservice.approve_arguments): nameservice.empty_object {
+    const approver_address = args.approver_address;
+    const to = args.to;
     const name = args.name;
-    const res = new nameservice.approve_result(false);
 
     // require authority of the approver_address
     System.requireAuthority(
@@ -268,56 +276,39 @@ export class Nameservice {
 
     // check that the token exists
     const nameKey = this.parseName(name);
-    let token = this.names.get(nameKey);
-    if (!token) {
-      System.log("nonexistent token");
-      return res;
-    }
+    const token = this.names.get(nameKey);
+
+    System.require(token != null, 'nonexistent token');
 
     // check that the to is not the owner
-    if(Arrays.equal(token.owner, to)) {
-      System.log("approve to current owner");
-      return res;
-    }
+    System.require(!Arrays.equal(token!.owner, to), 'approve to current owner');
 
     // check that the approver_address is allowed to approve the token
-    if(!Arrays.equal(token.owner, approver_address)) {
-      let approval = this.operatorApprovals.getApproval(token.owner, approver_address);
-      if (!approval || !approval.approved) {
-        System.log("approver_address is not owner nor approved");
-        return res;
-      }
+    if (!Arrays.equal(token!.owner, approver_address)) {
+      const approval = this.operatorApprovals.getApproval(token!.owner, approver_address)!;
+      System.require(approval.value == true, 'approver_address is not owner nor approved');
     }
 
     // update approval
-    let approval = this.tokenApprovals.get(name);
-    if (!approval) {
-      approval = new nameservice.token_approval_object(to);
-    }
+    const approval = this.tokenApprovals.get(name)!;
     this.tokenApprovals.put(name, approval);
 
-    // generate event
-    const approvalEvent = new nameservice.token_approval_event(
-      approver_address,
-      to,
-      name
-    );
-    const impacted = [to, approver_address];
+    // emit event
+    const approvalEvent = new nameservice.token_approval_event(name);
+
     System.event(
-      "nameservice.token_approval",
+      "nameservice.token_approval_event",
       Protobuf.encode(approvalEvent, nameservice.token_approval_event.encode),
-      impacted
+      [to, approver_address]
     );
 
-    res.value = true;
-    return res;
+    return new nameservice.empty_object();
   }
 
-  set_approval_for_all(args: nameservice.set_approval_for_all_arguments): nameservice.set_approval_for_all_result {
-    const approver_address = args.approver_address as Uint8Array;
-    const operator_address = args.operator_address as Uint8Array;
+  set_approval_for_all(args: nameservice.set_approval_for_all_arguments): nameservice.empty_object {
+    const approver_address = args.approver_address;
+    const operator_address = args.operator_address;
     const approved = args.approved;
-    const res = new nameservice.set_approval_for_all_result(false);
 
     // only the owner of approver_address can approve an operator for his account
     System.requireAuthority(
@@ -326,34 +317,26 @@ export class Nameservice {
     );
 
     // check that the approver_address is not the address to approve
-    if(Arrays.equal(approver_address, operator_address)) {
-      System.log("approve to operator_address");
-      return res;
-    }
+    System.require(!Arrays.equal(approver_address, operator_address), 'approve to operator_address');
+
 
     // update the approval
-    let approval = this.operatorApprovals.getApproval(approver_address, operator_address);
-    if(!approval) {
-      approval = new nameservice.operator_approval_object();
-    }
-    approval.approved = approved;
+    const approval = this.operatorApprovals.getApproval(approver_address, operator_address)!;
+    approval.value = approved;
     this.operatorApprovals.putApproval(approver_address, operator_address, approval);
 
-    // generate event
+    // emit event
     const approvalEvent = new nameservice.operator_approval_event(
-      approver_address,
-      operator_address,
       approved
     );
-    const impacted = [operator_address, approver_address];
+
     System.event(
-      "nameservice.operator_approval",
+      "nameservice.operator_approval_event",
       Protobuf.encode(approvalEvent, nameservice.operator_approval_event.encode),
-      impacted
+      [operator_address, approver_address]
     );
 
-    res.value = true;
-    return res;
+    return new nameservice.empty_object();
   }
 
   // END KCS-2
@@ -370,9 +353,7 @@ export class Nameservice {
     // so get the name_object no matter what
     const nameObj = this.names.get(nameKey);
 
-    if (nameObj == null) {
-      System.revert(`name "${name}" does not exist`);
-    }
+    System.require(nameObj != null, `name "${name}" does not exist`);
 
     // verify ownership
     const callerData = System.getCaller();
@@ -429,6 +410,17 @@ export class Nameservice {
       domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
       this.names.put(domainKey, domainObj);
     }
+
+    // emit event
+    const burnEvent = new nameservice.burn_event(
+      `${name}`
+    );
+
+    System.event(
+      "nameservice.burn_event",
+      Protobuf.encode(burnEvent, nameservice.burn_event.encode),
+      [nameObj!.owner]
+    );
 
     return new nameservice.empty_object();
   }

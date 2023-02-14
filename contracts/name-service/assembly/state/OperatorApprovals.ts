@@ -1,37 +1,37 @@
-import { Base58, Storage } from "@koinos/sdk-as";
+import { Storage } from "@koinos/sdk-as";
 import { nameservice } from "../proto/nameservice";
 
 const OPERATOR_APPROVALS_SPACE_ID = 4;
 
-export class OperatorApprovals extends Storage.Map<
-  string,
-  nameservice.operator_approval_object
+export class OperatorApprovals extends Storage.ProtoMap<
+  nameservice.operator_approval_key,
+  nameservice.bool_object
 > {
   constructor(contractId: Uint8Array) {
     super(
       contractId,
       OPERATOR_APPROVALS_SPACE_ID,
-      nameservice.operator_approval_object.decode,
-      nameservice.operator_approval_object.encode,
+      nameservice.operator_approval_key.decode,
+      nameservice.operator_approval_key.encode,
+      nameservice.bool_object.decode,
+      nameservice.bool_object.encode,
       // no operator approvals by default
-      () => new nameservice.operator_approval_object()
+      () => new nameservice.bool_object()
     );
   }
 
   getApproval(
     approver: Uint8Array,
     operator: Uint8Array
-  ): nameservice.operator_approval_object | null {
-    const key = `${Base58.encode(approver)}_${Base58.encode(operator)}`;
-    return super.get(key);
+  ): nameservice.bool_object | null {
+    return this.get(new nameservice.operator_approval_key(approver, operator));
   }
 
   putApproval(
     approver: Uint8Array,
     operator: Uint8Array,
-    approval: nameservice.operator_approval_object
+    approval: nameservice.bool_object
   ): void {
-    const key = `${Base58.encode(approver)}_${Base58.encode(operator)}`;
-    return super.put(key, approval);
+    return this.put(new nameservice.operator_approval_key(approver, operator), approval);
   }
 }
