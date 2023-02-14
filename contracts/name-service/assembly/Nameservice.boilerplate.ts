@@ -14,6 +14,130 @@ export class Nameservice {
     return res;
   }
 
+  name(args: nameservice.name_arguments): nameservice.name_result {
+    // YOUR CODE HERE
+
+    const res = new nameservice.name_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  symbol(args: nameservice.symbol_arguments): nameservice.symbol_result {
+    // YOUR CODE HERE
+
+    const res = new nameservice.symbol_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  uri(args: nameservice.uri_arguments): nameservice.uri_result {
+    // YOUR CODE HERE
+
+    const res = new nameservice.uri_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  total_supply(
+    args: nameservice.total_supply_arguments
+  ): nameservice.total_supply_result {
+    // YOUR CODE HERE
+
+    const res = new nameservice.total_supply_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  royalties(
+    args: nameservice.royalties_arguments
+  ): nameservice.royalties_result {
+    // YOUR CODE HERE
+
+    const res = new nameservice.royalties_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  set_royalties(
+    args: nameservice.set_royalties_arguments
+  ): nameservice.set_royalties_result {
+    // const value = args.value;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.set_royalties_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  owner(args: nameservice.owner_arguments): nameservice.owner_result {
+    // YOUR CODE HERE
+
+    const res = new nameservice.owner_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  transfer_ownership(
+    args: nameservice.transfer_ownership_arguments
+  ): nameservice.transfer_ownership_result {
+    // const owner = args.owner;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.transfer_ownership_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  balance_of(
+    args: nameservice.balance_of_arguments
+  ): nameservice.balance_of_result {
+    // const owner = args.owner;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.balance_of_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  get_approved(
+    args: nameservice.get_approved_arguments
+  ): nameservice.get_approved_result {
+    // const name = args.name;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.get_approved_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  is_approved_for_all(
+    args: nameservice.is_approved_for_all_arguments
+  ): nameservice.is_approved_for_all_result {
+    // const owner = args.owner;
+    // const operator = args.operator;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.is_approved_for_all_result();
+    // res.value = ;
+
+    return res;
+  }
+
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
     // const name = args.name;
     // const duration_increments = args.duration_increments;
@@ -28,8 +152,9 @@ export class Nameservice {
     return res;
   }
 
-  burn(args: nameservice.burn_arguments): nameservice.empty_object {
+  transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
     // const name = args.name;
+    // const to = args.to;
 
     // YOUR CODE HERE
 
@@ -38,9 +163,36 @@ export class Nameservice {
     return res;
   }
 
-  transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
-    // const name = args.name;
+  approve(args: nameservice.approve_arguments): nameservice.approve_result {
+    // const approver_address = args.approver_address;
     // const to = args.to;
+    // const name = args.name;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.approve_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  set_approval_for_all(
+    args: nameservice.set_approval_for_all_arguments
+  ): nameservice.set_approval_for_all_result {
+    // const approver_address = args.approver_address;
+    // const operator_address = args.operator_address;
+    // const approved = args.approved;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.set_approval_for_all_result();
+    // res.value = ;
+
+    return res;
+  }
+
+  burn(args: nameservice.burn_arguments): nameservice.empty_object {
+    // const name = args.name;
 
     // YOUR CODE HERE
 
