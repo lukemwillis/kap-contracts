@@ -3,6 +3,7 @@ import { nameservice } from '../proto/nameservice';
 
 const OWNERS_INDEX_SPACE_ID = 2;
 
+// TODO what is owners index? Switch to map to remove owner_index_key type?
 export class OwnersIndex extends Storage.ProtoMap<nameservice.owner_index_key, nameservice.name_object> {
   constructor(contractId: Uint8Array) {
     super(
