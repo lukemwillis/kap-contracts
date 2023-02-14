@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
+import { Contract, LocalKoinos, Serializer, Token } from '@roamin/local-koinos';
 
 import * as abi from '../abi/nameservice-abi.json';
 
@@ -7,6 +7,8 @@ import * as abi from '../abi/nameservice-abi.json';
 abi.koilib_types = abi.types;
 
 jest.setTimeout(600000);
+
+const serializer = new Serializer(abi.types);
 
 let localKoinos = new LocalKoinos();
 
@@ -16,7 +18,6 @@ if (process.env.ENV === 'LOCAL') {
     amqp: 'amqp://host.docker.internal:5672'
   });
 }
-
 
 const [
   genesis,
@@ -80,6 +81,18 @@ describe('mint', () => {
     });
 
     await res.transaction?.wait();
+
+    expect(res.receipt.events).toEqual(expect.arrayContaining([
+      {
+        source: nameserviceContract.getId(),
+        name: 'nameservice.mint_event',
+        data: 'CgRrb2lu',
+        impacted: [ koinDomainAcct.address ]
+      }
+    ]));
+
+    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.mint_event');
+    expect(eventData.name).toEqual('koin');
 
     res = await nameserviceContract.functions.get_name({
       name: 'koin',
@@ -972,6 +985,18 @@ describe('transfer', () => {
 
     await res.transaction.wait();
 
+    expect(res.receipt.events).toEqual(expect.arrayContaining([
+      {
+        source: nameserviceContract.getId(),
+        name: 'nameservice.transfer_event',
+        data: 'Gg10cmFuc2Zlci5rb2lu',
+        impacted: [ user4.address, user3.address ]
+      }
+    ]));
+
+    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.transfer_event');
+    expect(eventData.name).toEqual('transfer.koin');
+
     res = await nameserviceContract.functions.get_name({
       name: 'transfer.koin',
     });
@@ -1113,6 +1138,18 @@ describe('burn', () => {
     });
 
     await res.transaction?.wait();
+
+    expect(res.receipt.events).toEqual(expect.arrayContaining([
+      {
+        source: nameserviceContract.getId(),
+        name: 'nameservice.burn_event',
+        data: 'CglidXJuLmtvaW4=',
+        impacted: [ user3.address ]
+      }
+    ]));
+
+    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.burn_event');
+    expect(eventData.name).toEqual('burn.koin');
 
     res = await nameserviceContract.functions.get_name({
       name: 'burn.koin',

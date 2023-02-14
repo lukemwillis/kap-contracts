@@ -1,5 +1,5 @@
 import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token, value } from "@koinos/sdk-as";
-import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT, NAME, SYMBOL, URI, ROYALTIES } from "./Constants";
+import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT, NAME, SYMBOL, URI } from "./Constants";
 import { nameservice } from "./proto/nameservice";
 import { OwnersIndex } from "./state/OwnersIndex";
 import { Metadata } from "./state/Metadata";
