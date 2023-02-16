@@ -282,9 +282,16 @@
                                 "type": "string",
                                 "id": 1
                             },
-                            "to": {
+                            "from": {
                                 "type": "bytes",
                                 "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "to": {
+                                "type": "bytes",
+                                "id": 3,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }

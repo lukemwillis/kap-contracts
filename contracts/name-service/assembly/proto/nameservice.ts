@@ -464,8 +464,13 @@ export namespace nameservice {
         writer.string(message.name);
       }
 
-      if (message.to.length != 0) {
+      if (message.from.length != 0) {
         writer.uint32(18);
+        writer.bytes(message.from);
+      }
+
+      if (message.to.length != 0) {
+        writer.uint32(26);
         writer.bytes(message.to);
       }
     }
@@ -482,6 +487,10 @@ export namespace nameservice {
             break;
 
           case 2:
+            message.from = reader.bytes();
+            break;
+
+          case 3:
             message.to = reader.bytes();
             break;
 
@@ -495,10 +504,16 @@ export namespace nameservice {
     }
 
     name: string;
+    from: Uint8Array;
     to: Uint8Array;
 
-    constructor(name: string = "", to: Uint8Array = new Uint8Array(0)) {
+    constructor(
+      name: string = "",
+      from: Uint8Array = new Uint8Array(0),
+      to: Uint8Array = new Uint8Array(0)
+    ) {
       this.name = name;
+      this.from = from;
       this.to = to;
     }
   }

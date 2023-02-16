@@ -23,8 +23,8 @@ export class OperatorApprovals extends Storage.ProtoMap<
   getApproval(
     approver: Uint8Array,
     operator: Uint8Array
-  ): nameservice.bool_object | null {
-    return this.get(new nameservice.operator_approval_key(approver, operator));
+  ): nameservice.bool_object {
+    return this.get(new nameservice.operator_approval_key(approver, operator))!;
   }
 
   putApproval(

@@ -1016,6 +1016,7 @@ describe('transfer', () => {
 
     res = await nameserviceContract.functions.transfer({
       name: 'transfer.koin',
+      from: user3.address,
       to: user4.address
     }, {
       beforeSend: async (tx) => {
@@ -1097,6 +1098,7 @@ describe('transfer', () => {
     try {
       await nameserviceContract.functions.transfer({
         name: 'transfer.koin',
+        from: user4.address,
         to: user3.address
       }, {
         beforeSend: async (tx) => {
@@ -1104,7 +1106,7 @@ describe('transfer', () => {
         }
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('name owner has not authorized transfer');
+      expect(JSON.parse(error.message).error).toStrictEqual('from has not authorized transfer');
     }
 
     // when expired
@@ -1121,10 +1123,11 @@ describe('transfer', () => {
     try {
       await nameserviceContract.functions.transfer({
         name: 'expires-now.koin',
-        to: user4.address,
+        from: user4.address,
+        to: user3.address,
       }, {
         beforeSend: async (tx) => {
-          await doedotkoinDomainAcct.signer.signTransaction(tx);
+          await user4.signer.signTransaction(tx);
         }
       });
     } catch (error) {

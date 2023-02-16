@@ -5,7 +5,7 @@ import { OwnersIndex } from "./state/OwnersIndex";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
 import { OperatorApprovals } from "./state/OperatorApprovals";
-import { TokenApprovals } from "./state/TokenApprovals";
+import { NameApprovals } from "./state/NameApprovals";
 import { Supply } from "./state/Supply";
 
 export class Nameservice {
@@ -15,7 +15,7 @@ export class Nameservice {
   operatorApprovals: OperatorApprovals = new OperatorApprovals(this.contractId);
   ownersIndex: OwnersIndex = new OwnersIndex(this.contractId);
   supply: Supply = new Supply(this.contractId);
-  tokenApprovals: TokenApprovals = new TokenApprovals(this.contractId);
+  nameApprovals: NameApprovals = new NameApprovals(this.contractId);
   now: u64 = System.getHeadInfo().head_block_time;
 
   authorize(args: authority.authorize_arguments): authority.authorize_result {
@@ -143,11 +143,13 @@ export class Nameservice {
   }
 
   get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
-    return this.tokenApprovals.get(args.name)!;
+    const nameKey = this.parseName(args.name);
+
+    return this.nameApprovals.get(nameKey)!;
   }
 
   is_approved_for_all(args: nameservice.is_approved_for_all_arguments): nameservice.bool_object {
-    return this.operatorApprovals.getApproval(args.owner, args.operator)!;
+    return this.operatorApprovals.getApproval(args.owner, args.operator);
   }
 
   mint(args: nameservice.mint_arguments): nameservice.empty_object {
@@ -265,7 +267,9 @@ export class Nameservice {
 
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
     const name = args.name;
+    const from = args.from;
     const to = args.to;
+
     System.require(to.length > 0, 'missing "to" argument');
 
     // parseName will fail if name has an invalid format
@@ -277,14 +281,35 @@ export class Nameservice {
 
     System.require(nameObj != null, `name "${name}" does not exist`);
 
-    // verify ownership
-    const callerData = System.getCaller();
-    System.require(
-      Arrays.equal(callerData.caller, nameObj!.owner) ||
-      System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
-      'name owner has not authorized transfer',
-      error.error_code.authorization_failure
-    );
+    // ensure owner is "from"
+    System.require(Arrays.equal(nameObj!.owner, from), `from is not the owner of "${name}"`, error.error_code.authorization_failure);
+
+    // check token authorizations
+    let isTokenApproved: bool = false;
+    // caller is either empty or a contract id
+    const caller = System.getCaller().caller;
+    
+    if(!Arrays.equal(caller, from)) {
+      // check if caller is approved for this name
+      const approval = this.nameApprovals.get(nameKey)!;
+      isTokenApproved = approval.value.length > 0 && Arrays.equal(approval.value, caller);
+
+      if(!isTokenApproved) {
+        // check if the caller is an approved operator
+        const operatorApproval = this.operatorApprovals.getApproval(nameObj!.owner, caller);
+        isTokenApproved = operatorApproval.value;
+
+        if(!isTokenApproved) {
+          // otherwise check authority of "from"
+          isTokenApproved = System.checkAuthority(authority.authorization_type.contract_call, from);
+        }
+      }
+
+      System.require(isTokenApproved, 'from has not authorized transfer', error.error_code.authorization_failure);
+    }
+
+    // remove approval
+    this.nameApprovals.remove(nameKey);
 
     // update owners index
     this.ownersIndex.updateIndex(nameKey, nameObj!.owner, to);
@@ -315,27 +340,29 @@ export class Nameservice {
     // require authority of the approver_address
     System.requireAuthority(
       authority.authorization_type.contract_call,
-      approver_address
+      approver_address,
+      error.error_code.authorization_failure
     );
 
     // check that the token exists
     const nameKey = this.parseName(name);
-    const token = this.names.get(nameKey);
+    const nameObj = this.names.get(nameKey);
 
-    System.require(token != null, 'nonexistent token');
+    System.require(nameObj != null, 'nonexistent token');
 
     // check that the to is not the owner
-    System.require(!Arrays.equal(token!.owner, to), 'approve to current owner');
+    System.require(!Arrays.equal(nameObj!.owner, to), 'approve to current owner');
 
     // check that the approver_address is allowed to approve the token
-    if (!Arrays.equal(token!.owner, approver_address)) {
-      const approval = this.operatorApprovals.getApproval(token!.owner, approver_address)!;
+    if (!Arrays.equal(nameObj!.owner, approver_address)) {
+      const approval = this.operatorApprovals.getApproval(nameObj!.owner, approver_address);
       System.require(approval.value == true, 'approver_address is not owner nor approved');
     }
 
     // update approval
-    const approval = this.tokenApprovals.get(name)!;
-    this.tokenApprovals.put(name, approval);
+    const approval = this.nameApprovals.get(nameKey)!;
+    approval.value = to;
+    this.nameApprovals.put(nameKey, approval);
 
     // emit event
     const approvalEvent = new nameservice.token_approval_event(name);
@@ -363,9 +390,8 @@ export class Nameservice {
     // check that the approver_address is not the address to approve
     System.require(!Arrays.equal(approver_address, operator_address), 'approve to operator_address');
 
-
     // update the approval
-    const approval = this.operatorApprovals.getApproval(approver_address, operator_address)!;
+    const approval = this.operatorApprovals.getApproval(approver_address, operator_address);
     approval.value = approved;
     this.operatorApprovals.putApproval(approver_address, operator_address, approval);
 
@@ -442,7 +468,7 @@ export class Nameservice {
         domainObj.owner
       );
 
-      System.require(authorized == true, 'domain contract did not authorize burn');
+      System.require(authorized == true, 'domain contract did not authorize burn', error.error_code.authorization_failure);
 
       // delete name from the state
       this.names.remove(nameKey);
@@ -703,7 +729,7 @@ export class Nameservice {
     );
 
     const callRes = System.call(domainContractId, AUTHORIZE_MINT_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_mint_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize mint');
+    System.require(callRes.code == 0, 'failed to authorize mint', error.error_code.authorization_failure);
     const decodedCallRes = Protobuf.decode<nameservice.authorize_mint_res>(callRes.res.object, nameservice.authorize_mint_res.decode);
 
     return decodedCallRes;
@@ -721,7 +747,7 @@ export class Nameservice {
     );
 
     const callRes = System.call(domainContractId, AUTHORIZE_BURN_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_burn_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize burn');
+    System.require(callRes.code == 0, 'failed to authorize burn', error.error_code.authorization_failure);
     const decodedCallRes = Protobuf.decode<nameservice.authorize_burn_res>(callRes.res.object, nameservice.authorize_burn_res.decode);
 
     return decodedCallRes.authorized;
@@ -746,7 +772,7 @@ export class Nameservice {
     );
 
     const callRes = System.call(domainContractId, AUTHORIZE_RENEWAL_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_renewal_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize reclaim');
+    System.require(callRes.code == 0, 'failed to authorize reclaim', error.error_code.authorization_failure);
     const decodedCallRes = Protobuf.decode<nameservice.authorize_renewal_res>(callRes.res.object, nameservice.authorize_renewal_res.decode);
 
     return decodedCallRes;

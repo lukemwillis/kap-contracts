@@ -100,7 +100,8 @@ message mint_arguments {
 */
 message transfer_arguments {
   string name = 1;
-  bytes to = 2 [(koinos.btype) = ADDRESS];
+  bytes from = 2 [(koinos.btype) = ADDRESS];
+  bytes to = 3 [(koinos.btype) = ADDRESS];
 }
 
 // @description Approves an address to transfer a token

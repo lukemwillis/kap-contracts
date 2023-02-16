@@ -152,6 +152,7 @@ export class Nameservice {
 
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
     // const name = args.name;
+    // const from = args.from;
     // const to = args.to;
 
     // YOUR CODE HERE
