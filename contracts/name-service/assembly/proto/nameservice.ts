@@ -785,7 +785,7 @@ export namespace nameservice {
 
       if (message.limit != 0) {
         writer.uint32(24);
-        writer.uint32(message.limit);
+        writer.uint64(message.limit);
       }
 
       if (message.descending != false) {
@@ -810,7 +810,7 @@ export namespace nameservice {
             break;
 
           case 3:
-            message.limit = reader.uint32();
+            message.limit = reader.uint64();
             break;
 
           case 4:
@@ -828,13 +828,13 @@ export namespace nameservice {
 
     owner: Uint8Array;
     name_offset: string;
-    limit: u32;
+    limit: u64;
     descending: bool;
 
     constructor(
       owner: Uint8Array = new Uint8Array(0),
       name_offset: string = "",
-      limit: u32 = 0,
+      limit: u64 = 0,
       descending: bool = false
     ) {
       this.owner = owner;

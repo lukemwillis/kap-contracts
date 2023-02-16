@@ -365,6 +365,34 @@ describe('mint', () => {
     expect(res?.result?.domain).toEqual('koin');
     expect(res?.result?.name).toEqual('grace-period');
     expect(res?.result?.owner).toEqual(user2.address);
+
+    // check koinDomainAcct balance
+    res = await nameserviceContract.functions.balance_of({
+      owner: koinDomainAcct.address,
+    });
+
+    expect(res.result.value).toEqual('3');
+
+    // check doedotkoinDomainAcct balance
+    res = await nameserviceContract.functions.balance_of({
+      owner: doedotkoinDomainAcct.address,
+    });
+
+    expect(res.result.value).toEqual('4');
+
+    // check user1 balance
+    res = await nameserviceContract.functions.balance_of({
+      owner: user1.address,
+    });
+
+    expect(res.result.value).toEqual('3');
+
+    // check user2 balance
+    res = await nameserviceContract.functions.balance_of({
+      owner: user2.address,
+    });
+
+    expect(res.result.value).toEqual('1');
   });
 
   it('should not mint TLAs / names', async () => {
@@ -724,7 +752,7 @@ describe('get_names', () => {
     res = await nameserviceContract.functions.get_names({
       owner: user1.address,
       name_offset: 'notfree',
-      limit: 1
+      limit: '1'
     });
 
     expect(res.result).toStrictEqual({
@@ -751,7 +779,7 @@ describe('get_names', () => {
     res = await nameserviceContract.functions.get_names({
       owner: doedotkoinDomainAcct.address,
       name_offset: 'expired.koin',
-      limit: 1
+      limit: '1'
     });
 
     expect(res.result).toStrictEqual({
@@ -826,7 +854,7 @@ describe('get_names', () => {
     res = await nameserviceContract.functions.get_names({
       owner: user1.address,
       name_offset: 'notfree',
-      limit: 1,
+      limit: '1',
       descending: true
     });
 
@@ -847,7 +875,7 @@ describe('get_names', () => {
     res = await nameserviceContract.functions.get_names({
       owner: doedotkoinDomainAcct.address,
       name_offset: 'expired.koin',
-      limit: 1,
+      limit: '1',
       descending: true
     });
 

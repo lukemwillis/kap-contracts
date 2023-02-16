@@ -391,8 +391,11 @@
                                 "id": 2
                             },
                             "limit": {
-                                "type": "uint32",
-                                "id": 3
+                                "type": "uint64",
+                                "id": 3,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             },
                             "descending": {
                                 "type": "bool",

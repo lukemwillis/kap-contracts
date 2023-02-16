@@ -158,7 +158,7 @@ message get_name_arguments {
 message get_names_arguments {
   bytes owner = 1 [(koinos.btype) = ADDRESS];
   string name_offset = 2;
-  uint32 limit = 3;
+  uint64 limit = 3 [jstype = JS_STRING];
   bool descending = 4;
 }
 

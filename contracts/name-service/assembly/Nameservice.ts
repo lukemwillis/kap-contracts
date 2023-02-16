@@ -103,7 +103,45 @@ export class Nameservice {
   }
 
   balance_of(args: nameservice.balance_of_arguments): nameservice.uint64_object {
-    return this.balances.get(args.owner)!;
+    const owner = args.owner;
+
+    let ownerIndexKey = new nameservice.owner_index_key(
+      owner,
+      // a sha256 multihash is 34 bytes long (2 bytes for the multihash code, and 32 bytes for the digest)
+      // to get the first element in the index, use a hash where all the bytes are set to 0
+      new Uint8Array(34).fill(u8.MIN_VALUE)
+    );
+
+    let result: u64 = 0;
+
+    let nameObj: nameservice.name_object | null;
+    let ownerIndexObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
+    let tmpOwnerIndexKey: nameservice.owner_index_key;
+
+    do {
+      ownerIndexObj = this.ownersIndex.getNext(ownerIndexKey);
+
+      if (ownerIndexObj) {
+        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key!, nameservice.owner_index_key.decode);
+
+        if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
+          nameObj = this.getName(ownerIndexObj.value);
+
+          if (nameObj != null) {
+            // we don't check for overflow here
+            // it is unlikely users will have more than u64.MAX_VALUE names
+            result++;
+          }
+
+          ownerIndexKey = tmpOwnerIndexKey;
+        } else {
+          break;
+        }
+      }
+
+    } while (ownerIndexObj != null);
+
+    return new nameservice.uint64_object(result);
   }
 
   get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
@@ -493,7 +531,7 @@ export class Nameservice {
     const owner = args.owner;
     const nameOffset = args.name_offset;
     const descending = args.descending;
-    let limit = args.limit || 10;
+    let limit = args.limit || u64.MAX_VALUE;
 
     let nameObj: nameservice.name_object | null;
     let nameKeyHash: Uint8Array;
@@ -520,7 +558,6 @@ export class Nameservice {
 
     const res = new nameservice.get_names_result();
 
-    let done = false;
     let ownerIndexObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
     let tmpOwnerIndexKey: nameservice.owner_index_key;
 
@@ -540,13 +577,11 @@ export class Nameservice {
 
           ownerIndexKey = tmpOwnerIndexKey;
         } else {
-          done = true;
+          break;
         }
-      } else {
-        done = true;
       }
 
-    } while (!done && limit > 0);
+    } while (ownerIndexObj != null && limit > 0);
 
     return res;
   }
