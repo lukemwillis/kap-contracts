@@ -4,14 +4,12 @@ import { nameservice } from "./proto/nameservice";
 import { OwnersIndex } from "./state/OwnersIndex";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
-import { Balances } from "./state/Balances";
 import { OperatorApprovals } from "./state/OperatorApprovals";
 import { TokenApprovals } from "./state/TokenApprovals";
 import { Supply } from "./state/Supply";
 
 export class Nameservice {
   contractId: Uint8Array = System.getContractId();
-  balances: Balances = new Balances(this.contractId);
   metadata: Metadata = new Metadata(this.contractId);
   names: Names = new Names(this.contractId);
   operatorApprovals: OperatorApprovals = new OperatorApprovals(this.contractId);
