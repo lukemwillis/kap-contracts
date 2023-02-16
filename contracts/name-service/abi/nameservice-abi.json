@@ -72,7 +72,7 @@
         },
         "owner_of": {
             "argument": "nameservice.owner_of_arguments",
-            "return": "nameservice.owner_of_result",
+            "return": "nameservice.bytes_address_object",
             "description": "Gets the owner of a name",
             "entry_point": 3982608455,
             "read_only": true
@@ -229,17 +229,6 @@
                             "name": {
                                 "type": "string",
                                 "id": 1
-                            }
-                        }
-                    },
-                    "owner_of_result": {
-                        "fields": {
-                            "value": {
-                                "type": "bytes",
-                                "id": 1,
-                                "options": {
-                                    "(koinos.btype)": "ADDRESS"
-                                }
                             }
                         }
                     },

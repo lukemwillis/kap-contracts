@@ -115,7 +115,7 @@ export function main(): i32 {
         ProtoNamespace.owner_of_arguments.decode
       );
       const res = c.owner_of(args);
-      retbuf = Protobuf.encode(res, ProtoNamespace.owner_of_result.encode);
+      retbuf = Protobuf.encode(res, ProtoNamespace.bytes_address_object.encode);
       break;
     }
 

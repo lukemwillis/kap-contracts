@@ -720,8 +720,8 @@ describe('get_names', () => {
     expect(res.result).toStrictEqual({
       names: [
         {
-          domain: '🔥.💎',
-          name: '❤️',
+          domain: 'doe.koin',
+          name: 'john',
           owner: user1.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
@@ -755,8 +755,8 @@ describe('get_names', () => {
           locked_kap_tokens: '0'
         },
         {
-          domain: 'doe.koin',
-          name: 'john',
+          domain: '🔥.💎',
+          name: '❤️',
           owner: user1.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
@@ -788,7 +788,7 @@ describe('get_names', () => {
 
     res = await nameserviceContract.functions.get_names({
       owner: user1.address,
-      name_offset: 'doe.koin'
+      name_offset: '❤️.🔥.💎'
     });
 
     expect(res.result).toStrictEqual(undefined);
@@ -802,8 +802,8 @@ describe('get_names', () => {
     expect(res.result).toStrictEqual({
       names: [
         {
-          domain: 'koin',
-          name: 'doe',
+          domain: '💎',
+          name: '🔥',
           owner: doedotkoinDomainAcct.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
@@ -822,8 +822,8 @@ describe('get_names', () => {
     expect(res.result).toStrictEqual({
       names: [
         {
-          domain: 'doe.koin',
-          name: 'john',
+          domain: '🔥.💎',
+          name: '❤️',
           owner: user1.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
@@ -857,8 +857,8 @@ describe('get_names', () => {
           locked_kap_tokens: '0'
         },
         {
-          domain: '🔥.💎',
-          name: '❤️',
+          domain: 'doe.koin',
+          name: 'john',
           owner: user1.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
@@ -891,7 +891,7 @@ describe('get_names', () => {
 
     res = await nameserviceContract.functions.get_names({
       owner: doedotkoinDomainAcct.address,
-      name_offset: 'expired.koin',
+      name_offset: 'doe.koin',
       limit: '1',
       descending: true
     });
@@ -929,8 +929,8 @@ describe('get_names', () => {
     expect(res.result).toStrictEqual({
       names: [
         {
-          domain: '🔥.💎',
-          name: '❤️',
+          domain: 'doe.koin',
+          name: 'john',
           owner: user1.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
@@ -964,8 +964,8 @@ describe('get_names', () => {
           locked_kap_tokens: '0'
         },
         {
-          domain: 'doe.koin',
-          name: 'john',
+          domain: '🔥.💎',
+          name: '❤️',
           owner: user1.address,
           expiration: '10622574211224',
           grace_period_end: '15933861316836',
