@@ -59,7 +59,7 @@
         "transfer_ownership": {
             "argument": "nameservice.transfer_ownership_arguments",
             "return": "nameservice.empty_object",
-            "description": "Unsupported",
+            "description": "Transfer ownership of the contract",
             "entry_point": 961275650,
             "read_only": false
         },

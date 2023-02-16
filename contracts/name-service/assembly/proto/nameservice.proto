@@ -51,7 +51,7 @@ message set_royalties_arguments {
 message owner_arguments {
 }
 
-// @description Unsupported
+// @description Transfer ownership of the contract
 // @read-only false
 // @result empty_object
 message transfer_ownership_arguments {
