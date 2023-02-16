@@ -288,18 +288,18 @@ export class Nameservice {
     let isTokenApproved: bool = false;
     // caller is either empty or a contract id
     const caller = System.getCaller().caller;
-    
-    if(!Arrays.equal(caller, from)) {
+
+    if (!Arrays.equal(caller, from)) {
       // check if caller is approved for this name
       const approval = this.nameApprovals.get(nameKey)!;
       isTokenApproved = approval.value.length > 0 && Arrays.equal(approval.value, caller);
 
-      if(!isTokenApproved) {
+      if (!isTokenApproved) {
         // check if the caller is an approved operator
         const operatorApproval = this.operatorApprovals.getApproval(nameObj!.owner, caller);
         isTokenApproved = operatorApproval.value;
 
-        if(!isTokenApproved) {
+        if (!isTokenApproved) {
           // otherwise check authority of "from"
           isTokenApproved = System.checkAuthority(authority.authorization_type.contract_call, from);
         }
@@ -340,8 +340,7 @@ export class Nameservice {
     // require authority of the approver_address
     System.requireAuthority(
       authority.authorization_type.contract_call,
-      approver_address,
-      error.error_code.authorization_failure
+      approver_address
     );
 
     // check that the token exists
