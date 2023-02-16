@@ -164,6 +164,7 @@ export class Nameservice {
 
     // ensure TLA/Name is not minted yet
     let nameObj = this.names.get(nameKey);
+    const isNewName = nameObj == null;
 
     // if it already exists and has not expired and the grace_period has not ended
     if (nameObj != null && (
@@ -240,6 +241,13 @@ export class Nameservice {
     // save new name
     nameObj.owner = owner;
     this.names.put(nameKey, nameObj);
+
+    // update supply if needed
+    if (isNewName) {
+      const supplyObj = this.supply.get()!;
+      supplyObj.value = SafeMath.add(supplyObj.value, 1);
+      this.supply.put(supplyObj);
+    }
 
     // emit event
     const mintEvent = new nameservice.mint_event(
@@ -446,6 +454,11 @@ export class Nameservice {
       domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
       this.names.put(domainKey, domainObj);
     }
+
+    // update supply
+    const supplyObj = this.supply.get()!;
+    supplyObj.value = SafeMath.sub(supplyObj.value, 1);
+    this.supply.put(supplyObj);
 
     // emit event
     const burnEvent = new nameservice.burn_event(

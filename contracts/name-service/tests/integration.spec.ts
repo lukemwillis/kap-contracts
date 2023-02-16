@@ -87,7 +87,7 @@ describe('mint', () => {
         source: nameserviceContract.getId(),
         name: 'nameservice.mint_event',
         data: 'CgRrb2lu',
-        impacted: [ koinDomainAcct.address ]
+        impacted: [koinDomainAcct.address]
       }
     ]));
 
@@ -107,6 +107,10 @@ describe('mint', () => {
       sub_names_count: '0',
       locked_kap_tokens: '0'
     });
+
+    // check supply
+    res = await nameserviceContract.functions.total_supply({});
+    expect(res.result.value).toEqual('1');
 
     res = await nameserviceContract.functions.mint({
       name: 'doe.koin',
@@ -346,6 +350,10 @@ describe('mint', () => {
     // should be reclaimable, meaning get_name doesn't not return anything
     expect(res?.result).toEqual(undefined);
 
+    // check supply
+    res = await nameserviceContract.functions.total_supply({});
+    expect(res.result.value).toEqual('11');
+
     // reclaim name
     res = await nameserviceContract.functions.mint({
       name: 'grace-period.koin',
@@ -365,6 +373,10 @@ describe('mint', () => {
     expect(res?.result?.domain).toEqual('koin');
     expect(res?.result?.name).toEqual('grace-period');
     expect(res?.result?.owner).toEqual(user2.address);
+
+    // check supply, should still be 11
+    res = await nameserviceContract.functions.total_supply({});
+    expect(res.result.value).toEqual('11');
 
     // check koinDomainAcct balance
     res = await nameserviceContract.functions.balance_of({
@@ -1018,7 +1030,7 @@ describe('transfer', () => {
         source: nameserviceContract.getId(),
         name: 'nameservice.transfer_event',
         data: 'Gg10cmFuc2Zlci5rb2lu',
-        impacted: [ user4.address, user3.address ]
+        impacted: [user4.address, user3.address]
       }
     ]));
 
@@ -1157,6 +1169,10 @@ describe('burn', () => {
       ]
     });
 
+    // check supply
+    res = await nameserviceContract.functions.total_supply({});
+    expect(res.result.value).toEqual('18');
+
     res = await nameserviceContract.functions.burn({
       name: 'burn.koin',
     }, {
@@ -1172,7 +1188,7 @@ describe('burn', () => {
         source: nameserviceContract.getId(),
         name: 'nameservice.burn_event',
         data: 'CglidXJuLmtvaW4=',
-        impacted: [ user3.address ]
+        impacted: [user3.address]
       }
     ]));
 
@@ -1190,6 +1206,10 @@ describe('burn', () => {
     });
 
     expect(res.result).toStrictEqual(undefined);
+
+    // check supply
+    res = await nameserviceContract.functions.total_supply({});
+    expect(res.result.value).toEqual('17');
 
     // check that TLA fees are returned
     let bal = await kapContract.balanceOf(user1.address);
