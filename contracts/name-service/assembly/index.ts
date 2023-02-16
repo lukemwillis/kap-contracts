@@ -109,6 +109,16 @@ export function main(): i32 {
       break;
     }
 
+    case 0xed61c847: {
+      const args = Protobuf.decode<ProtoNamespace.owner_of_arguments>(
+        contractArgs.args,
+        ProtoNamespace.owner_of_arguments.decode
+      );
+      const res = c.owner_of(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.owner_of_result.encode);
+      break;
+    }
+
     case 0x4c731020: {
       const args = Protobuf.decode<ProtoNamespace.get_approved_arguments>(
         contractArgs.args,

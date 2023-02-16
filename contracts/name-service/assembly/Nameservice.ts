@@ -142,6 +142,20 @@ export class Nameservice {
     return new nameservice.uint64_object(result);
   }
 
+  owner_of(args: nameservice.owner_of_arguments): nameservice.owner_of_result {
+    const nameKey = this.parseName(args.name);
+
+    const nameObj = this.getName(nameKey);
+
+    const res = new nameservice.owner_of_result();
+
+    if ( nameObj) {
+      res.value = nameObj.owner;
+    }
+
+    return res;
+  }
+
   get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
     const nameKey = this.parseName(args.name);
 

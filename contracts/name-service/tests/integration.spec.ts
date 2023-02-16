@@ -108,6 +108,11 @@ describe('mint', () => {
       locked_kap_tokens: '0'
     });
 
+    res = await nameserviceContract.functions.owner_of({
+      name: 'koin',
+    });
+    expect(res?.result?.value).toEqual(koinDomainAcct.address);
+
     // check supply
     res = await nameserviceContract.functions.total_supply({});
     expect(res.result.value).toEqual('1');

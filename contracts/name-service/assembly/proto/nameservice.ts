@@ -285,6 +285,76 @@ export namespace nameservice {
     }
   }
 
+  export class owner_of_arguments {
+    static encode(message: owner_of_arguments, writer: Writer): void {
+      if (message.name.length != 0) {
+        writer.uint32(10);
+        writer.string(message.name);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): owner_of_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new owner_of_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.name = reader.string();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    name: string;
+
+    constructor(name: string = "") {
+      this.name = name;
+    }
+  }
+
+  export class owner_of_result {
+    static encode(message: owner_of_result, writer: Writer): void {
+      if (message.value.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.value);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): owner_of_result {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new owner_of_result();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.value = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    value: Uint8Array;
+
+    constructor(value: Uint8Array = new Uint8Array(0)) {
+      this.value = value;
+    }
+  }
+
   export class get_approved_arguments {
     static encode(message: get_approved_arguments, writer: Writer): void {
       if (message.name.length != 0) {

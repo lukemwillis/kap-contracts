@@ -65,6 +65,16 @@ message balance_of_arguments {
    bytes owner = 1 [(koinos.btype) = ADDRESS];
 }
 
+// @description Gets the owner of a name
+// @read-only true
+message owner_of_arguments {
+  string name = 1;
+}
+
+message owner_of_result {
+  bytes value = 1 [(koinos.btype) = ADDRESS];
+}
+
 // @description Gets approved address for a token
 // @read-only true
 // @result bytes_address_object

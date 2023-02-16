@@ -109,6 +109,17 @@ export class Nameservice {
     return res;
   }
 
+  owner_of(args: nameservice.owner_of_arguments): nameservice.owner_of_result {
+    // const name = args.name;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.owner_of_result();
+    // res.value = ;
+
+    return res;
+  }
+
   get_approved(
     args: nameservice.get_approved_arguments
   ): nameservice.bytes_address_object {

@@ -70,6 +70,13 @@
             "entry_point": 1550980247,
             "read_only": true
         },
+        "owner_of": {
+            "argument": "nameservice.owner_of_arguments",
+            "return": "nameservice.owner_of_result",
+            "description": "Gets the owner of a name",
+            "entry_point": 3982608455,
+            "read_only": true
+        },
         "get_approved": {
             "argument": "nameservice.get_approved_arguments",
             "return": "nameservice.bytes_address_object",
@@ -209,6 +216,25 @@
                     "balance_of_arguments": {
                         "fields": {
                             "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "owner_of_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "owner_of_result": {
+                        "fields": {
+                            "value": {
                                 "type": "bytes",
                                 "id": 1,
                                 "options": {
