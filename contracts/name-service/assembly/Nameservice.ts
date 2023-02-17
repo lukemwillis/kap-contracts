@@ -290,7 +290,7 @@ export class Nameservice {
     const mintEvent = new nameservice.mint_event(nameKey);
 
     System.event(
-      "nameservice.mint_event",
+      "collections.mint_event",
       Protobuf.encode(mintEvent, nameservice.mint_event.encode),
       [nameObj.owner]
     );
@@ -355,7 +355,7 @@ export class Nameservice {
     const transferEvent = new nameservice.transfer_event(nameKey);
 
     System.event(
-      "nameservice.transfer_event",
+      "collections.transfer_event",
       Protobuf.encode(transferEvent, nameservice.transfer_event.encode),
       [to, nameObj!.owner]
     );
@@ -401,7 +401,7 @@ export class Nameservice {
     const approvalEvent = new nameservice.token_approval_event(name);
 
     System.event(
-      "nameservice.token_approval_event",
+      "collections.token_approval_event",
       Protobuf.encode(approvalEvent, nameservice.token_approval_event.encode),
       [to, approver_address]
     );
@@ -434,7 +434,7 @@ export class Nameservice {
     );
 
     System.event(
-      "nameservice.operator_approval_event",
+      "collections.operator_approval_event",
       Protobuf.encode(approvalEvent, nameservice.operator_approval_event.encode),
       [operator_address, approver_address]
     );
@@ -531,7 +531,7 @@ export class Nameservice {
     const burnEvent = new nameservice.burn_event(nameKey);
 
     System.event(
-      "nameservice.burn_event",
+      "collections.burn_event",
       Protobuf.encode(burnEvent, nameservice.burn_event.encode),
       [nameObj!.owner]
     );

@@ -85,14 +85,14 @@ describe('mint', () => {
     expect(res.receipt.events).toEqual(expect.arrayContaining([
       {
         source: nameserviceContract.getId(),
-        name: 'nameservice.mint_event',
+        name: 'collections.mint_event',
         data: 'CgRrb2lu',
         impacted: [koinDomainAcct.address]
       }
     ]));
 
     const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.mint_event');
-    expect(eventData.name).toEqual('koin');
+    expect(eventData.token_id).toEqual('koin');
 
     res = await nameserviceContract.functions.get_name({
       name: 'koin',
@@ -1034,14 +1034,14 @@ describe('transfer', () => {
     expect(res.receipt.events).toEqual(expect.arrayContaining([
       {
         source: nameserviceContract.getId(),
-        name: 'nameservice.transfer_event',
-        data: 'Gg10cmFuc2Zlci5rb2lu',
+        name: 'collections.transfer_event',
+        data: 'Cg10cmFuc2Zlci5rb2lu',
         impacted: [user4.address, user3.address]
       }
     ]));
 
     const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.transfer_event');
-    expect(eventData.name).toEqual('transfer.koin');
+    expect(eventData.token_id).toEqual('transfer.koin');
 
     res = await nameserviceContract.functions.get_name({
       name: 'transfer.koin',
@@ -1194,14 +1194,14 @@ describe('burn', () => {
     expect(res.receipt.events).toEqual(expect.arrayContaining([
       {
         source: nameserviceContract.getId(),
-        name: 'nameservice.burn_event',
+        name: 'collections.burn_event',
         data: 'CglidXJuLmtvaW4=',
         impacted: [user3.address]
       }
     ]));
 
     const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.burn_event');
-    expect(eventData.name).toEqual('burn.koin');
+    expect(eventData.token_id).toEqual('burn.koin');
 
     res = await nameserviceContract.functions.get_name({
       name: 'burn.koin',

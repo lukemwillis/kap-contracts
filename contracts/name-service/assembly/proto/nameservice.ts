@@ -1018,9 +1018,9 @@ export namespace nameservice {
 
   export class mint_event {
     static encode(message: mint_event, writer: Writer): void {
-      if (message.name.length != 0) {
+      if (message.token_id.length != 0) {
         writer.uint32(10);
-        writer.string(message.name);
+        writer.string(message.token_id);
       }
     }
 
@@ -1032,7 +1032,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.name = reader.string();
+            message.token_id = reader.string();
             break;
 
           default:
@@ -1044,18 +1044,18 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
+    token_id: string;
 
-    constructor(name: string = "") {
-      this.name = name;
+    constructor(token_id: string = "") {
+      this.token_id = token_id;
     }
   }
 
   export class burn_event {
     static encode(message: burn_event, writer: Writer): void {
-      if (message.name.length != 0) {
+      if (message.token_id.length != 0) {
         writer.uint32(10);
-        writer.string(message.name);
+        writer.string(message.token_id);
       }
     }
 
@@ -1067,7 +1067,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.name = reader.string();
+            message.token_id = reader.string();
             break;
 
           default:
@@ -1079,18 +1079,18 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
+    token_id: string;
 
-    constructor(name: string = "") {
-      this.name = name;
+    constructor(token_id: string = "") {
+      this.token_id = token_id;
     }
   }
 
   export class transfer_event {
     static encode(message: transfer_event, writer: Writer): void {
-      if (message.name.length != 0) {
-        writer.uint32(26);
-        writer.string(message.name);
+      if (message.token_id.length != 0) {
+        writer.uint32(10);
+        writer.string(message.token_id);
       }
     }
 
@@ -1101,8 +1101,8 @@ export namespace nameservice {
       while (reader.ptr < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
-          case 3:
-            message.name = reader.string();
+          case 1:
+            message.token_id = reader.string();
             break;
 
           default:
@@ -1114,10 +1114,10 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
+    token_id: string;
 
-    constructor(name: string = "") {
-      this.name = name;
+    constructor(token_id: string = "") {
+      this.token_id = token_id;
     }
   }
 
@@ -1159,9 +1159,9 @@ export namespace nameservice {
 
   export class token_approval_event {
     static encode(message: token_approval_event, writer: Writer): void {
-      if (message.name.length != 0) {
-        writer.uint32(26);
-        writer.string(message.name);
+      if (message.token_id.length != 0) {
+        writer.uint32(10);
+        writer.string(message.token_id);
       }
     }
 
@@ -1172,8 +1172,8 @@ export namespace nameservice {
       while (reader.ptr < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
-          case 3:
-            message.name = reader.string();
+          case 1:
+            message.token_id = reader.string();
             break;
 
           default:
@@ -1185,10 +1185,10 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
+    token_id: string;
 
-    constructor(name: string = "") {
-      this.name = name;
+    constructor(token_id: string = "") {
+      this.token_id = token_id;
     }
   }
 

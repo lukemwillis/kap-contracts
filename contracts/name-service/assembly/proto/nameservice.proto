@@ -198,17 +198,17 @@ message get_metadata_arguments {
 
 // KAP Entrypoints END
 
-// Events
+// KCS-2 Events START
 message mint_event {
-  string name = 1;
+  string token_id = 1;
 }
 
 message burn_event {
-  string name = 1;
+  string token_id = 1;
 }
 
 message transfer_event {
-  string name = 3;
+  string token_id = 1;
 }
 
 message operator_approval_event {
@@ -216,8 +216,10 @@ message operator_approval_event {
 }
 
 message token_approval_event {
-  string name = 3;
+  string token_id = 1;
 }
+
+// KCS-2 Events END
 
 // Objects
 message empty_object {
