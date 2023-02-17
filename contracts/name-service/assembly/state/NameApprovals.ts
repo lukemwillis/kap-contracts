@@ -1,5 +1,4 @@
-import { chain, Storage, StringBytes, System } from '@koinos/sdk-as';
-import { nameservice } from '../proto/nameservice';
+import { chain, System } from '@koinos/sdk-as';
 
 const NAME_APPROVALS_SPACE_ID = 6;
 

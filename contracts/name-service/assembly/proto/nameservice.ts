@@ -287,9 +287,9 @@ export namespace nameservice {
 
   export class owner_of_arguments {
     static encode(message: owner_of_arguments, writer: Writer): void {
-      if (message.name.length != 0) {
+      if (message.token_id.length != 0) {
         writer.uint32(10);
-        writer.string(message.name);
+        writer.string(message.token_id);
       }
     }
 
@@ -301,7 +301,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.name = reader.string();
+            message.token_id = reader.string();
             break;
 
           default:
@@ -313,18 +313,18 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
+    token_id: string;
 
-    constructor(name: string = "") {
-      this.name = name;
+    constructor(token_id: string = "") {
+      this.token_id = token_id;
     }
   }
 
   export class get_approved_arguments {
     static encode(message: get_approved_arguments, writer: Writer): void {
-      if (message.name.length != 0) {
+      if (message.token_id.length != 0) {
         writer.uint32(10);
-        writer.string(message.name);
+        writer.string(message.token_id);
       }
     }
 
@@ -336,7 +336,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.name = reader.string();
+            message.token_id = reader.string();
             break;
 
           default:
@@ -348,10 +348,10 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
+    token_id: string;
 
-    constructor(name: string = "") {
-      this.name = name;
+    constructor(token_id: string = "") {
+      this.token_id = token_id;
     }
   }
 
@@ -494,19 +494,19 @@ export namespace nameservice {
 
   export class transfer_arguments {
     static encode(message: transfer_arguments, writer: Writer): void {
-      if (message.name.length != 0) {
-        writer.uint32(10);
-        writer.string(message.name);
-      }
-
       if (message.from.length != 0) {
-        writer.uint32(18);
+        writer.uint32(10);
         writer.bytes(message.from);
       }
 
       if (message.to.length != 0) {
-        writer.uint32(26);
+        writer.uint32(18);
         writer.bytes(message.to);
+      }
+
+      if (message.token_id.length != 0) {
+        writer.uint32(26);
+        writer.string(message.token_id);
       }
     }
 
@@ -518,15 +518,15 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.name = reader.string();
-            break;
-
-          case 2:
             message.from = reader.bytes();
             break;
 
-          case 3:
+          case 2:
             message.to = reader.bytes();
+            break;
+
+          case 3:
+            message.token_id = reader.string();
             break;
 
           default:
@@ -538,18 +538,18 @@ export namespace nameservice {
       return message;
     }
 
-    name: string;
     from: Uint8Array;
     to: Uint8Array;
+    token_id: string;
 
     constructor(
-      name: string = "",
       from: Uint8Array = new Uint8Array(0),
-      to: Uint8Array = new Uint8Array(0)
+      to: Uint8Array = new Uint8Array(0),
+      token_id: string = ""
     ) {
-      this.name = name;
       this.from = from;
       this.to = to;
+      this.token_id = token_id;
     }
   }
 
@@ -565,9 +565,9 @@ export namespace nameservice {
         writer.bytes(message.to);
       }
 
-      if (message.name.length != 0) {
+      if (message.token_id.length != 0) {
         writer.uint32(26);
-        writer.string(message.name);
+        writer.string(message.token_id);
       }
     }
 
@@ -587,7 +587,7 @@ export namespace nameservice {
             break;
 
           case 3:
-            message.name = reader.string();
+            message.token_id = reader.string();
             break;
 
           default:
@@ -601,16 +601,16 @@ export namespace nameservice {
 
     approver_address: Uint8Array;
     to: Uint8Array;
-    name: string;
+    token_id: string;
 
     constructor(
       approver_address: Uint8Array = new Uint8Array(0),
       to: Uint8Array = new Uint8Array(0),
-      name: string = ""
+      token_id: string = ""
     ) {
       this.approver_address = approver_address;
       this.to = to;
-      this.name = name;
+      this.token_id = token_id;
     }
   }
 

@@ -112,7 +112,7 @@ export class Nameservice {
   owner_of(
     args: nameservice.owner_of_arguments
   ): nameservice.bytes_address_object {
-    // const name = args.name;
+    // const token_id = args.token_id;
 
     // YOUR CODE HERE
 
@@ -125,7 +125,7 @@ export class Nameservice {
   get_approved(
     args: nameservice.get_approved_arguments
   ): nameservice.bytes_address_object {
-    // const name = args.name;
+    // const token_id = args.token_id;
 
     // YOUR CODE HERE
 
@@ -164,9 +164,9 @@ export class Nameservice {
   }
 
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
-    // const name = args.name;
     // const from = args.from;
     // const to = args.to;
+    // const token_id = args.token_id;
 
     // YOUR CODE HERE
 
@@ -178,7 +178,7 @@ export class Nameservice {
   approve(args: nameservice.approve_arguments): nameservice.empty_object {
     // const approver_address = args.approver_address;
     // const to = args.to;
-    // const name = args.name;
+    // const token_id = args.token_id;
 
     // YOUR CODE HERE
 

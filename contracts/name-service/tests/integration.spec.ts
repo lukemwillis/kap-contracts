@@ -109,7 +109,7 @@ describe('mint', () => {
     });
 
     res = await nameserviceContract.functions.owner_of({
-      name: 'koin',
+      token_id: 'koin',
     });
     expect(res?.result?.value).toEqual(koinDomainAcct.address);
 
@@ -1020,7 +1020,7 @@ describe('transfer', () => {
     expect(res.result).toStrictEqual(undefined);
 
     res = await nameserviceContract.functions.transfer({
-      name: 'transfer.koin',
+      token_id: 'transfer.koin',
       from: user3.address,
       to: user4.address
     }, {
@@ -1077,7 +1077,7 @@ describe('transfer', () => {
   it('should not transfer a name', async () => {
     try {
       await nameserviceContract.functions.transfer({
-        name: 'transfer.koin'
+        token_id: 'transfer.koin'
       }, {
         beforeSend: async (tx) => {
           await user3.signer.signTransaction(tx);
@@ -1089,7 +1089,7 @@ describe('transfer', () => {
 
     try {
       await nameserviceContract.functions.transfer({
-        name: 'i-dont-exist.koin',
+        token_id: 'i-dont-exist.koin',
         to: user4.address
       }, {
         beforeSend: async (tx) => {
@@ -1102,7 +1102,7 @@ describe('transfer', () => {
 
     try {
       await nameserviceContract.functions.transfer({
-        name: 'transfer.koin',
+        token_id: 'transfer.koin',
         from: user4.address,
         to: user3.address
       }, {
@@ -1127,7 +1127,7 @@ describe('transfer', () => {
 
     try {
       await nameserviceContract.functions.transfer({
-        name: 'expires-now.koin',
+        token_id: 'expires-now.koin',
         from: user4.address,
         to: user3.address,
       }, {

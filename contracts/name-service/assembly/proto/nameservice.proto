@@ -4,7 +4,7 @@ package nameservice;
 
 import "koinos/options.proto"; 
 
-// Entrypoints
+// KCS-2 Entrypoints START
 
 // @description Returns the token's name
 // @read-only true
@@ -69,14 +69,14 @@ message balance_of_arguments {
 // @read-only true
 // @result bytes_address_object
 message owner_of_arguments {
-  string name = 1;
+  string token_id = 1;
 }
 
 // @description Gets approved address for a token
 // @read-only true
 // @result bytes_address_object
 message get_approved_arguments {
-   string name = 1;
+   string token_id = 1;
 }
 
 // @description Checks if an operator is approved by an owner
@@ -106,9 +106,9 @@ message mint_arguments {
   @result empty_object
 */
 message transfer_arguments {
-  string name = 1;
-  bytes from = 2 [(koinos.btype) = ADDRESS];
-  bytes to = 3 [(koinos.btype) = ADDRESS];
+  bytes from = 1 [(koinos.btype) = ADDRESS];
+  bytes to = 2 [(koinos.btype) = ADDRESS];
+  string token_id = 3;
 }
 
 // @description Approves an address to transfer a token
@@ -117,7 +117,7 @@ message transfer_arguments {
 message approve_arguments {
    bytes approver_address = 1 [(koinos.btype) = ADDRESS];
    bytes to = 2 [(koinos.btype) = ADDRESS];
-   string name = 3;
+   string token_id = 3;
 }
 
 // @description Approves or revokes an address to operate on all tokens owned by caller
@@ -129,6 +129,9 @@ message set_approval_for_all_arguments {
    bool approved = 3;
 }
 
+// KCS-2 Entrypoints END
+
+// KAP Entrypoints START
 /* 
   @description Burn a name or TLA
   @read-only false
@@ -192,6 +195,8 @@ message set_metadata_arguments {
 */
 message get_metadata_arguments {
 }
+
+// KAP Entrypoints END
 
 // Events
 message mint_event {

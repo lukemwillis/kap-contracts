@@ -146,7 +146,7 @@ export class Nameservice {
   }
 
   owner_of(args: nameservice.owner_of_arguments): nameservice.bytes_address_object {
-    const parsedName = new ParsedName(args.name);
+    const parsedName = new ParsedName(args.token_id);
 
     const res = new nameservice.bytes_address_object();
 
@@ -160,7 +160,7 @@ export class Nameservice {
   }
 
   get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
-    const parsedName = new ParsedName(args.name);
+    const parsedName = new ParsedName(args.token_id);
 
     const res = new nameservice.bytes_address_object();
 
@@ -291,7 +291,7 @@ export class Nameservice {
   }
 
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
-    const name = args.name;
+    const name = args.token_id;
     const from = args.from;
     const to = args.to;
 
@@ -362,7 +362,7 @@ export class Nameservice {
   approve(args: nameservice.approve_arguments): nameservice.empty_object {
     const approver_address = args.approver_address;
     const to = args.to;
-    const name = args.name;
+    const name = args.token_id;
 
     // require authority of the approver_address
     System.requireAuthority(
