@@ -274,7 +274,15 @@ export class Nameservice {
     // update supply if needed
     if (isNewName) {
       const supplyObj = this.supply.get()!;
-      supplyObj.value = SafeMath.add(supplyObj.value, 1);
+      // KCS-2 supply can only receive a u64
+      // but KAP can potentially mint more names that can fit in a u64
+      // as a temporary workaround, just force the supply to u64.MAX if overflow
+      const newSupply = SafeMath.tryAdd(supplyObj.value, 1);
+      supplyObj.value = newSupply.value;
+      // if overflow, force to u64.MAX_VALUE
+      if (newSupply.error) {
+        supplyObj.value = u64.MAX_VALUE;
+      }
       this.supply.put(supplyObj);
     }
 
@@ -508,7 +516,15 @@ export class Nameservice {
 
     // update supply
     const supplyObj = this.supply.get()!;
-    supplyObj.value = SafeMath.sub(supplyObj.value, 1);
+    // KCS-2 supply can only receive a u64
+    // but KAP can potentially mint more names that can fit in a u64
+    // as a temporary workaround, just force the supply to 0 if underflow
+    const newSupply = SafeMath.trySub(supplyObj.value, 1);
+    supplyObj.value = newSupply.value;
+    // if underflow, force to 0
+    if (newSupply.error) {
+      supplyObj.value = 0;
+    }
     this.supply.put(supplyObj);
 
     // emit event
