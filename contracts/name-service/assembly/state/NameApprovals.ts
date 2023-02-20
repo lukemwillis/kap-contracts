@@ -1,19 +1,23 @@
-import { Storage } from '@koinos/sdk-as';
-import { nameservice } from '../proto/nameservice';
+import { chain, System } from '@koinos/sdk-as';
 
 const NAME_APPROVALS_SPACE_ID = 6;
 
-export class NameApprovals extends Storage.ProtoMap<nameservice.name_object, nameservice.bytes_address_object> {
+export class NameApprovals {
+  space: chain.object_space;
+
   constructor(contractId: Uint8Array) {
-    super(
-      contractId,
-      NAME_APPROVALS_SPACE_ID,
-      nameservice.name_object.decode,
-      nameservice.name_object.encode,
-      nameservice.bytes_address_object.decode,
-      nameservice.bytes_address_object.encode,
-      // no token approvals by default
-      () => new nameservice.bytes_address_object()
-    );
+    this.space = new chain.object_space(false, contractId, NAME_APPROVALS_SPACE_ID);
+  }
+
+  get(name: string): Uint8Array | null {
+    return System.getBytes(this.space, name);
+  }
+
+  put(name: string, address: Uint8Array): void{
+    System.putBytes(this.space, name, address);
+  }
+
+  remove(name: string): void{
+    System.removeObject(this.space, name);
   }
 }

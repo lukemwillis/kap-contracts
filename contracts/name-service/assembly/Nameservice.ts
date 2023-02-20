@@ -1,4 +1,4 @@
-import { Arrays, authority, Crypto, error, Protobuf, SafeMath, System, Token, value } from "@koinos/sdk-as";
+import { Arrays, authority, Crypto, error, Protobuf, SafeMath, StringBytes, System, system_calls, Token, value } from "@koinos/sdk-as";
 import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT, NAME, SYMBOL, URI } from "./Constants";
 import { nameservice } from "./proto/nameservice";
 import { OwnersIndex } from "./state/OwnersIndex";
@@ -7,6 +7,7 @@ import { Names } from "./state/Names";
 import { OperatorApprovals } from "./state/OperatorApprovals";
 import { NameApprovals } from "./state/NameApprovals";
 import { Supply } from "./state/Supply";
+import { ParsedName } from "./ParsedName";
 
 export class Nameservice {
   contractId: Uint8Array = System.getContractId();
@@ -113,17 +114,19 @@ export class Nameservice {
     let result: u64 = 0;
 
     let nameObj: nameservice.name_object | null;
-    let ownerIndexObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
+    let ownerIndexObj: system_calls.database_object | null;
+    let tmpName: string;
     let tmpOwnerIndexKey: nameservice.owner_index_key;
 
     do {
       ownerIndexObj = this.ownersIndex.getNext(ownerIndexKey);
 
       if (ownerIndexObj) {
-        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key!, nameservice.owner_index_key.decode);
+        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key, nameservice.owner_index_key.decode);
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
-          nameObj = this.getName(ownerIndexObj.value);
+          tmpName = StringBytes.bytesToString(ownerIndexObj.value);
+          nameObj = this.getName(tmpName);
 
           if (nameObj != null) {
             // we don't check for overflow here
@@ -142,14 +145,14 @@ export class Nameservice {
     return new nameservice.uint64_object(result);
   }
 
-  owner_of(args: nameservice.owner_of_arguments): nameservice.owner_of_result {
-    const nameKey = this.parseName(args.name);
+  owner_of(args: nameservice.owner_of_arguments): nameservice.bytes_address_object {
+    const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
-    const nameObj = this.getName(nameKey);
+    const res = new nameservice.bytes_address_object();
 
-    const res = new nameservice.owner_of_result();
+    const nameObj = this.getName(parsedName.key());
 
-    if ( nameObj) {
+    if (nameObj) {
       res.value = nameObj.owner;
     }
 
@@ -157,9 +160,17 @@ export class Nameservice {
   }
 
   get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
-    const nameKey = this.parseName(args.name);
+    const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
-    return this.nameApprovals.get(nameKey)!;
+    const res = new nameservice.bytes_address_object();
+
+    const approvedAddress = this.nameApprovals.get(parsedName.key());
+
+    if (approvedAddress) {
+      res.value = approvedAddress;
+    }
+
+    return res;
   }
 
   is_approved_for_all(args: nameservice.is_approved_for_all_arguments): nameservice.bool_object {
@@ -176,7 +187,10 @@ export class Nameservice {
     System.require(owner.length > 0, 'missing "owner" argument');
 
     // parseName will fail if name has an invalid format
-    const nameKey = this.parseName(name);
+    const parsedName = new ParsedName(name);
+    // we use the key generated from the parsed name 
+    // in case we want to add sanitization later on
+    const nameKey = parsedName.key();
 
     // ensure TLA/Name is not minted yet
     let nameObj = this.names.get(nameKey);
@@ -190,7 +204,7 @@ export class Nameservice {
     )) {
       System.revert(`name "${name}" is already taken`);
     } else if (nameObj == null) {
-      nameObj = new nameservice.name_object(nameKey.domain, nameKey.name);
+      nameObj = new nameservice.name_object(parsedName.domain, parsedName.name);
     }
 
     // is the user trying to mint a TLA?
@@ -218,8 +232,7 @@ export class Nameservice {
       // then we need to get the domain for the name_object name: "sub" / domain: "koin"
       // if the user is trying to mint "john.subsub.sub.koin" 
       // then we need to get the domain for the name_object name: "subsub" / domain: "sub.koin"
-      const domainKey = this.parseName(nameObj.domain);
-      const domainObj = this.getName(domainKey);
+      const domainObj = this.getName(nameObj.domain);
 
       // should not allow minting if a domain does not exist or if the domain has expired
       System.require(domainObj != null, `domain "${nameObj.domain}" does not exist`);
@@ -245,7 +258,7 @@ export class Nameservice {
 
       // update domain's sub_names_count
       domainObj!.sub_names_count = SafeMath.add(domainObj!.sub_names_count, 1);
-      this.names.put(domainKey, domainObj!);
+      this.names.put(nameObj.domain, domainObj!);
     }
 
     // if the execution reaches this line, then the TLA or name are authorized
@@ -261,17 +274,26 @@ export class Nameservice {
     // update supply if needed
     if (isNewName) {
       const supplyObj = this.supply.get()!;
-      supplyObj.value = SafeMath.add(supplyObj.value, 1);
+      // KCS-2 supply can only receive a u64
+      // but KAP can potentially mint more names that can fit in a u64
+      // as a temporary workaround, just force the supply to u64.MAX if overflow
+      const newSupply = SafeMath.tryAdd(supplyObj.value, 1);
+      supplyObj.value = newSupply.value;
+      // if overflow, force to u64.MAX_VALUE
+      if (newSupply.error) {
+        supplyObj.value = u64.MAX_VALUE;
+      }
       this.supply.put(supplyObj);
     }
 
     // emit event
     const mintEvent = new nameservice.mint_event(
-      `${name}`
+      owner,
+      StringBytes.stringToBytes(nameKey)
     );
 
     System.event(
-      "nameservice.mint_event",
+      "collections.mint_event",
       Protobuf.encode(mintEvent, nameservice.mint_event.encode),
       [nameObj.owner]
     );
@@ -280,14 +302,15 @@ export class Nameservice {
   }
 
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
-    const name = args.name;
+    const name = StringBytes.bytesToString(args.token_id);
     const from = args.from;
     const to = args.to;
 
     System.require(to.length > 0, 'missing "to" argument');
 
     // parseName will fail if name has an invalid format
-    const nameKey = this.parseName(name);
+    const parsedName = new ParsedName(name);
+    const nameKey = parsedName.key();
 
     // attempt to get name from state
     // expired names cannot be transfered
@@ -305,8 +328,11 @@ export class Nameservice {
 
     if (!Arrays.equal(caller, from)) {
       // check if caller is approved for this name
-      const approval = this.nameApprovals.get(nameKey)!;
-      isTokenApproved = approval.value.length > 0 && Arrays.equal(approval.value, caller);
+      const approvalAddress = this.nameApprovals.get(nameKey);
+
+      if (approvalAddress && approvalAddress.length > 0) {
+        isTokenApproved = Arrays.equal(approvalAddress, caller);
+      }
 
       if (!isTokenApproved) {
         // check if the caller is an approved operator
@@ -330,11 +356,13 @@ export class Nameservice {
 
     // emit event
     const transferEvent = new nameservice.transfer_event(
-      `${name}`
+      from,
+      to,
+      StringBytes.stringToBytes(nameKey)
     );
 
     System.event(
-      "nameservice.transfer_event",
+      "collections.transfer_event",
       Protobuf.encode(transferEvent, nameservice.transfer_event.encode),
       [to, nameObj!.owner]
     );
@@ -349,7 +377,7 @@ export class Nameservice {
   approve(args: nameservice.approve_arguments): nameservice.empty_object {
     const approver_address = args.approver_address;
     const to = args.to;
-    const name = args.name;
+    const name = StringBytes.bytesToString(args.token_id);
 
     // require authority of the approver_address
     System.requireAuthority(
@@ -358,7 +386,8 @@ export class Nameservice {
     );
 
     // check that the token exists
-    const nameKey = this.parseName(name);
+    const parsedName = new ParsedName(name);
+    const nameKey = parsedName.key();
     const nameObj = this.names.get(nameKey);
 
     System.require(nameObj != null, 'nonexistent token');
@@ -373,15 +402,17 @@ export class Nameservice {
     }
 
     // update approval
-    const approval = this.nameApprovals.get(nameKey)!;
-    approval.value = to;
-    this.nameApprovals.put(nameKey, approval);
+    this.nameApprovals.put(nameKey, to);
 
     // emit event
-    const approvalEvent = new nameservice.token_approval_event(name);
+    const approvalEvent = new nameservice.token_approval_event(
+      approver_address,
+      to,
+      StringBytes.stringToBytes(name)
+    );
 
     System.event(
-      "nameservice.token_approval_event",
+      "collections.token_approval_event",
       Protobuf.encode(approvalEvent, nameservice.token_approval_event.encode),
       [to, approver_address]
     );
@@ -410,11 +441,13 @@ export class Nameservice {
 
     // emit event
     const approvalEvent = new nameservice.operator_approval_event(
+      approver_address,
+      operator_address,
       approved
     );
 
     System.event(
-      "nameservice.operator_approval_event",
+      "collections.operator_approval_event",
       Protobuf.encode(approvalEvent, nameservice.operator_approval_event.encode),
       [operator_address, approver_address]
     );
@@ -426,10 +459,12 @@ export class Nameservice {
   // CUSTOM FUNCTIONALITY
 
   burn(args: nameservice.burn_arguments): nameservice.empty_object {
-    const name = args.name;
+    const from = args.from;
+    const name = StringBytes.bytesToString(args.token_id);
 
     // parseName will fail if name has an invalid format
-    const nameKey = this.parseName(name);
+    const parsedName = new ParsedName(name);
+    const nameKey = parsedName.key();
 
     // attempt to get name from state
     // even expired names can be burned,
@@ -437,13 +472,14 @@ export class Nameservice {
     const nameObj = this.names.get(nameKey);
 
     System.require(nameObj != null, `name "${name}" does not exist`);
+    System.require(Arrays.equal(from, nameObj!.owner), '"from" is not the owner');
 
     // verify ownership
     const callerData = System.getCaller();
 
     System.require(
-      Arrays.equal(callerData.caller, nameObj!.owner) ||
-      System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
+      Arrays.equal(callerData.caller, from) ||
+      System.checkAuthority(authority.authorization_type.contract_call, from),
       'name owner has not authorized burn',
       error.error_code.authorization_failure
     );
@@ -468,10 +504,9 @@ export class Nameservice {
       this.ownersIndex.updateIndex(nameKey, nameObj!.owner);
     } else {
       // get domain object
-      const domainKey = this.parseName(nameKey.domain);
       // can burn names from expired domains
-      // this will always get the domain as a domain cannot be bburned when it has sub names
-      const domainObj = this.names.get(domainKey)!;
+      // this will always get the domain as a domain cannot be burned when it has sub names
+      const domainObj = this.names.get(nameObj!.domain)!;
 
       // call the "authorize_burn" entrypoint of the contract hosted at "owner" address
       // if this call doesn't revert the transaction,
@@ -491,21 +526,30 @@ export class Nameservice {
 
       // update domain sub_names_count
       domainObj.sub_names_count = SafeMath.sub(domainObj.sub_names_count, 1);
-      this.names.put(domainKey, domainObj);
+      this.names.put(nameObj!.domain, domainObj);
     }
 
     // update supply
     const supplyObj = this.supply.get()!;
-    supplyObj.value = SafeMath.sub(supplyObj.value, 1);
+    // KCS-2 supply can only receive a u64
+    // but KAP can potentially mint more names that can fit in a u64
+    // as a temporary workaround, just force the supply to 0 if underflow
+    const newSupply = SafeMath.trySub(supplyObj.value, 1);
+    supplyObj.value = newSupply.value;
+    // if underflow, force to 0
+    if (newSupply.error) {
+      supplyObj.value = 0;
+    }
     this.supply.put(supplyObj);
 
     // emit event
     const burnEvent = new nameservice.burn_event(
-      `${name}`
+      from,
+      StringBytes.stringToBytes(nameKey)
     );
 
     System.event(
-      "nameservice.burn_event",
+      "collections.burn_event",
       Protobuf.encode(burnEvent, nameservice.burn_event.encode),
       [nameObj!.owner]
     );
@@ -520,7 +564,8 @@ export class Nameservice {
     const payment_token_address = args.payment_token_address;
 
     // parseName will fail if name has an invalid format
-    const nameKey = this.parseName(name);
+    const parsedName = new ParsedName(name);
+    const nameKey = parsedName.key();
 
     // attempt to get name from state
     // expired names must use the mint function to renew
@@ -534,10 +579,8 @@ export class Nameservice {
       System.revert('TLAs cannot be renewed at the moment');
     } else {
       // get domain object
-      const domainKey = this.parseName(nameKey.domain);
-
       // cannot renew a name on an expired domain
-      const domainObj = this.getName(domainKey);
+      const domainObj = this.getName(nameObj!.domain);
 
       System.require(domainObj != null, `cannot renew name "${name}" because its domain has expired`);
 
@@ -562,7 +605,8 @@ export class Nameservice {
 
   get_name(args: nameservice.get_name_arguments): nameservice.name_object {
     // parseName will fail if args.name has an invalid format
-    const nameKey = this.parseName(args.name);
+    const parsedName = new ParsedName(args.name);
+    const nameKey = parsedName.key();
 
     // expired names don't return anything
     const nameObj = this.getName(nameKey);
@@ -588,11 +632,9 @@ export class Nameservice {
 
     // calculate offset address key if name_offset provided
     if (nameOffset.length > 0) {
-      const nameOffsetKey = this.parseName(nameOffset);
-      nameObj = new nameservice.name_object(nameOffsetKey.domain, nameOffsetKey.name);
       nameKeyHash = System.hash(
         Crypto.multicodec.sha2_256,
-        Protobuf.encode(nameObj, nameservice.name_object.encode)
+        StringBytes.stringToBytes(nameOffset)
       )!;
     } else {
       // a sha256 multihash is 34 bytes long (2 bytes for the multihash code, and 32 bytes for the digest)
@@ -608,17 +650,19 @@ export class Nameservice {
 
     const res = new nameservice.get_names_result();
 
-    let ownerIndexObj: System.ProtoDatabaseObject<nameservice.name_object> | null;
+    let ownerIndexObj: system_calls.database_object | null;
+    let tmpName: string;
     let tmpOwnerIndexKey: nameservice.owner_index_key;
 
     do {
       ownerIndexObj = descending ? this.ownersIndex.getPrev(ownerIndexKey) : this.ownersIndex.getNext(ownerIndexKey);
 
       if (ownerIndexObj) {
-        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key!, nameservice.owner_index_key.decode);
+        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key, nameservice.owner_index_key.decode);
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
-          nameObj = this.getName(ownerIndexObj.value);
+          tmpName = StringBytes.bytesToString(ownerIndexObj.value);
+          nameObj = this.getName(tmpName);
 
           if (nameObj != null) {
             res.names.push(nameObj);
@@ -667,7 +711,7 @@ export class Nameservice {
   * Get a name from the Names space
   * @return the name if found and it has not expired and the grace_peiod has not ended
   */
-  private getName(key: nameservice.name_object): nameservice.name_object | null {
+  private getName(key: string): nameservice.name_object | null {
     const nameObj = this.names.get(key);
 
     // if it exists and has not expired and the grace_period has not ended
@@ -680,43 +724,6 @@ export class Nameservice {
     }
 
     return null;
-  }
-
-  /**
-    * Validate a name or domain
-    */
-  private validateElement(element: string): void {
-    System.require(element.length > 0, 'an element cannot be empty');
-    System.require(!element.startsWith('-'), `element "${element}" cannot start with an hyphen (-)`);
-    System.require(!element.endsWith('-'), `element "${element}" cannot end with an hyphen (-)`);
-    System.require(!element.includes('--'), `element "${element}" cannot have consecutive hyphens (-)`);
-  }
-
-  /**
-    * Parse a string name into a name_object
-    * e.g.: "name.domain" => obj.name = "name" and obj.domain = "domain"
-    * e.g.: "name.subdomain.domain" => obj.name = "name" and obj.domain = "subdomain.domain"
-   */
-  private parseName(name: string): nameservice.name_object {
-    const splittedNameArr = name.toLowerCase().split('.');
-
-    // validate first element only 
-    // everything after the first "." would have been previously validated
-    this.validateElement(splittedNameArr[0]);
-
-    const nameObject = new nameservice.name_object();
-
-    // the first element of splittedNameArr is either a name or a TLA
-    nameObject.name = splittedNameArr.shift();
-
-    // if splittedNameArr has 2 or more elements, that means a domain was provided 
-    // otherwise it's a TLA, so keep the domain empty
-    if (splittedNameArr.length >= 1) {
-      // group the domain elements back with a '.'
-      nameObject.domain = splittedNameArr.join('.');
-    }
-
-    return nameObject;
   }
 
   /**

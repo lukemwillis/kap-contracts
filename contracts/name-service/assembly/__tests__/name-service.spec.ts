@@ -1,5 +1,6 @@
 import { Base58, MockVM, chain, protocol, System } from "@koinos/sdk-as";
 import { Nameservice } from "../Nameservice";
+import { ParsedName } from "../ParsedName";
 
 const CONTRACT_ID = Base58.decode("1DQzuCcTKacbs9GGScRTU1Hc8BsyARTPqe");
 
@@ -23,49 +24,49 @@ describe("nameservice", () => {
     const ns = new Nameservice();
 
     let name = 'domain';
-    let nameObj = ns.parseName(name);
+    let nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual(name);
     expect(nameObj.domain).toStrictEqual('');
 
     name = 'test-domain';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('test-domain');
     expect(nameObj.domain).toStrictEqual('');
 
     name = 'name.domain';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('name');
     expect(nameObj.domain).toStrictEqual('domain');
 
     name = 'name-test.domain';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('name-test');
     expect(nameObj.domain).toStrictEqual('domain');
 
     name = 'name.subdomain.domain';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('name');
     expect(nameObj.domain).toStrictEqual('subdomain.domain');
 
     name = 'name.subsubdomain.subdomain.domain';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('name');
     expect(nameObj.domain).toStrictEqual('subsubdomain.subdomain.domain');
 
     name = 'domain.';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('domain');
     expect(nameObj.domain).toStrictEqual('');
 
     name = 'name..domain';
-    nameObj = ns.parseName(name);
+    nameObj = new ParsedName(name);
 
     expect(nameObj.name).toStrictEqual('name');
     expect(nameObj.domain).toStrictEqual('.domain');
@@ -75,7 +76,7 @@ describe("nameservice", () => {
       const ns = new Nameservice();
 
       const name = '.domain';
-      ns.parseName(name);
+      new ParsedName(name);
     }).toThrow();
 
     expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
@@ -84,7 +85,7 @@ describe("nameservice", () => {
       const ns = new Nameservice();
 
       const name = '-name.domain';
-      ns.parseName(name);
+      new ParsedName(name);
     }).toThrow();
 
     expect(MockVM.getErrorMessage()).toStrictEqual('element "-name" cannot start with an hyphen (-)');
@@ -93,7 +94,7 @@ describe("nameservice", () => {
       const ns = new Nameservice();
 
       const name = 'name-.domain';
-      ns.parseName(name);
+      new ParsedName(name);
     }).toThrow();
 
     expect(MockVM.getErrorMessage()).toStrictEqual('element "name-" cannot end with an hyphen (-)');
@@ -102,7 +103,7 @@ describe("nameservice", () => {
       const ns = new Nameservice();
 
       const name = 'name--test.domain';
-      ns.parseName(name);
+      new ParsedName(name);
     }).toThrow();
 
     expect(MockVM.getErrorMessage()).toStrictEqual('element "name--test" cannot have consecutive hyphens (-)');
