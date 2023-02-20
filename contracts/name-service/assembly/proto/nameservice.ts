@@ -289,7 +289,7 @@ export namespace nameservice {
     static encode(message: owner_of_arguments, writer: Writer): void {
       if (message.token_id.length != 0) {
         writer.uint32(10);
-        writer.string(message.token_id);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -301,7 +301,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.token_id = reader.string();
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -313,9 +313,9 @@ export namespace nameservice {
       return message;
     }
 
-    token_id: string;
+    token_id: Uint8Array;
 
-    constructor(token_id: string = "") {
+    constructor(token_id: Uint8Array = new Uint8Array(0)) {
       this.token_id = token_id;
     }
   }
@@ -324,7 +324,7 @@ export namespace nameservice {
     static encode(message: get_approved_arguments, writer: Writer): void {
       if (message.token_id.length != 0) {
         writer.uint32(10);
-        writer.string(message.token_id);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -336,7 +336,7 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.token_id = reader.string();
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -348,9 +348,9 @@ export namespace nameservice {
       return message;
     }
 
-    token_id: string;
+    token_id: Uint8Array;
 
-    constructor(token_id: string = "") {
+    constructor(token_id: Uint8Array = new Uint8Array(0)) {
       this.token_id = token_id;
     }
   }
@@ -492,6 +492,55 @@ export namespace nameservice {
     }
   }
 
+  export class burn_arguments {
+    static encode(message: burn_arguments, writer: Writer): void {
+      if (message.from.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.from);
+      }
+
+      if (message.token_id.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.token_id);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): burn_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new burn_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.from = reader.bytes();
+            break;
+
+          case 2:
+            message.token_id = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    from: Uint8Array;
+    token_id: Uint8Array;
+
+    constructor(
+      from: Uint8Array = new Uint8Array(0),
+      token_id: Uint8Array = new Uint8Array(0)
+    ) {
+      this.from = from;
+      this.token_id = token_id;
+    }
+  }
+
   export class transfer_arguments {
     static encode(message: transfer_arguments, writer: Writer): void {
       if (message.from.length != 0) {
@@ -506,7 +555,7 @@ export namespace nameservice {
 
       if (message.token_id.length != 0) {
         writer.uint32(26);
-        writer.string(message.token_id);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -526,7 +575,7 @@ export namespace nameservice {
             break;
 
           case 3:
-            message.token_id = reader.string();
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -540,12 +589,12 @@ export namespace nameservice {
 
     from: Uint8Array;
     to: Uint8Array;
-    token_id: string;
+    token_id: Uint8Array;
 
     constructor(
       from: Uint8Array = new Uint8Array(0),
       to: Uint8Array = new Uint8Array(0),
-      token_id: string = ""
+      token_id: Uint8Array = new Uint8Array(0)
     ) {
       this.from = from;
       this.to = to;
@@ -567,7 +616,7 @@ export namespace nameservice {
 
       if (message.token_id.length != 0) {
         writer.uint32(26);
-        writer.string(message.token_id);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -587,7 +636,7 @@ export namespace nameservice {
             break;
 
           case 3:
-            message.token_id = reader.string();
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -601,12 +650,12 @@ export namespace nameservice {
 
     approver_address: Uint8Array;
     to: Uint8Array;
-    token_id: string;
+    token_id: Uint8Array;
 
     constructor(
       approver_address: Uint8Array = new Uint8Array(0),
       to: Uint8Array = new Uint8Array(0),
-      token_id: string = ""
+      token_id: Uint8Array = new Uint8Array(0)
     ) {
       this.approver_address = approver_address;
       this.to = to;
@@ -675,41 +724,6 @@ export namespace nameservice {
       this.approver_address = approver_address;
       this.operator_address = operator_address;
       this.approved = approved;
-    }
-  }
-
-  export class burn_arguments {
-    static encode(message: burn_arguments, writer: Writer): void {
-      if (message.name.length != 0) {
-        writer.uint32(10);
-        writer.string(message.name);
-      }
-    }
-
-    static decode(reader: Reader, length: i32): burn_arguments {
-      const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new burn_arguments();
-
-      while (reader.ptr < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1:
-            message.name = reader.string();
-            break;
-
-          default:
-            reader.skipType(tag & 7);
-            break;
-        }
-      }
-
-      return message;
-    }
-
-    name: string;
-
-    constructor(name: string = "") {
-      this.name = name;
     }
   }
 
@@ -1018,9 +1032,14 @@ export namespace nameservice {
 
   export class mint_event {
     static encode(message: mint_event, writer: Writer): void {
-      if (message.token_id.length != 0) {
+      if (message.to.length != 0) {
         writer.uint32(10);
-        writer.string(message.token_id);
+        writer.bytes(message.to);
+      }
+
+      if (message.token_id.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -1032,7 +1051,11 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.token_id = reader.string();
+            message.to = reader.bytes();
+            break;
+
+          case 2:
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -1044,18 +1067,28 @@ export namespace nameservice {
       return message;
     }
 
-    token_id: string;
+    to: Uint8Array;
+    token_id: Uint8Array;
 
-    constructor(token_id: string = "") {
+    constructor(
+      to: Uint8Array = new Uint8Array(0),
+      token_id: Uint8Array = new Uint8Array(0)
+    ) {
+      this.to = to;
       this.token_id = token_id;
     }
   }
 
   export class burn_event {
     static encode(message: burn_event, writer: Writer): void {
-      if (message.token_id.length != 0) {
+      if (message.from.length != 0) {
         writer.uint32(10);
-        writer.string(message.token_id);
+        writer.bytes(message.from);
+      }
+
+      if (message.token_id.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -1067,7 +1100,11 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.token_id = reader.string();
+            message.from = reader.bytes();
+            break;
+
+          case 2:
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -1079,18 +1116,33 @@ export namespace nameservice {
       return message;
     }
 
-    token_id: string;
+    from: Uint8Array;
+    token_id: Uint8Array;
 
-    constructor(token_id: string = "") {
+    constructor(
+      from: Uint8Array = new Uint8Array(0),
+      token_id: Uint8Array = new Uint8Array(0)
+    ) {
+      this.from = from;
       this.token_id = token_id;
     }
   }
 
   export class transfer_event {
     static encode(message: transfer_event, writer: Writer): void {
-      if (message.token_id.length != 0) {
+      if (message.from.length != 0) {
         writer.uint32(10);
-        writer.string(message.token_id);
+        writer.bytes(message.from);
+      }
+
+      if (message.to.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.to);
+      }
+
+      if (message.token_id.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -1102,7 +1154,15 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.token_id = reader.string();
+            message.from = reader.bytes();
+            break;
+
+          case 2:
+            message.to = reader.bytes();
+            break;
+
+          case 3:
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -1114,18 +1174,35 @@ export namespace nameservice {
       return message;
     }
 
-    token_id: string;
+    from: Uint8Array;
+    to: Uint8Array;
+    token_id: Uint8Array;
 
-    constructor(token_id: string = "") {
+    constructor(
+      from: Uint8Array = new Uint8Array(0),
+      to: Uint8Array = new Uint8Array(0),
+      token_id: Uint8Array = new Uint8Array(0)
+    ) {
+      this.from = from;
+      this.to = to;
       this.token_id = token_id;
     }
   }
 
-  @unmanaged
   export class operator_approval_event {
     static encode(message: operator_approval_event, writer: Writer): void {
+      if (message.approver_address.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.approver_address);
+      }
+
+      if (message.operator_address.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.operator_address);
+      }
+
       if (message.approved != false) {
-        writer.uint32(8);
+        writer.uint32(24);
         writer.bool(message.approved);
       }
     }
@@ -1138,6 +1215,14 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
+            message.approver_address = reader.bytes();
+            break;
+
+          case 2:
+            message.operator_address = reader.bytes();
+            break;
+
+          case 3:
             message.approved = reader.bool();
             break;
 
@@ -1150,18 +1235,36 @@ export namespace nameservice {
       return message;
     }
 
+    approver_address: Uint8Array;
+    operator_address: Uint8Array;
     approved: bool;
 
-    constructor(approved: bool = false) {
+    constructor(
+      approver_address: Uint8Array = new Uint8Array(0),
+      operator_address: Uint8Array = new Uint8Array(0),
+      approved: bool = false
+    ) {
+      this.approver_address = approver_address;
+      this.operator_address = operator_address;
       this.approved = approved;
     }
   }
 
   export class token_approval_event {
     static encode(message: token_approval_event, writer: Writer): void {
-      if (message.token_id.length != 0) {
+      if (message.approver_address.length != 0) {
         writer.uint32(10);
-        writer.string(message.token_id);
+        writer.bytes(message.approver_address);
+      }
+
+      if (message.to.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.to);
+      }
+
+      if (message.token_id.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.token_id);
       }
     }
 
@@ -1173,7 +1276,15 @@ export namespace nameservice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.token_id = reader.string();
+            message.approver_address = reader.bytes();
+            break;
+
+          case 2:
+            message.to = reader.bytes();
+            break;
+
+          case 3:
+            message.token_id = reader.bytes();
             break;
 
           default:
@@ -1185,9 +1296,17 @@ export namespace nameservice {
       return message;
     }
 
-    token_id: string;
+    approver_address: Uint8Array;
+    to: Uint8Array;
+    token_id: Uint8Array;
 
-    constructor(token_id: string = "") {
+    constructor(
+      approver_address: Uint8Array = new Uint8Array(0),
+      to: Uint8Array = new Uint8Array(0),
+      token_id: Uint8Array = new Uint8Array(0)
+    ) {
+      this.approver_address = approver_address;
+      this.to = to;
       this.token_id = token_id;
     }
   }

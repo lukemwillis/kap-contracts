@@ -163,6 +163,17 @@ export class Nameservice {
     return res;
   }
 
+  burn(args: nameservice.burn_arguments): nameservice.empty_object {
+    // const from = args.from;
+    // const token_id = args.token_id;
+
+    // YOUR CODE HERE
+
+    const res = new nameservice.empty_object();
+
+    return res;
+  }
+
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
     // const from = args.from;
     // const to = args.to;
@@ -193,16 +204,6 @@ export class Nameservice {
     // const approver_address = args.approver_address;
     // const operator_address = args.operator_address;
     // const approved = args.approved;
-
-    // YOUR CODE HERE
-
-    const res = new nameservice.empty_object();
-
-    return res;
-  }
-
-  burn(args: nameservice.burn_arguments): nameservice.empty_object {
-    // const name = args.name;
 
     // YOUR CODE HERE
 

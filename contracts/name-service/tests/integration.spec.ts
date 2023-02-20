@@ -72,6 +72,10 @@ afterAll(async () => {
   await localKoinos.stopNode();
 });
 
+function encodeHex(str: string) {
+  return `0x${Buffer.from(str, 'utf-8').toString('hex')}`;
+}
+
 describe('mint', () => {
   it('should mint TLAs, names and sub names', async () => {
     // ASCII characters
@@ -86,13 +90,14 @@ describe('mint', () => {
       {
         source: nameserviceContract.getId(),
         name: 'collections.mint_event',
-        data: 'CgRrb2lu',
+        data: 'ChkA7IVnjhHPBtM8qmxD2Bzl1Yx1kqpjau1JEgRrb2lu',
         impacted: [koinDomainAcct.address]
       }
     ]));
 
     const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.mint_event');
-    expect(eventData.token_id).toEqual('koin');
+    expect(eventData.to).toEqual(koinDomainAcct.address);
+    expect(eventData.token_id).toEqual(encodeHex('koin'));
 
     res = await nameserviceContract.functions.get_name({
       name: 'koin',
@@ -109,7 +114,7 @@ describe('mint', () => {
     });
 
     res = await nameserviceContract.functions.owner_of({
-      token_id: 'koin',
+      token_id: encodeHex('koin'),
     });
     expect(res?.result?.value).toEqual(koinDomainAcct.address);
 
@@ -1020,7 +1025,7 @@ describe('transfer', () => {
     expect(res.result).toStrictEqual(undefined);
 
     res = await nameserviceContract.functions.transfer({
-      token_id: 'transfer.koin',
+      token_id: encodeHex('transfer.koin'),
       from: user3.address,
       to: user4.address
     }, {
@@ -1035,13 +1040,15 @@ describe('transfer', () => {
       {
         source: nameserviceContract.getId(),
         name: 'collections.transfer_event',
-        data: 'Cg10cmFuc2Zlci5rb2lu',
+        data: 'ChkARA9kymzXWeGVcM55n-KkXRYpjgdG6zK3EhkANROzg5T2-KcE3KSk8lAW44KmzcvHpFduGg10cmFuc2Zlci5rb2lu',
         impacted: [user4.address, user3.address]
       }
     ]));
 
     const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.transfer_event');
-    expect(eventData.token_id).toEqual('transfer.koin');
+    expect(eventData.from).toEqual(user3.address);
+    expect(eventData.to).toEqual(user4.address);
+    expect(eventData.token_id).toEqual(encodeHex('transfer.koin'));
 
     res = await nameserviceContract.functions.get_name({
       name: 'transfer.koin',
@@ -1075,9 +1082,11 @@ describe('transfer', () => {
   });
 
   it('should not transfer a name', async () => {
+    expect.assertions(4);
+    
     try {
       await nameserviceContract.functions.transfer({
-        token_id: 'transfer.koin'
+        token_id: encodeHex('transfer.koin')
       }, {
         beforeSend: async (tx) => {
           await user3.signer.signTransaction(tx);
@@ -1089,7 +1098,7 @@ describe('transfer', () => {
 
     try {
       await nameserviceContract.functions.transfer({
-        token_id: 'i-dont-exist.koin',
+        token_id: encodeHex('i-dont-exist.koin'),
         to: user4.address
       }, {
         beforeSend: async (tx) => {
@@ -1102,7 +1111,7 @@ describe('transfer', () => {
 
     try {
       await nameserviceContract.functions.transfer({
-        token_id: 'transfer.koin',
+        token_id: encodeHex('transfer.koin'),
         from: user4.address,
         to: user3.address
       }, {
@@ -1127,7 +1136,7 @@ describe('transfer', () => {
 
     try {
       await nameserviceContract.functions.transfer({
-        token_id: 'expires-now.koin',
+        token_id: encodeHex('expires-now.koin'),
         from: user4.address,
         to: user3.address,
       }, {
@@ -1182,7 +1191,8 @@ describe('burn', () => {
     expect(res.result.value).toEqual('18');
 
     res = await nameserviceContract.functions.burn({
-      name: 'burn.koin',
+      from: user3.address,
+      token_id: encodeHex('burn.koin'),
     }, {
       beforeSend: async (tx) => {
         await user3.signer.signTransaction(tx);
@@ -1195,13 +1205,14 @@ describe('burn', () => {
       {
         source: nameserviceContract.getId(),
         name: 'collections.burn_event',
-        data: 'CglidXJuLmtvaW4=',
+        data: 'ChkARA9kymzXWeGVcM55n-KkXRYpjgdG6zK3EglidXJuLmtvaW4=',
         impacted: [user3.address]
       }
     ]));
 
     const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.burn_event');
-    expect(eventData.token_id).toEqual('burn.koin');
+    expect(eventData.from).toEqual(user3.address);
+    expect(eventData.token_id).toEqual(encodeHex('burn.koin'));
 
     res = await nameserviceContract.functions.get_name({
       name: 'burn.koin',
@@ -1224,9 +1235,8 @@ describe('burn', () => {
     expect(bal).toStrictEqual('990');
 
     res = await nameserviceContract.functions.burn({
-      name: 'notfree',
-      owner: user1.address,
-      payment_from: user1.address,
+      from: user1.address,
+      token_id: encodeHex('notfree')
     }, {
       beforeSend: async (tx) => {
         await user1.signer.signTransaction(tx);
@@ -1246,9 +1256,25 @@ describe('burn', () => {
   });
 
   it('should not burn a name', async () => {
+    expect.assertions(6);
+
     try {
       await nameserviceContract.functions.burn({
-        name: 'i-dont-exist.koin',
+        from: user3.address,
+        token_id: encodeHex('transfer.koin'),
+      }, {
+        beforeSend: async (tx) => {
+          await user3.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('"from" is not the owner');
+    }
+
+    try {
+      await nameserviceContract.functions.burn({
+        from: user3.address,
+        token_id: encodeHex('i-dont-exist.koin'),
       }, {
         beforeSend: async (tx) => {
           await user3.signer.signTransaction(tx);
@@ -1260,7 +1286,8 @@ describe('burn', () => {
 
     try {
       await nameserviceContract.functions.burn({
-        name: 'transfer.koin',
+        from: user4.address,
+        token_id: encodeHex('transfer.koin'),
       }, {
         beforeSend: async (tx) => {
           await user3.signer.signTransaction(tx);
@@ -1272,7 +1299,8 @@ describe('burn', () => {
 
     try {
       await nameserviceContract.functions.burn({
-        name: 'koin',
+        from: koinDomainAcct.address,
+        token_id: encodeHex('koin'),
       }, {
         beforeSend: async (tx) => {
           await koinDomainAcct.signer.signTransaction(tx);
@@ -1301,7 +1329,8 @@ describe('burn', () => {
 
     try {
       await nameserviceContract.functions.burn({
-        name: 'cannot-burn.koin',
+        from: user1.address,
+        token_id: encodeHex('cannot-burn.koin'),
       }, {
         beforeSend: async (tx) => {
           await user1.signer.signTransaction(tx);

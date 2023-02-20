@@ -146,7 +146,7 @@ export class Nameservice {
   }
 
   owner_of(args: nameservice.owner_of_arguments): nameservice.bytes_address_object {
-    const parsedName = new ParsedName(args.token_id);
+    const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
     const res = new nameservice.bytes_address_object();
 
@@ -160,7 +160,7 @@ export class Nameservice {
   }
 
   get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
-    const parsedName = new ParsedName(args.token_id);
+    const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
     const res = new nameservice.bytes_address_object();
 
@@ -287,7 +287,10 @@ export class Nameservice {
     }
 
     // emit event
-    const mintEvent = new nameservice.mint_event(nameKey);
+    const mintEvent = new nameservice.mint_event(
+      owner,
+      StringBytes.stringToBytes(nameKey)
+    );
 
     System.event(
       "collections.mint_event",
@@ -299,7 +302,7 @@ export class Nameservice {
   }
 
   transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
-    const name = args.token_id;
+    const name = StringBytes.bytesToString(args.token_id);
     const from = args.from;
     const to = args.to;
 
@@ -352,7 +355,11 @@ export class Nameservice {
     this.ownersIndex.updateIndex(nameKey, nameObj!.owner, to);
 
     // emit event
-    const transferEvent = new nameservice.transfer_event(nameKey);
+    const transferEvent = new nameservice.transfer_event(
+      from,
+      to,
+      StringBytes.stringToBytes(nameKey)
+    );
 
     System.event(
       "collections.transfer_event",
@@ -370,7 +377,7 @@ export class Nameservice {
   approve(args: nameservice.approve_arguments): nameservice.empty_object {
     const approver_address = args.approver_address;
     const to = args.to;
-    const name = args.token_id;
+    const name = StringBytes.bytesToString(args.token_id);
 
     // require authority of the approver_address
     System.requireAuthority(
@@ -398,7 +405,11 @@ export class Nameservice {
     this.nameApprovals.put(nameKey, to);
 
     // emit event
-    const approvalEvent = new nameservice.token_approval_event(name);
+    const approvalEvent = new nameservice.token_approval_event(
+      approver_address,
+      to,
+      StringBytes.stringToBytes(name)
+    );
 
     System.event(
       "collections.token_approval_event",
@@ -430,6 +441,8 @@ export class Nameservice {
 
     // emit event
     const approvalEvent = new nameservice.operator_approval_event(
+      approver_address,
+      operator_address,
       approved
     );
 
@@ -446,7 +459,8 @@ export class Nameservice {
   // CUSTOM FUNCTIONALITY
 
   burn(args: nameservice.burn_arguments): nameservice.empty_object {
-    const name = args.name;
+    const from = args.from;
+    const name = StringBytes.bytesToString(args.token_id);
 
     // parseName will fail if name has an invalid format
     const parsedName = new ParsedName(name);
@@ -458,13 +472,14 @@ export class Nameservice {
     const nameObj = this.names.get(nameKey);
 
     System.require(nameObj != null, `name "${name}" does not exist`);
+    System.require(Arrays.equal(from, nameObj!.owner), '"from" is not the owner');
 
     // verify ownership
     const callerData = System.getCaller();
 
     System.require(
-      Arrays.equal(callerData.caller, nameObj!.owner) ||
-      System.checkAuthority(authority.authorization_type.contract_call, nameObj!.owner),
+      Arrays.equal(callerData.caller, from) ||
+      System.checkAuthority(authority.authorization_type.contract_call, from),
       'name owner has not authorized burn',
       error.error_code.authorization_failure
     );
@@ -528,7 +543,10 @@ export class Nameservice {
     this.supply.put(supplyObj);
 
     // emit event
-    const burnEvent = new nameservice.burn_event(nameKey);
+    const burnEvent = new nameservice.burn_event(
+      from,
+      StringBytes.stringToBytes(nameKey)
+    );
 
     System.event(
       "collections.burn_event",

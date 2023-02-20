@@ -69,14 +69,14 @@ message balance_of_arguments {
 // @read-only true
 // @result bytes_address_object
 message owner_of_arguments {
-  string token_id = 1;
+  bytes token_id = 1 [(koinos.btype) = HEX];
 }
 
 // @description Gets approved address for a token
 // @read-only true
 // @result bytes_address_object
 message get_approved_arguments {
-   string token_id = 1;
+  bytes token_id = 1 [(koinos.btype) = HEX];
 }
 
 // @description Checks if an operator is approved by an owner
@@ -101,6 +101,16 @@ message mint_arguments {
 }
 
 /* 
+  @description Burn a name or TLA
+  @read-only false
+  @result empty_object
+*/
+message burn_arguments {
+  bytes from = 1 [(koinos.btype) = ADDRESS];
+  bytes token_id = 2 [(koinos.btype) = HEX];
+}
+
+/* 
   @description Transfer ownership of a name or TLA
   @read-only false
   @result empty_object
@@ -108,7 +118,7 @@ message mint_arguments {
 message transfer_arguments {
   bytes from = 1 [(koinos.btype) = ADDRESS];
   bytes to = 2 [(koinos.btype) = ADDRESS];
-  string token_id = 3;
+  bytes token_id = 3 [(koinos.btype) = HEX];
 }
 
 // @description Approves an address to transfer a token
@@ -117,7 +127,7 @@ message transfer_arguments {
 message approve_arguments {
    bytes approver_address = 1 [(koinos.btype) = ADDRESS];
    bytes to = 2 [(koinos.btype) = ADDRESS];
-   string token_id = 3;
+   bytes token_id = 3 [(koinos.btype) = HEX];
 }
 
 // @description Approves or revokes an address to operate on all tokens owned by caller
@@ -132,14 +142,6 @@ message set_approval_for_all_arguments {
 // KCS-2 Entrypoints END
 
 // KAP Entrypoints START
-/* 
-  @description Burn a name or TLA
-  @read-only false
-  @result empty_object
-*/
-message burn_arguments {
-  string name = 1;
-}
 
 /* 
   @description Renew a name
@@ -200,23 +202,31 @@ message get_metadata_arguments {
 
 // KCS-2 Events START
 message mint_event {
-  string token_id = 1;
+  bytes to = 1 [(koinos.btype) = ADDRESS];
+  bytes token_id = 2 [(koinos.btype) = HEX];
 }
 
 message burn_event {
-  string token_id = 1;
+  bytes from = 1 [(koinos.btype) = ADDRESS];
+  bytes token_id = 2 [(koinos.btype) = HEX];
 }
 
 message transfer_event {
-  string token_id = 1;
+  bytes from = 1 [(koinos.btype) = ADDRESS];
+  bytes to = 2 [(koinos.btype) = ADDRESS];
+  bytes token_id = 3 [(koinos.btype) = HEX];
 }
 
 message operator_approval_event {
-  bool approved = 1;
+  bytes approver_address = 1 [(koinos.btype) = ADDRESS];
+  bytes operator_address = 2 [(koinos.btype) = ADDRESS];
+  bool approved = 3;
 }
 
 message token_approval_event {
-  string token_id = 1;
+  bytes approver_address = 1 [(koinos.btype) = ADDRESS];
+  bytes to = 2 [(koinos.btype) = ADDRESS];
+  bytes token_id = 3 [(koinos.btype) = HEX];
 }
 
 // KCS-2 Events END
