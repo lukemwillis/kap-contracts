@@ -1,0 +1,146 @@
+{
+    "methods": {
+        "update_profile": {
+            "argument": "profile.update_profile_arguments",
+            "return": "profile.empty_object",
+            "description": "update the profil linked to an address",
+            "entry_point": 3358560969,
+            "read_only": true
+        },
+        "get_profile": {
+            "argument": "profile.get_profile_arguments",
+            "return": "profile.profile_object",
+            "description": "Get a profile linked to an address",
+            "entry_point": 1168022053,
+            "read_only": true
+        },
+        "set_metadata": {
+            "argument": "profile.set_metadata_arguments",
+            "return": "profile.empty_object",
+            "description": "Set contract metadata",
+            "entry_point": 1029287705,
+            "read_only": false
+        },
+        "get_metadata": {
+            "argument": "profile.get_metadata_arguments",
+            "return": "profile.metadata_object",
+            "description": "Get contract metadata",
+            "entry_point": 4244088463,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "profile": {
+                "nested": {
+                    "update_profile_arguments": {
+                        "fields": {
+                            "address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "profile": {
+                                "type": "profile_object",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "get_profile_arguments": {
+                        "fields": {
+                            "address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "set_metadata_arguments": {
+                        "fields": {
+                            "metadata": {
+                                "type": "metadata_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "get_metadata_arguments": {
+                        "fields": {}
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "profile_object": {
+                        "fields": {
+                            "avatar_contract_id": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "avatar_token_id": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            },
+                            "name": {
+                                "type": "string",
+                                "id": 3
+                            },
+                            "bio": {
+                                "type": "string",
+                                "id": 4
+                            },
+                            "theme": {
+                                "type": "string",
+                                "id": 5
+                            },
+                            "links": {
+                                "rule": "repeated",
+                                "type": "link_object",
+                                "id": 6
+                            }
+                        }
+                    },
+                    "link_object": {
+                        "fields": {
+                            "key": {
+                                "type": "string",
+                                "id": 1
+                            },
+                            "value": {
+                                "type": "string",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "metadata_object": {
+                        "fields": {
+                            "kap_nameservice_address": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            }
+                        }
+                    },
+                    "bytes_object": {
+                        "fields": {
+                            "bytes": {
+                                "type": "bytes",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

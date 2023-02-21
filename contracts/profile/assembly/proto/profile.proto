@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package profile;
+
+import "koinos/options.proto"; 
+
+// entry points
+
+// @description update the profil linked to an address
+// @read-only true
+// @result empty_object
+message update_profile_arguments {
+  bytes address = 1 [(koinos.btype) = ADDRESS];
+  profile_object profile = 2;
+}
+
+// @description Get a profile linked to an address
+// @read-only true
+// @result profile_object
+message get_profile_arguments {
+  bytes address = 1 [(koinos.btype) = ADDRESS];
+}
+
+/* 
+  @description Set contract metadata
+  @read-only false
+  @result empty_object
+*/
+message set_metadata_arguments {
+  metadata_object metadata = 1;
+}
+
+/* 
+  @description Get contract metadata
+  @read-only true
+  @result metadata_object
+*/
+message get_metadata_arguments {
+}
+
+// objects
+message empty_object {
+}
+
+message profile_object {
+  bytes avatar_contract_id = 1 [(koinos.btype) = CONTRACT_ID];
+  bytes avatar_token_id = 2 [(koinos.btype) = HEX];
+  string name = 3;
+  string bio = 4;
+  string theme = 5;
+  repeated link_object links = 6;
+}
+
+message link_object {
+  string key = 1;
+  string value = 2;
+}
+
+message metadata_object {
+  bytes kap_nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
+}
+
+message bytes_object {
+  bytes bytes = 1;
+}

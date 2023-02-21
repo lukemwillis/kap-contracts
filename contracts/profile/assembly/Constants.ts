@@ -1,0 +1,2 @@
+export const OWNER_OF_ENTRYPOINT = 0xed61c847;
+export const VALID_HEX_CHARS = '0123456789abcdefABCDEF';
