@@ -1,0 +1,26 @@
+{
+    "methods": {
+        "mint": {
+            "argument": "testcollection.mint_arguments",
+            "return": "testcollection.empty_object",
+            "description": "Mints a tokens",
+            "entry-point": "0xdc6f17bb",
+            "read-only": false
+        },
+        "transfer": {
+            "argument": "testcollection.transfer_arguments",
+            "return": "testcollection.empty_object",
+            "description": "Transfers a token",
+            "entry-point": "0x27f576ca",
+            "read-only": false
+        },
+        "owner_of": {
+            "argument": "testcollection.owner_of_arguments",
+            "return": "testcollection.owner_object",
+            "description": "Gets the owner of a name",
+            "entry-point": "0xed61c847",
+            "read-only": true
+        }
+    },
+    "types": "CvwCCiNhc3NlbWJseS9wcm90by90ZXN0Y29sbGVjdGlvbi5wcm90bxIOdGVzdGNvbGxlY3Rpb24aFGtvaW5vcy9vcHRpb25zLnByb3RvIk0KDm1pbnRfYXJndW1lbnRzEhoKBW93bmVyGAEgASgMQgSAtRgGUgVvd25lchIfCgh0b2tlbl9pZBgCIAEoDEIEgLUYAlIHdG9rZW5JZCJlChJ0cmFuc2Zlcl9hcmd1bWVudHMSGAoEZnJvbRgBIAEoDEIEgLUYBlIEZnJvbRIUCgJ0bxgCIAEoDEIEgLUYBlICdG8SHwoIdG9rZW5faWQYAyABKAxCBIC1GAJSB3Rva2VuSWQiNQoSb3duZXJfb2ZfYXJndW1lbnRzEh8KCHRva2VuX2lkGAEgASgMQgSAtRgCUgd0b2tlbklkIg4KDGVtcHR5X29iamVjdCIqCgxvd25lcl9vYmplY3QSGgoFb3duZXIYASABKAxCBIC1GAZSBW93bmVyYgZwcm90bzM="
+}

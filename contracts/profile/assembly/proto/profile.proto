@@ -7,7 +7,7 @@ import "koinos/options.proto";
 // entry points
 
 // @description update the profil linked to an address
-// @read-only true
+// @read-only false
 // @result empty_object
 message update_profile_arguments {
   bytes address = 1 [(koinos.btype) = ADDRESS];

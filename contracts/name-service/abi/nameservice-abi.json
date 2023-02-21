@@ -623,7 +623,7 @@
                         "fields": {
                             "value": {
                                 "type": "bytes",
-                                "id": 2,
+                                "id": 1,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }

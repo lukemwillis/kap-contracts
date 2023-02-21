@@ -5,7 +5,7 @@
             "return": "profile.empty_object",
             "description": "update the profil linked to an address",
             "entry_point": 3358560969,
-            "read_only": true
+            "read_only": false
         },
         "get_profile": {
             "argument": "profile.get_profile_arguments",

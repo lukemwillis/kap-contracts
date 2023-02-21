@@ -18,6 +18,7 @@
   "scripts": {
     "lint": "eslint --max-warnings 0 --ext ts \"contracts/*/assembly/**/*.ts\"",
     "test-domain:build": "cd contracts/test-domain && yarn install && yarn build:release",
+    "test-collection:build": "cd contracts/test-collection && yarn install && yarn build:release",
     "usd-oracle:build": "cd contracts/usd-oracle && yarn install && yarn build:release",
     "usd-oracle:deploy": "yarn ts-node ./scripts/deploy-usd-oracle.ts",
     "usd-oracle:set-koin-usd-price": "yarn ts-node ./scripts/set-koin-price-usd-oracle.ts",
@@ -31,8 +32,10 @@
     "name-service:set-metadata": "yarn ts-node ./scripts/set-metadata-name-service.ts",
     "multi-sig:build": "cd contracts/multi-sig && yarn install && yarn build:release",
     "multi-sig:ci": "cd contracts/multi-sig && yarn ci",
-    "all:build": "yarn test-domain:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build",
-    "all:ci": "yarn koin-domain:ci && yarn name-service:ci && yarn multi-sig:ci",
+    "profile:build": "cd contracts/profile && yarn install && yarn build:release",
+    "profile:ci": "cd contracts/profile && yarn ci",
+    "all:build": "yarn test-domain:build && yarn test-collection:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build && yarn profile:build",
+    "all:ci": "yarn koin-domain:ci && yarn name-service:ci && yarn multi-sig:ci  && yarn profile:ci",
     "ci": "yarn lint && yarn all:build && yarn all:ci"
   }
 }

@@ -1444,7 +1444,7 @@ export namespace nameservice {
   export class bytes_address_object {
     static encode(message: bytes_address_object, writer: Writer): void {
       if (message.value.length != 0) {
-        writer.uint32(18);
+        writer.uint32(10);
         writer.bytes(message.value);
       }
     }
@@ -1456,7 +1456,7 @@ export namespace nameservice {
       while (reader.ptr < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
-          case 2:
+          case 1:
             message.value = reader.bytes();
             break;
 

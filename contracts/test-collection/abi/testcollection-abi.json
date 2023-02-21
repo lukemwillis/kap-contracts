@@ -1,0 +1,101 @@
+{
+    "methods": {
+        "mint": {
+            "argument": "testcollection.mint_arguments",
+            "return": "testcollection.empty_object",
+            "description": "Mints a tokens",
+            "entry_point": 3698268091,
+            "read_only": false
+        },
+        "transfer": {
+            "argument": "testcollection.transfer_arguments",
+            "return": "testcollection.empty_object",
+            "description": "Transfers a token",
+            "entry_point": 670398154,
+            "read_only": false
+        },
+        "owner_of": {
+            "argument": "testcollection.owner_of_arguments",
+            "return": "testcollection.owner_object",
+            "description": "Gets the owner of a name",
+            "entry_point": 3982608455,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "testcollection": {
+                "nested": {
+                    "mint_arguments": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "token_id": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            }
+                        }
+                    },
+                    "transfer_arguments": {
+                        "fields": {
+                            "from": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "to": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "token_id": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            }
+                        }
+                    },
+                    "owner_of_arguments": {
+                        "fields": {
+                            "token_id": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            }
+                        }
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "owner_object": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

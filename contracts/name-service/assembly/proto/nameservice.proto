@@ -248,7 +248,7 @@ message bool_object {
 }
 
 message bytes_address_object {
-  bytes value = 2 [(koinos.btype) = ADDRESS];
+  bytes value = 1 [(koinos.btype) = ADDRESS];
 }
 
 message royalty_object {

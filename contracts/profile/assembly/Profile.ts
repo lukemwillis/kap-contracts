@@ -20,7 +20,12 @@ export class Profile {
       tokenId
     );
 
-    const callRes = System.call(contractId, OWNER_OF_ENTRYPOINT, Protobuf.encode(ownerOfArgs, profile.bytes_object.encode));
+    const callRes = System.call(
+      contractId,
+      OWNER_OF_ENTRYPOINT,
+      Protobuf.encode(ownerOfArgs, profile.bytes_object.encode)
+    );
+
     System.require(callRes.code == 0, 'failed to call owner_of');
     const decodedCallRes = Protobuf.decode<profile.bytes_object>(callRes.res.object, profile.bytes_object.decode);
 
@@ -29,7 +34,7 @@ export class Profile {
 
   update_profile(args: profile.update_profile_arguments): profile.empty_object {
     System.require(args.address.length > 0, 'missing "address" argument');
-    System.require(args.profile == null, 'missing "profile" argument');
+    System.require(args.profile != null, 'missing "profile" argument');
 
     const address = args.address;
     const profileObj = args.profile!;
@@ -40,8 +45,7 @@ export class Profile {
     // if an avatar is set, check ownership
     if (profileObj.avatar_contract_id.length > 0 && profileObj.avatar_token_id.length > 0) {
       const avatarOwner = this.getTokenOwner(profileObj.avatar_contract_id, profileObj.avatar_token_id);
-
-      System.require(Arrays.equal(address, avatarOwner), '"address" is not the owner of the token set as avatar.');
+      System.require(Arrays.equal(address, avatarOwner), 'provided "address" is not the owner of the token set as avatar.');
     }
 
     // if a name is set, check ownership
@@ -53,14 +57,14 @@ export class Profile {
         StringBytes.stringToBytes(profileObj.name)
       );
 
-      System.require(Arrays.equal(address, nameOwner), '"address" is not the owner of the "name" provided.');
+      System.require(Arrays.equal(address, nameOwner), 'provided "address" is not the owner of the "name" provided.');
     }
 
     // ensure theme is a valid hex string
     if (profileObj.theme.length > 0) {
       System.require(
         profileObj.theme.length == 3 ||
-        profileObj.theme.length == 6, 
+        profileObj.theme.length == 6,
         '"theme" argument must be composed of 3 or 6 characters.'
       );
 

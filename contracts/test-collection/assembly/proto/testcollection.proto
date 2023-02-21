@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package testcollection;
+
+import "koinos/options.proto"; 
+
+// entrypoints
+
+/* 
+  @description Mints a tokens
+  @read-only false
+  @result empty_object
+*/
+message mint_arguments {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+  bytes token_id = 2 [(koinos.btype) = HEX];
+}
+
+// @description Transfers a token
+// @read-only false
+// @result empty_object
+message transfer_arguments {
+  bytes from = 1 [(koinos.btype) = ADDRESS];
+  bytes to = 2 [(koinos.btype) = ADDRESS];
+  bytes token_id = 3 [(koinos.btype) = HEX];
+}
+
+// @description Gets the owner of a name
+// @read-only true
+// @result owner_object
+message owner_of_arguments {
+  bytes token_id = 1 [(koinos.btype) = HEX];
+}
+
+// Objects
+message empty_object {
+}
+
+message owner_object {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+}
