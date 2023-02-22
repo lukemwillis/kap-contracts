@@ -320,9 +320,9 @@ export namespace profile {
 
   export class metadata_object {
     static encode(message: metadata_object, writer: Writer): void {
-      if (message.kap_nameservice_address.length != 0) {
+      if (message.nameservice_address.length != 0) {
         writer.uint32(10);
-        writer.bytes(message.kap_nameservice_address);
+        writer.bytes(message.nameservice_address);
       }
     }
 
@@ -334,7 +334,7 @@ export namespace profile {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.kap_nameservice_address = reader.bytes();
+            message.nameservice_address = reader.bytes();
             break;
 
           default:
@@ -346,10 +346,10 @@ export namespace profile {
       return message;
     }
 
-    kap_nameservice_address: Uint8Array;
+    nameservice_address: Uint8Array;
 
-    constructor(kap_nameservice_address: Uint8Array = new Uint8Array(0)) {
-      this.kap_nameservice_address = kap_nameservice_address;
+    constructor(nameservice_address: Uint8Array = new Uint8Array(0)) {
+      this.nameservice_address = nameservice_address;
     }
   }
 

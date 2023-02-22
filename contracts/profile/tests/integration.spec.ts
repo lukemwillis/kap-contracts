@@ -84,7 +84,7 @@ describe('profile', () => {
   it('should set the contract metadata', async () => {
     let res = await profileContract.functions.set_metadata({
       metadata: {
-        kap_nameservice_address: nameserviceContract.getId()
+        nameservice_address: nameserviceContract.getId()
       }
     });
 
@@ -92,7 +92,7 @@ describe('profile', () => {
 
     res = await profileContract.functions.get_metadata({});
 
-    expect(res.result.kap_nameservice_address).toEqual(nameserviceContract.getId());
+    expect(res.result.nameservice_address).toEqual(nameserviceContract.getId());
   });
 
   it('should set a profile', async () => {

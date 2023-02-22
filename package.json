@@ -34,6 +34,8 @@
     "multi-sig:ci": "cd contracts/multi-sig && yarn ci",
     "profile:build": "cd contracts/profile && yarn install && yarn build:release",
     "profile:ci": "cd contracts/profile && yarn ci",
+    "profile:deploy": "yarn ts-node ./scripts/deploy-profile.ts",
+    "profile:set-metadata": "yarn ts-node ./scripts/set-metadata-profile.ts",
     "all:build": "yarn test-domain:build && yarn test-collection:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build && yarn profile:build",
     "all:ci": "yarn koin-domain:ci && yarn name-service:ci && yarn multi-sig:ci  && yarn profile:ci",
     "ci": "yarn lint && yarn all:build && yarn all:ci"

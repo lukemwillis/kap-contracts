@@ -122,7 +122,7 @@
                     },
                     "metadata_object": {
                         "fields": {
-                            "kap_nameservice_address": {
+                            "nameservice_address": {
                                 "type": "bytes",
                                 "id": 1,
                                 "options": {

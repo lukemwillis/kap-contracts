@@ -43,7 +43,7 @@ export class Profile {
     // YOUR CODE HERE
 
     const res = new profile.metadata_object();
-    // res.kap_nameservice_address = ;
+    // res.nameservice_address = ;
 
     return res;
   }

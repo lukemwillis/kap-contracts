@@ -53,7 +53,7 @@ export class Profile {
       const metadata = this.metadata.get()!;
 
       const nameOwner = this.getTokenOwner(
-        metadata.kap_nameservice_address,
+        metadata.nameservice_address,
         StringBytes.stringToBytes(profileObj.name)
       );
 
@@ -103,7 +103,7 @@ export class Profile {
       const metadata = this.metadata.get()!;
 
       const nameOwner = this.getTokenOwner(
-        metadata.kap_nameservice_address,
+        metadata.nameservice_address,
         StringBytes.stringToBytes(profileObj.name)
       );
 

@@ -57,7 +57,7 @@ message link_object {
 }
 
 message metadata_object {
-  bytes kap_nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
+  bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
 }
 
 message bytes_object {

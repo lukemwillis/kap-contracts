@@ -1,0 +1,36 @@
+import { Signer, Provider, Contract } from 'koilib';
+import * as abi from '../contracts/profile/abi/profile-abi.json';
+require('dotenv').config();
+
+const { 
+  PROFILE_PRIVATE_KEY, 
+  RPC_URL, 
+  NAME_SERVICE_ADDRESS,
+} = process.env;
+
+// @ts-ignore koilib_types is needed when using koilib
+abi.koilib_types = abi.types;
+
+(async () => {
+  const provider = new Provider(RPC_URL!);
+  const signer = Signer.fromWif(PROFILE_PRIVATE_KEY!);
+  signer.provider = provider;
+
+  const contract = new Contract({
+    id: signer.address,
+    // @ts-ignore abi is compatible
+    abi,
+    provider,
+    signer
+  });
+
+  const res = await contract.functions.set_metadata({
+    metadata: {
+      nameservice_address: NAME_SERVICE_ADDRESS
+    }
+  });
+
+  await res.transaction?.wait();
+
+  console.log('Profile metadata set');
+})();
