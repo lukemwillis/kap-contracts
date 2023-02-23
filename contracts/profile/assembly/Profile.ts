@@ -42,24 +42,6 @@ export class Profile {
     // only the owner of address can update the profile
     System.requireAuthority(authority.authorization_type.contract_call, address);
 
-    // if an avatar is set, check ownership
-    if (profileObj.avatar_contract_id.length > 0 && profileObj.avatar_token_id.length > 0) {
-      const avatarOwner = this.getTokenOwner(profileObj.avatar_contract_id, profileObj.avatar_token_id);
-      System.require(Arrays.equal(address, avatarOwner), 'provided "address" is not the owner of the token set as avatar.');
-    }
-
-    // if a name is set, check ownership
-    if (profileObj.name.length > 0) {
-      const metadata = this.metadata.get()!;
-
-      const nameOwner = this.getTokenOwner(
-        metadata.nameservice_address,
-        StringBytes.stringToBytes(profileObj.name)
-      );
-
-      System.require(Arrays.equal(address, nameOwner), 'provided "address" is not the owner of the "name" provided.');
-    }
-
     // ensure theme is a valid hex string
     if (profileObj.theme.length > 0) {
       System.require(

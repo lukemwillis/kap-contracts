@@ -268,7 +268,7 @@ describe('profile', () => {
   });
 
   it('should not set a profile', async () => {
-    expect.assertions(6);
+    expect.assertions(4);
 
     try {
       await profileContract.functions.update_profile({
@@ -300,48 +300,6 @@ describe('profile', () => {
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual('missing "profile" argument');
-    }
-
-    try {
-      await profileContract.functions.update_profile({
-        address: user1.address,
-        profile: {
-          avatar_contract_id: collectionContract.getId(),
-          avatar_token_id: '0x02',
-          name: 'user1',
-          bio: 'I am user one',
-          theme: '000',
-          links: [
-          ]
-        }
-      }, {
-        beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx);
-        }
-      });
-    } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('provided "address" is not the owner of the token set as avatar.');
-    }
-
-    try {
-      await profileContract.functions.update_profile({
-        address: user1.address,
-        profile: {
-          avatar_contract_id: collectionContract.getId(),
-          avatar_token_id: '0x01',
-          name: 'user2',
-          bio: 'I am user one',
-          theme: '000',
-          links: [
-          ]
-        }
-      }, {
-        beforeSend: async (tx) => {
-          await user1.signer.signTransaction(tx);
-        }
-      });
-    } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('provided "address" is not the owner of the "name" provided.');
     }
 
     try {
