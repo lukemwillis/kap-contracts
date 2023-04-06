@@ -85,6 +85,8 @@ export class Koindomain {
     // const nameservice_address = args.nameservice_address;
     // const oracle_address = args.oracle_address;
     // const owner = args.owner;
+    // const press_badge_address = args.press_badge_address;
+    // const is_launched = args.is_launched;
 
     // YOUR CODE HERE
 
@@ -102,6 +104,8 @@ export class Koindomain {
     // res.nameservice_address = ;
     // res.oracle_address = ;
     // res.owner = ;
+    // res.press_badge_address = ;
+    // res.is_launched = ;
 
     return res;
   }

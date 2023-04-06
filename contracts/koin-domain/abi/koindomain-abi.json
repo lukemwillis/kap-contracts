@@ -211,6 +211,17 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "press_badge_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "is_launched": {
+                                "type": "bool",
+                                "id": 5
                             }
                         }
                     },
@@ -237,6 +248,28 @@
                             "timestamp": {
                                 "type": "uint64",
                                 "id": 2
+                            }
+                        }
+                    },
+                    "balance_of_nft_args": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "balance_of_nft_res": {
+                        "fields": {
+                            "value": {
+                                "type": "uint64",
+                                "id": 1,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             }
                         }
                     },
@@ -312,6 +345,17 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "press_badge_address": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "is_launched": {
+                                "type": "bool",
+                                "id": 5
                             }
                         }
                     },

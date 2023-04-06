@@ -471,6 +471,16 @@ export namespace koindomain {
         writer.uint32(26);
         writer.bytes(message.owner);
       }
+
+      if (message.press_badge_address.length != 0) {
+        writer.uint32(34);
+        writer.bytes(message.press_badge_address);
+      }
+
+      if (message.is_launched != false) {
+        writer.uint32(40);
+        writer.bool(message.is_launched);
+      }
     }
 
     static decode(reader: Reader, length: i32): set_metadata_arguments {
@@ -492,6 +502,14 @@ export namespace koindomain {
             message.owner = reader.bytes();
             break;
 
+          case 4:
+            message.press_badge_address = reader.bytes();
+            break;
+
+          case 5:
+            message.is_launched = reader.bool();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -504,15 +522,21 @@ export namespace koindomain {
     nameservice_address: Uint8Array;
     oracle_address: Uint8Array;
     owner: Uint8Array;
+    press_badge_address: Uint8Array;
+    is_launched: bool;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
       oracle_address: Uint8Array = new Uint8Array(0),
-      owner: Uint8Array = new Uint8Array(0)
+      owner: Uint8Array = new Uint8Array(0),
+      press_badge_address: Uint8Array = new Uint8Array(0),
+      is_launched: bool = false
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
       this.owner = owner;
+      this.press_badge_address = press_badge_address;
+      this.is_launched = is_launched;
     }
   }
 
@@ -618,6 +642,77 @@ export namespace koindomain {
     constructor(price: u64 = 0, timestamp: u64 = 0) {
       this.price = price;
       this.timestamp = timestamp;
+    }
+  }
+
+  export class balance_of_nft_args {
+    static encode(message: balance_of_nft_args, writer: Writer): void {
+      if (message.owner.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.owner);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): balance_of_nft_args {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new balance_of_nft_args();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.owner = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    owner: Uint8Array;
+
+    constructor(owner: Uint8Array = new Uint8Array(0)) {
+      this.owner = owner;
+    }
+  }
+
+  @unmanaged
+  export class balance_of_nft_res {
+    static encode(message: balance_of_nft_res, writer: Writer): void {
+      if (message.value != 0) {
+        writer.uint32(8);
+        writer.uint64(message.value);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): balance_of_nft_res {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new balance_of_nft_res();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.value = reader.uint64();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    value: u64;
+
+    constructor(value: u64 = 0) {
+      this.value = value;
     }
   }
 
@@ -769,6 +864,16 @@ export namespace koindomain {
         writer.uint32(26);
         writer.bytes(message.owner);
       }
+
+      if (message.press_badge_address.length != 0) {
+        writer.uint32(34);
+        writer.bytes(message.press_badge_address);
+      }
+
+      if (message.is_launched != false) {
+        writer.uint32(40);
+        writer.bool(message.is_launched);
+      }
     }
 
     static decode(reader: Reader, length: i32): metadata_object {
@@ -790,6 +895,14 @@ export namespace koindomain {
             message.owner = reader.bytes();
             break;
 
+          case 4:
+            message.press_badge_address = reader.bytes();
+            break;
+
+          case 5:
+            message.is_launched = reader.bool();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -802,15 +915,21 @@ export namespace koindomain {
     nameservice_address: Uint8Array;
     oracle_address: Uint8Array;
     owner: Uint8Array;
+    press_badge_address: Uint8Array;
+    is_launched: bool;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
       oracle_address: Uint8Array = new Uint8Array(0),
-      owner: Uint8Array = new Uint8Array(0)
+      owner: Uint8Array = new Uint8Array(0),
+      press_badge_address: Uint8Array = new Uint8Array(0),
+      is_launched: bool = false
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
       this.owner = owner;
+      this.press_badge_address = press_badge_address;
+      this.is_launched = is_launched;
     }
   }
 

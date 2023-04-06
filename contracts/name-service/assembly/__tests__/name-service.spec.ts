@@ -88,7 +88,7 @@ describe("nameservice", () => {
       new ParsedName(name);
     }).toThrow();
 
-    expect(MockVM.getErrorMessage()).toStrictEqual('element "-name" cannot start with an hyphen (-)');
+    expect(MockVM.getErrorMessage()).toStrictEqual('element "-name" cannot start or end with a hyphen (-)');
 
     expect(() => {
       const ns = new Nameservice();
@@ -97,7 +97,7 @@ describe("nameservice", () => {
       new ParsedName(name);
     }).toThrow();
 
-    expect(MockVM.getErrorMessage()).toStrictEqual('element "name-" cannot end with an hyphen (-)');
+    expect(MockVM.getErrorMessage()).toStrictEqual('element "name-" cannot start or end with a hyphen (-)');
 
     expect(() => {
       const ns = new Nameservice();

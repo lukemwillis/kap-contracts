@@ -1,5 +1,24 @@
-import { Arrays, authority, Crypto, error, Protobuf, SafeMath, StringBytes, System, system_calls, Token, value } from "@koinos/sdk-as";
-import { AUTHORIZE_MINT_ENTRYPOINT, AUTHORIZE_RENEWAL_ENTRYPOINT, AUTHORIZE_BURN_ENTRYPOINT, NAME, SYMBOL, URI } from "./Constants";
+import {
+  Arrays,
+  authority,
+  Crypto,
+  error,
+  Protobuf,
+  SafeMath,
+  StringBytes,
+  System,
+  system_calls,
+  Token,
+  value,
+} from "@koinos/sdk-as";
+import {
+  AUTHORIZE_MINT_ENTRYPOINT,
+  AUTHORIZE_RENEWAL_ENTRYPOINT,
+  AUTHORIZE_BURN_ENTRYPOINT,
+  NAME,
+  SYMBOL,
+  URI,
+} from "./Constants";
 import { nameservice } from "./proto/nameservice";
 import { OwnersIndex } from "./state/OwnersIndex";
 import { Metadata } from "./state/Metadata";
@@ -23,17 +42,20 @@ export class Nameservice {
     const metadata = this.metadata.get()!;
 
     // if the owner is not this contract id, then check authority of owner
-    if (metadata.owner.length > 0 && !Arrays.equal(this.contractId, metadata.owner)) {
+    if (
+      metadata.owner.length > 0 &&
+      !Arrays.equal(this.contractId, metadata.owner)
+    ) {
       return new authority.authorize_result(
-        System.checkAuthority(
-          args.type,
-          metadata.owner
-        )
+        System.checkAuthority(args.type, metadata.owner)
       );
     } else {
       // otherwise check transaction signatures
-      const transactionId = System.getTransactionField('id')!.bytes_value;
-      const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
+      const transactionId = System.getTransactionField("id")!.bytes_value;
+      const signatures = Protobuf.decode<value.list_type>(
+        System.getTransactionField("signatures")!.message_value!.value!,
+        value.list_type.decode
+      );
 
       let signature: Uint8Array;
       let recoveredKey: Uint8Array;
@@ -67,16 +89,22 @@ export class Nameservice {
     return new nameservice.string_object(URI);
   }
 
-  total_supply(args: nameservice.total_supply_arguments): nameservice.uint64_object {
+  total_supply(
+    args: nameservice.total_supply_arguments
+  ): nameservice.uint64_object {
     const supply = this.supply.get()!;
     return new nameservice.uint64_object(supply.value);
   }
 
-  royalties(args: nameservice.royalties_arguments): nameservice.royalties_result {
+  royalties(
+    args: nameservice.royalties_arguments
+  ): nameservice.royalties_result {
     return new nameservice.royalties_result();
   }
 
-  set_royalties(args: nameservice.set_royalties_arguments): nameservice.empty_object {
+  set_royalties(
+    args: nameservice.set_royalties_arguments
+  ): nameservice.empty_object {
     // not supported
     return new nameservice.empty_object();
   }
@@ -86,9 +114,14 @@ export class Nameservice {
     return new nameservice.bytes_address_object(metadata.owner);
   }
 
-  transfer_ownership(args: nameservice.transfer_ownership_arguments): nameservice.empty_object {
+  transfer_ownership(
+    args: nameservice.transfer_ownership_arguments
+  ): nameservice.empty_object {
     // only this contract owner can update the owner
-    System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
+    System.requireAuthority(
+      authority.authorization_type.contract_call,
+      this.contractId
+    );
 
     const owner = args.owner;
     System.require(owner.length > 0, 'argument "owner" is missng');
@@ -101,7 +134,9 @@ export class Nameservice {
     return new nameservice.empty_object();
   }
 
-  balance_of(args: nameservice.balance_of_arguments): nameservice.uint64_object {
+  balance_of(
+    args: nameservice.balance_of_arguments
+  ): nameservice.uint64_object {
     const owner = args.owner;
 
     let ownerIndexKey = new nameservice.owner_index_key(
@@ -122,7 +157,10 @@ export class Nameservice {
       ownerIndexObj = this.ownersIndex.getNext(ownerIndexKey);
 
       if (ownerIndexObj) {
-        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key, nameservice.owner_index_key.decode);
+        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(
+          ownerIndexObj.key,
+          nameservice.owner_index_key.decode
+        );
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
           tmpName = StringBytes.bytesToString(ownerIndexObj.value);
@@ -139,13 +177,14 @@ export class Nameservice {
           break;
         }
       }
-
     } while (ownerIndexObj != null);
 
     return new nameservice.uint64_object(result);
   }
 
-  owner_of(args: nameservice.owner_of_arguments): nameservice.bytes_address_object {
+  owner_of(
+    args: nameservice.owner_of_arguments
+  ): nameservice.bytes_address_object {
     const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
     const res = new nameservice.bytes_address_object();
@@ -159,7 +198,9 @@ export class Nameservice {
     return res;
   }
 
-  get_approved(args: nameservice.get_approved_arguments): nameservice.bytes_address_object {
+  get_approved(
+    args: nameservice.get_approved_arguments
+  ): nameservice.bytes_address_object {
     const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
     const res = new nameservice.bytes_address_object();
@@ -173,7 +214,9 @@ export class Nameservice {
     return res;
   }
 
-  is_approved_for_all(args: nameservice.is_approved_for_all_arguments): nameservice.bool_object {
+  is_approved_for_all(
+    args: nameservice.is_approved_for_all_arguments
+  ): nameservice.bool_object {
     return this.operatorApprovals.getApproval(args.owner, args.operator);
   }
 
@@ -188,7 +231,7 @@ export class Nameservice {
 
     // parseName will fail if name has an invalid format
     const parsedName = new ParsedName(name);
-    // we use the key generated from the parsed name 
+    // we use the key generated from the parsed name
     // in case we want to add sanitization later on
     const nameKey = parsedName.key();
 
@@ -197,11 +240,12 @@ export class Nameservice {
     const isNewName = nameObj == null;
 
     // if it already exists and has not expired and the grace_period has not ended
-    if (nameObj != null && (
-      nameObj.expiration == 0 ||
-      nameObj.expiration > this.now ||
-      nameObj.grace_period_end > this.now
-    )) {
+    if (
+      nameObj != null &&
+      (nameObj.expiration == 0 ||
+        nameObj.expiration > this.now ||
+        nameObj.grace_period_end > this.now)
+    ) {
       System.revert(`name "${name}" is already taken`);
     } else if (nameObj == null) {
       nameObj = new nameservice.name_object(parsedName.domain, parsedName.name);
@@ -210,15 +254,28 @@ export class Nameservice {
     // is the user trying to mint a TLA?
     if (nameObj.domain.length == 0) {
       // only this contract owner can mint TLAs for now
-      System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
+      System.requireAuthority(
+        authority.authorization_type.contract_call,
+        this.contractId
+      );
       const metadata = this.metadata.get()!;
 
       // lock $KAP tokens
       if (metadata.tla_mint_fee > 0) {
-        System.require(payment_from.length > 0, 'argument "payment_from" is missing');
+        System.require(
+          payment_from.length > 0,
+          'argument "payment_from" is missing'
+        );
 
         const tokenContract = new Token(metadata.kap_token_address);
-        System.require(tokenContract.transfer(payment_from, this.contractId, metadata.tla_mint_fee), 'could not lock $KAP tokens');
+        System.require(
+          tokenContract.transfer(
+            payment_from,
+            this.contractId,
+            metadata.tla_mint_fee
+          ),
+          "could not lock $KAP tokens"
+        );
 
         nameObj.locked_kap_tokens = metadata.tla_mint_fee;
       }
@@ -226,16 +283,19 @@ export class Nameservice {
       // otherwise, the user is trying to mint a name
       // get the domain
       // to get the domain object, we need to parse the domain name into a name_object
-      // if the user is trying to mint "john.koin" 
+      // if the user is trying to mint "john.koin"
       // then we need to get the domain with the name_object name: "koin" / domain: ""
-      // if the user is trying to mint "john.sub.koin" 
+      // if the user is trying to mint "john.sub.koin"
       // then we need to get the domain for the name_object name: "sub" / domain: "koin"
-      // if the user is trying to mint "john.subsub.sub.koin" 
+      // if the user is trying to mint "john.subsub.sub.koin"
       // then we need to get the domain for the name_object name: "subsub" / domain: "sub.koin"
       const domainObj = this.getName(nameObj.domain);
 
       // should not allow minting if a domain does not exist or if the domain has expired
-      System.require(domainObj != null, `domain "${nameObj.domain}" does not exist`);
+      System.require(
+        domainObj != null,
+        `domain "${nameObj.domain}" does not exist`
+      );
 
       // call the "authorize_mint" entrypoint of the contract hosted at "owner" address
       // this call must return the name expiration as uint64 and the grace period end as uint64
@@ -319,7 +379,11 @@ export class Nameservice {
     System.require(nameObj != null, `name "${name}" does not exist`);
 
     // ensure owner is "from"
-    System.require(Arrays.equal(nameObj!.owner, from), `from is not the owner of "${name}"`, error.error_code.authorization_failure);
+    System.require(
+      Arrays.equal(nameObj!.owner, from),
+      `from is not the owner of "${name}"`,
+      error.error_code.authorization_failure
+    );
 
     // check token authorizations
     let isTokenApproved: bool = false;
@@ -336,16 +400,26 @@ export class Nameservice {
 
       if (!isTokenApproved) {
         // check if the caller is an approved operator
-        const operatorApproval = this.operatorApprovals.getApproval(nameObj!.owner, caller);
+        const operatorApproval = this.operatorApprovals.getApproval(
+          nameObj!.owner,
+          caller
+        );
         isTokenApproved = operatorApproval.value;
 
         if (!isTokenApproved) {
           // otherwise check authority of "from"
-          isTokenApproved = System.checkAuthority(authority.authorization_type.contract_call, from);
+          isTokenApproved = System.checkAuthority(
+            authority.authorization_type.contract_call,
+            from
+          );
         }
       }
 
-      System.require(isTokenApproved, 'from has not authorized transfer', error.error_code.authorization_failure);
+      System.require(
+        isTokenApproved,
+        "from has not authorized transfer",
+        error.error_code.authorization_failure
+      );
     }
 
     // remove approval
@@ -390,15 +464,24 @@ export class Nameservice {
     const nameKey = parsedName.key();
     const nameObj = this.names.get(nameKey);
 
-    System.require(nameObj != null, 'nonexistent token');
+    System.require(nameObj != null, "nonexistent token");
 
     // check that the to is not the owner
-    System.require(!Arrays.equal(nameObj!.owner, to), 'approve to current owner');
+    System.require(
+      !Arrays.equal(nameObj!.owner, to),
+      "approve to current owner"
+    );
 
     // check that the approver_address is allowed to approve the token
     if (!Arrays.equal(nameObj!.owner, approver_address)) {
-      const approval = this.operatorApprovals.getApproval(nameObj!.owner, approver_address);
-      System.require(approval.value == true, 'approver_address is not owner nor approved');
+      const approval = this.operatorApprovals.getApproval(
+        nameObj!.owner,
+        approver_address
+      );
+      System.require(
+        approval.value == true,
+        "approver_address is not owner nor approved"
+      );
     }
 
     // update approval
@@ -420,7 +503,9 @@ export class Nameservice {
     return new nameservice.empty_object();
   }
 
-  set_approval_for_all(args: nameservice.set_approval_for_all_arguments): nameservice.empty_object {
+  set_approval_for_all(
+    args: nameservice.set_approval_for_all_arguments
+  ): nameservice.empty_object {
     const approver_address = args.approver_address;
     const operator_address = args.operator_address;
     const approved = args.approved;
@@ -432,12 +517,22 @@ export class Nameservice {
     );
 
     // check that the approver_address is not the address to approve
-    System.require(!Arrays.equal(approver_address, operator_address), 'approve to operator_address');
+    System.require(
+      !Arrays.equal(approver_address, operator_address),
+      "approve to operator_address"
+    );
 
     // update the approval
-    const approval = this.operatorApprovals.getApproval(approver_address, operator_address);
+    const approval = this.operatorApprovals.getApproval(
+      approver_address,
+      operator_address
+    );
     approval.value = approved;
-    this.operatorApprovals.putApproval(approver_address, operator_address, approval);
+    this.operatorApprovals.putApproval(
+      approver_address,
+      operator_address,
+      approval
+    );
 
     // emit event
     const approvalEvent = new nameservice.operator_approval_event(
@@ -448,7 +543,10 @@ export class Nameservice {
 
     System.event(
       "collections.operator_approval_event",
-      Protobuf.encode(approvalEvent, nameservice.operator_approval_event.encode),
+      Protobuf.encode(
+        approvalEvent,
+        nameservice.operator_approval_event.encode
+      ),
       [operator_address, approver_address]
     );
 
@@ -472,20 +570,26 @@ export class Nameservice {
     const nameObj = this.names.get(nameKey);
 
     System.require(nameObj != null, `name "${name}" does not exist`);
-    System.require(Arrays.equal(from, nameObj!.owner), '"from" is not the owner');
+    System.require(
+      Arrays.equal(from, nameObj!.owner),
+      '"from" is not the owner'
+    );
 
     // verify ownership
     const callerData = System.getCaller();
 
     System.require(
       Arrays.equal(callerData.caller, from) ||
-      System.checkAuthority(authority.authorization_type.contract_call, from),
-      'name owner has not authorized burn',
+        System.checkAuthority(authority.authorization_type.contract_call, from),
+      "name owner has not authorized burn",
       error.error_code.authorization_failure
     );
 
     // can only burn a name if no sub_names were setup
-    System.require(nameObj!.sub_names_count == 0, `name "${name}" cannot be burned because sub names exist`);
+    System.require(
+      nameObj!.sub_names_count == 0,
+      `name "${name}" cannot be burned because sub names exist`
+    );
 
     // if TLA
     if (nameObj!.domain.length == 0) {
@@ -494,7 +598,14 @@ export class Nameservice {
         const metadata = this.metadata.get()!;
         const tokenContract = new Token(metadata.kap_token_address);
 
-        System.require(tokenContract.transfer(this.contractId, nameObj!.owner, nameObj!.locked_kap_tokens), 'could not unlock $KAP tokens');
+        System.require(
+          tokenContract.transfer(
+            this.contractId,
+            nameObj!.owner,
+            nameObj!.locked_kap_tokens
+          ),
+          "could not unlock $KAP tokens"
+        );
       }
 
       // remove TLA from state
@@ -511,12 +622,13 @@ export class Nameservice {
       // call the "authorize_burn" entrypoint of the contract hosted at "owner" address
       // if this call doesn't revert the transaction,
       // proceed with the burn
-      const authorized = this.authorizeBurn(
-        nameObj!,
-        domainObj.owner
-      );
+      const authorized = this.authorizeBurn(nameObj!, domainObj.owner);
 
-      System.require(authorized == true, 'domain contract did not authorize burn', error.error_code.authorization_failure);
+      System.require(
+        authorized == true,
+        "domain contract did not authorize burn",
+        error.error_code.authorization_failure
+      );
 
       // delete name from the state
       this.names.remove(nameKey);
@@ -572,17 +684,23 @@ export class Nameservice {
     let nameObj = this.getName(nameKey);
 
     System.require(nameObj != null, `name "${name}" does not exist`);
-    System.require(nameObj!.expiration != 0, `cannot renew "${name}" because it cannot expire`);
+    System.require(
+      nameObj!.expiration != 0,
+      `cannot renew "${name}" because it cannot expire`
+    );
 
     // if TLA, revert for now
     if (nameObj!.domain.length == 0) {
-      System.revert('TLAs cannot be renewed at the moment');
+      System.revert("TLAs cannot be renewed at the moment");
     } else {
       // get domain object
       // cannot renew a name on an expired domain
       const domainObj = this.getName(nameObj!.domain);
 
-      System.require(domainObj != null, `cannot renew name "${name}" because its domain has expired`);
+      System.require(
+        domainObj != null,
+        `cannot renew name "${name}" because its domain has expired`
+      );
 
       // call the "authorize_renewal" entrypoint of the contract hosted at "owner" address
       // if this call doesn't revert the transaction,
@@ -640,13 +758,12 @@ export class Nameservice {
       // a sha256 multihash is 34 bytes long (2 bytes for the multihash code, and 32 bytes for the digest)
       // to get the first element in the index, use a hash where all the bytes are set to 0
       // to get the last element in the index, use a hash where all the bytes are set to 255
-      nameKeyHash = descending ? new Uint8Array(34).fill(u8.MAX_VALUE) : new Uint8Array(34).fill(u8.MIN_VALUE);
+      nameKeyHash = descending
+        ? new Uint8Array(34).fill(u8.MAX_VALUE)
+        : new Uint8Array(34).fill(u8.MIN_VALUE);
     }
 
-    let ownerIndexKey = new nameservice.owner_index_key(
-      owner,
-      nameKeyHash
-    );
+    let ownerIndexKey = new nameservice.owner_index_key(owner, nameKeyHash);
 
     const res = new nameservice.get_names_result();
 
@@ -655,10 +772,15 @@ export class Nameservice {
     let tmpOwnerIndexKey: nameservice.owner_index_key;
 
     do {
-      ownerIndexObj = descending ? this.ownersIndex.getPrev(ownerIndexKey) : this.ownersIndex.getNext(ownerIndexKey);
+      ownerIndexObj = descending
+        ? this.ownersIndex.getPrev(ownerIndexKey)
+        : this.ownersIndex.getNext(ownerIndexKey);
 
       if (ownerIndexObj) {
-        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(ownerIndexObj.key, nameservice.owner_index_key.decode);
+        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(
+          ownerIndexObj.key,
+          nameservice.owner_index_key.decode
+        );
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
           tmpName = StringBytes.bytesToString(ownerIndexObj.value);
@@ -674,7 +796,6 @@ export class Nameservice {
           break;
         }
       }
-
     } while (ownerIndexObj != null && limit > 0);
 
     return res;
@@ -684,17 +805,18 @@ export class Nameservice {
     args: nameservice.set_metadata_arguments
   ): nameservice.empty_object {
     // only this contract owner can set the metadata
-    System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
+    System.requireAuthority(
+      authority.authorization_type.contract_call,
+      this.contractId
+    );
 
     const tla_mint_fee = args.tla_mint_fee;
     const kap_token_address = args.kap_token_address;
     const owner = args.owner;
 
-    this.metadata.put(new nameservice.metadata_object(
-      tla_mint_fee,
-      kap_token_address,
-      owner
-    ));
+    this.metadata.put(
+      new nameservice.metadata_object(tla_mint_fee, kap_token_address, owner)
+    );
 
     return new nameservice.empty_object();
   }
@@ -708,18 +830,19 @@ export class Nameservice {
   // PRIVATE FUNCTIONS
 
   /**
-  * Get a name from the Names space
-  * @return the name if found and it has not expired and the grace_peiod has not ended
-  */
+   * Get a name from the Names space
+   * @return the name if found and it has not expired and the grace_peiod has not ended
+   */
   private getName(key: string): nameservice.name_object | null {
     const nameObj = this.names.get(key);
 
     // if it exists and has not expired and the grace_period has not ended
-    if (nameObj != null && (
-      nameObj.expiration == 0 ||
-      nameObj.expiration > this.now ||
-      nameObj.grace_period_end > this.now
-    )) {
+    if (
+      nameObj != null &&
+      (nameObj.expiration == 0 ||
+        nameObj.expiration > this.now ||
+        nameObj.grace_period_end > this.now)
+    ) {
       return nameObj;
     }
 
@@ -748,9 +871,20 @@ export class Nameservice {
       paymentTokenAddress
     );
 
-    const callRes = System.call(domainContractId, AUTHORIZE_MINT_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_mint_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize mint', error.error_code.authorization_failure);
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_mint_res>(callRes.res.object, nameservice.authorize_mint_res.decode);
+    const callRes = System.call(
+      domainContractId,
+      AUTHORIZE_MINT_ENTRYPOINT,
+      Protobuf.encode(authArgs, nameservice.authorize_mint_args.encode)
+    );
+    System.require(
+      callRes.code == 0,
+      "failed to authorize mint",
+      error.error_code.authorization_failure
+    );
+    const decodedCallRes = Protobuf.decode<nameservice.authorize_mint_res>(
+      callRes.res.object,
+      nameservice.authorize_mint_res.decode
+    );
 
     return decodedCallRes;
   }
@@ -762,13 +896,22 @@ export class Nameservice {
     nameObj: nameservice.name_object,
     domainContractId: Uint8Array
   ): bool {
-    const authArgs = new nameservice.authorize_burn_args(
-      nameObj
-    );
+    const authArgs = new nameservice.authorize_burn_args(nameObj);
 
-    const callRes = System.call(domainContractId, AUTHORIZE_BURN_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_burn_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize burn', error.error_code.authorization_failure);
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_burn_res>(callRes.res.object, nameservice.authorize_burn_res.decode);
+    const callRes = System.call(
+      domainContractId,
+      AUTHORIZE_BURN_ENTRYPOINT,
+      Protobuf.encode(authArgs, nameservice.authorize_burn_args.encode)
+    );
+    System.require(
+      callRes.code == 0,
+      "failed to authorize burn",
+      error.error_code.authorization_failure
+    );
+    const decodedCallRes = Protobuf.decode<nameservice.authorize_burn_res>(
+      callRes.res.object,
+      nameservice.authorize_burn_res.decode
+    );
 
     return decodedCallRes.authorized;
   }
@@ -791,9 +934,20 @@ export class Nameservice {
       paymentTokenAddress
     );
 
-    const callRes = System.call(domainContractId, AUTHORIZE_RENEWAL_ENTRYPOINT, Protobuf.encode(authArgs, nameservice.authorize_renewal_args.encode));
-    System.require(callRes.code == 0, 'failed to authorize reclaim', error.error_code.authorization_failure);
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_renewal_res>(callRes.res.object, nameservice.authorize_renewal_res.decode);
+    const callRes = System.call(
+      domainContractId,
+      AUTHORIZE_RENEWAL_ENTRYPOINT,
+      Protobuf.encode(authArgs, nameservice.authorize_renewal_args.encode)
+    );
+    System.require(
+      callRes.code == 0,
+      "failed to authorize reclaim",
+      error.error_code.authorization_failure
+    );
+    const decodedCallRes = Protobuf.decode<nameservice.authorize_renewal_res>(
+      callRes.res.object,
+      nameservice.authorize_renewal_res.decode
+    );
 
     return decodedCallRes;
   }
