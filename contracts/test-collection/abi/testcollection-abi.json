@@ -14,6 +14,13 @@
             "entry_point": 670398154,
             "read_only": false
         },
+        "balance_of": {
+            "argument": "testcollection.balance_of_arguments",
+            "return": "testcollection.balance_object",
+            "description": "Balance of an owner",
+            "entry_point": 1550980247,
+            "read_only": true
+        },
         "owner_of": {
             "argument": "testcollection.owner_of_arguments",
             "return": "testcollection.owner_object",
@@ -69,6 +76,17 @@
                             }
                         }
                     },
+                    "balance_of_arguments": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
                     "owner_of_arguments": {
                         "fields": {
                             "token_id": {
@@ -90,6 +108,17 @@
                                 "id": 1,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "balance_object": {
+                        "fields": {
+                            "value": {
+                                "type": "uint64",
+                                "id": 1,
+                                "options": {
+                                    "jstype": "JS_STRING"
                                 }
                             }
                         }

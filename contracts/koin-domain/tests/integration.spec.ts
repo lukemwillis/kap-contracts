@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Contract, LocalKoinos, Signer } from '@roamin/local-koinos';
+import { Contract, LocalKoinos, Signer, Token } from '@roamin/local-koinos';
 
 // ABIs
 import * as koindomainAbi from '../abi/koindomain-abi.json';
 import * as nameserviceAbi from '../../name-service/abi/nameservice-abi.json';
 import * as usdOracleAbi from '../../usd-oracle/abi/usdoracle-abi.json';
+import * as collectionAbi from '../../test-collection/abi/testcollection-abi.json';
 
 // @ts-ignore koilib_types is needed when using koilib
 koindomainAbi.koilib_types = koindomainAbi.types;
@@ -12,6 +13,8 @@ koindomainAbi.koilib_types = koindomainAbi.types;
 nameserviceAbi.koilib_types = nameserviceAbi.types;
 // @ts-ignore koilib_types is needed when using koilib
 usdOracleAbi.koilib_types = usdOracleAbi.types;
+// @ts-ignore koilib_types is needed when using koilib
+collectionAbi.koilib_types = collectionAbi.types;
 
 jest.setTimeout(600000);
 
@@ -33,12 +36,14 @@ const [
   user1,
   user2,
   user3,
-  user4
+  user4,
+  collectionAcct
 ] = localKoinos.getAccounts();
 
 let koinDomainContract: Contract;
 let nameserviceContract: Contract;
 let usdOracleContract: Contract;
+let collectionContract: Contract;
 
 beforeAll(async () => {
   // start local-koinos node
@@ -61,6 +66,10 @@ beforeAll(async () => {
   // @ts-ignore abi is compatible
   usdOracleContract = await localKoinos.deployContract(usdOracleAcct.wif, '../usd-oracle/build/release/contract.wasm', usdOracleAbi, { mode: 'manual' });
 
+  // deploy a dummy collection
+  // @ts-ignore abi is compatible
+  collectionContract = await localKoinos.deployContract(collectionAcct.wif, '../test-collection/build/release/contract.wasm', collectionAbi, { mode: 'manual' });
+
   await localKoinos.startBlockProduction();
 });
 
@@ -74,7 +83,9 @@ describe('mint', () => {
     // set koin domain contract metadata
     let res = await koinDomainContract.functions.set_metadata({
       nameservice_address: nameserviceAcct.address,
-      oracle_address: usdOracleAcct.address
+      oracle_address: usdOracleAcct.address,
+      press_badge_address: collectionAcct.address,
+      is_launched: true,
     });
 
     await res.transaction?.wait();

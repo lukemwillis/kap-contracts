@@ -27,6 +27,19 @@ export class Testcollection {
     return res;
   }
 
+  balance_of(
+    args: testcollection.balance_of_arguments
+  ): testcollection.balance_object {
+    // const owner = args.owner;
+
+    // YOUR CODE HERE
+
+    const res = new testcollection.balance_object();
+    // res.value = ;
+
+    return res;
+  }
+
   owner_of(
     args: testcollection.owner_of_arguments
   ): testcollection.owner_object {
