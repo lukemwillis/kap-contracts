@@ -25,6 +25,15 @@ message transfer_arguments {
   bytes token_id = 3 [(koinos.btype) = HEX];
 }
 
+/* 
+  @description Balance of an owner
+  @read-only true
+  @result balance_object
+*/
+message balance_of_arguments {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+}
+
 // @description Gets the owner of a name
 // @read-only true
 // @result owner_object
@@ -38,4 +47,8 @@ message empty_object {
 
 message owner_object {
   bytes owner = 1 [(koinos.btype) = ADDRESS];
+}
+
+message balance_object {
+  uint64 value = 1 [jstype = JS_STRING];
 }

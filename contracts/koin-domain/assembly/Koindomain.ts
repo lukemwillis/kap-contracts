@@ -203,7 +203,7 @@ export class Koindomain {
     args: koindomain.authorize_mint_arguments
   ): koindomain.authorize_mint_result {
     const metadata = this.metadata.get()!;
-
+    
     this.requireNameserviceAuthority(metadata.nameservice_address);
 
     const name = args.name;
@@ -220,7 +220,7 @@ export class Koindomain {
       );
 
       if (!buyerHasPressBadge) {
-        System.fail("Minting not yet available to the public.");
+        System.revert("Minting not yet available to the public.");
       }
 
       const buyerHasKAPName = this.hasNFT(
@@ -229,7 +229,7 @@ export class Koindomain {
       );
 
       if (buyerHasKAPName) {
-        System.fail("Pre-launch name already minted for this address.");
+        System.revert("Pre-launch name already minted for this address.");
       }
     }
 
@@ -417,9 +417,17 @@ export class Koindomain {
     const nameservice_address = args.nameservice_address;
     const oracle_address = args.oracle_address;
     const owner = args.owner;
+    const press_badge_address = args.press_badge_address;
+    const is_launched = args.is_launched;
 
     this.metadata.put(
-      new koindomain.metadata_object(nameservice_address, oracle_address, owner)
+      new koindomain.metadata_object(
+        nameservice_address, 
+        oracle_address, 
+        owner, 
+        press_badge_address, 
+        is_launched
+      )
     );
 
     return new koindomain.empty_object();

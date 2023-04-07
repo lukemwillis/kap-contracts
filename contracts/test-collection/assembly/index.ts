@@ -29,6 +29,16 @@ export function main(): i32 {
       break;
     }
 
+    case 0x5c721497: {
+      const args = Protobuf.decode<ProtoNamespace.balance_of_arguments>(
+        contractArgs.args,
+        ProtoNamespace.balance_of_arguments.decode
+      );
+      const res = c.balance_of(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.balance_object.encode);
+      break;
+    }
+
     case 0xed61c847: {
       const args = Protobuf.decode<ProtoNamespace.owner_of_arguments>(
         contractArgs.args,

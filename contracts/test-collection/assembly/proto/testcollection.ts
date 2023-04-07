@@ -111,6 +111,41 @@ export namespace testcollection {
     }
   }
 
+  export class balance_of_arguments {
+    static encode(message: balance_of_arguments, writer: Writer): void {
+      if (message.owner.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.owner);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): balance_of_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new balance_of_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.owner = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    owner: Uint8Array;
+
+    constructor(owner: Uint8Array = new Uint8Array(0)) {
+      this.owner = owner;
+    }
+  }
+
   export class owner_of_arguments {
     static encode(message: owner_of_arguments, writer: Writer): void {
       if (message.token_id.length != 0) {
@@ -201,6 +236,42 @@ export namespace testcollection {
 
     constructor(owner: Uint8Array = new Uint8Array(0)) {
       this.owner = owner;
+    }
+  }
+
+  @unmanaged
+  export class balance_object {
+    static encode(message: balance_object, writer: Writer): void {
+      if (message.value != 0) {
+        writer.uint32(8);
+        writer.uint64(message.value);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): balance_object {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new balance_object();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.value = reader.uint64();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    value: u64;
+
+    constructor(value: u64 = 0) {
+      this.value = value;
     }
   }
 }
