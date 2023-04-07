@@ -435,7 +435,7 @@ describe('mint', () => {
         owner: koinDomainAcct.address
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('element "-koin" cannot start with an hyphen (-)');
+      expect(JSON.parse(error.message).error).toStrictEqual('element "-koin" cannot start or end with a hyphen (-)');
     }
 
     try {
@@ -444,7 +444,7 @@ describe('mint', () => {
         owner: koinDomainAcct.address
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('element "koin-" cannot end with an hyphen (-)');
+      expect(JSON.parse(error.message).error).toStrictEqual('element "koin-" cannot start or end with a hyphen (-)');
     }
 
     try {
@@ -471,7 +471,7 @@ describe('mint', () => {
         owner: koinDomainAcct.address
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('element "-doe" cannot start with an hyphen (-)');
+      expect(JSON.parse(error.message).error).toStrictEqual('element "-doe" cannot start or end with a hyphen (-)');
     }
 
     try {
@@ -480,7 +480,7 @@ describe('mint', () => {
         owner: koinDomainAcct.address
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('element "doe-" cannot end with an hyphen (-)');
+      expect(JSON.parse(error.message).error).toStrictEqual('element "doe-" cannot start or end with a hyphen (-)');
     }
 
     try {
