@@ -481,6 +481,11 @@ export namespace koindomain {
         writer.uint32(40);
         writer.bool(message.is_launched);
       }
+
+      if (message.beneficiary.length != 0) {
+        writer.uint32(50);
+        writer.bytes(message.beneficiary);
+      }
     }
 
     static decode(reader: Reader, length: i32): set_metadata_arguments {
@@ -510,6 +515,10 @@ export namespace koindomain {
             message.is_launched = reader.bool();
             break;
 
+          case 6:
+            message.beneficiary = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -524,19 +533,22 @@ export namespace koindomain {
     owner: Uint8Array;
     press_badge_address: Uint8Array;
     is_launched: bool;
+    beneficiary: Uint8Array;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
       oracle_address: Uint8Array = new Uint8Array(0),
       owner: Uint8Array = new Uint8Array(0),
       press_badge_address: Uint8Array = new Uint8Array(0),
-      is_launched: bool = false
+      is_launched: bool = false,
+      beneficiary: Uint8Array = new Uint8Array(0)
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
       this.owner = owner;
       this.press_badge_address = press_badge_address;
       this.is_launched = is_launched;
+      this.beneficiary = beneficiary;
     }
   }
 
@@ -874,6 +886,11 @@ export namespace koindomain {
         writer.uint32(40);
         writer.bool(message.is_launched);
       }
+
+      if (message.beneficiary.length != 0) {
+        writer.uint32(50);
+        writer.bytes(message.beneficiary);
+      }
     }
 
     static decode(reader: Reader, length: i32): metadata_object {
@@ -903,6 +920,10 @@ export namespace koindomain {
             message.is_launched = reader.bool();
             break;
 
+          case 6:
+            message.beneficiary = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -917,19 +938,22 @@ export namespace koindomain {
     owner: Uint8Array;
     press_badge_address: Uint8Array;
     is_launched: bool;
+    beneficiary: Uint8Array;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
       oracle_address: Uint8Array = new Uint8Array(0),
       owner: Uint8Array = new Uint8Array(0),
       press_badge_address: Uint8Array = new Uint8Array(0),
-      is_launched: bool = false
+      is_launched: bool = false,
+      beneficiary: Uint8Array = new Uint8Array(0)
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
       this.owner = owner;
       this.press_badge_address = press_badge_address;
       this.is_launched = is_launched;
+      this.beneficiary = beneficiary;
     }
   }
 

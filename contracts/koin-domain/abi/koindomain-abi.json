@@ -222,6 +222,13 @@
                             "is_launched": {
                                 "type": "bool",
                                 "id": 5
+                            },
+                            "beneficiary": {
+                                "type": "bytes",
+                                "id": 6,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
                             }
                         }
                     },
@@ -356,6 +363,13 @@
                             "is_launched": {
                                 "type": "bool",
                                 "id": 5
+                            },
+                            "beneficiary": {
+                                "type": "bytes",
+                                "id": 6,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
                             }
                         }
                     },

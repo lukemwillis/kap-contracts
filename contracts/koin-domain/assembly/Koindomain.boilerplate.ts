@@ -87,6 +87,7 @@ export class Koindomain {
     // const owner = args.owner;
     // const press_badge_address = args.press_badge_address;
     // const is_launched = args.is_launched;
+    // const beneficiary = args.beneficiary;
 
     // YOUR CODE HERE
 
@@ -106,6 +107,7 @@ export class Koindomain {
     // res.owner = ;
     // res.press_badge_address = ;
     // res.is_launched = ;
+    // res.beneficiary = ;
 
     return res;
   }
