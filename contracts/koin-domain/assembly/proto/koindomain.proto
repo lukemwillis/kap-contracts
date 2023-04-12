@@ -78,6 +78,7 @@ message set_metadata_arguments {
   bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
   bytes press_badge_address = 4 [(koinos.btype) = CONTRACT_ID];
   bool is_launched = 5;
+  bytes beneficiary = 6 [(koinos.btype) = CONTRACT_ID];
 }
 
 /* 
@@ -129,6 +130,7 @@ message metadata_object {
   bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
   bytes press_badge_address = 4 [(koinos.btype) = CONTRACT_ID];
   bool is_launched = 5;
+  bytes beneficiary = 6 [(koinos.btype) = CONTRACT_ID];
 }
 
 message purchase_object{

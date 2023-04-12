@@ -266,7 +266,7 @@ export class Koindomain {
       System.require(
         tokenContract.transfer(
           payment_from,
-          this.contractId,
+          metadata.beneficiary,
           numberOfTokensToTransfer
         ),
         "could not transfer Koin tokens"
@@ -336,7 +336,7 @@ export class Koindomain {
     System.require(
       tokenContract.transfer(
         payment_from,
-        this.contractId,
+        metadata.beneficiary,
         numberOfTokensToTransfer
       ),
       "could not transfer Koin tokens"
@@ -419,6 +419,7 @@ export class Koindomain {
     const owner = args.owner;
     const press_badge_address = args.press_badge_address;
     const is_launched = args.is_launched;
+    const beneficiary = args.beneficiary;
 
     this.metadata.put(
       new koindomain.metadata_object(
@@ -426,7 +427,8 @@ export class Koindomain {
         oracle_address, 
         owner, 
         press_badge_address, 
-        is_launched
+        is_launched,
+        beneficiary
       )
     );
 
