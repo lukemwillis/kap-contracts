@@ -1,6 +1,6 @@
 import { Writer, Reader } from "as-proto";
 
-export namespace nameservice {
+export namespace collections {
   @unmanaged
   export class name_arguments {
     static encode(message: name_arguments, writer: Writer): void {}

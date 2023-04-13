@@ -24,8 +24,8 @@
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 --ext ts \"*/assembly/**/*.ts\"",
-    "build:debug": "koinos-sdk-as-cli build-all --generate_authorize debug 0 nameservice.proto",
-    "build:release": "koinos-sdk-as-cli build-all --generate_authorize release 0 nameservice.proto",
+    "build:debug": "koinos-sdk-as-cli build-all --generate_authorize debug 0 collections.proto",
+    "build:release": "koinos-sdk-as-cli build-all --generate_authorize release 0 collections.proto",
     "test": "koinos-sdk-as-cli run-tests",
     "ci": "ENV=CI jest -i",
     "local-ci": "ENV=LOCAL jest -i"

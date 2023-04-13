@@ -19,7 +19,7 @@ import {
   SYMBOL,
   URI,
 } from "./Constants";
-import { nameservice } from "./proto/nameservice";
+import { collections } from "./proto/collections";
 import { OwnersIndex } from "./state/OwnersIndex";
 import { Metadata } from "./state/Metadata";
 import { Names } from "./state/Names";
@@ -28,7 +28,7 @@ import { NameApprovals } from "./state/NameApprovals";
 import { Supply } from "./state/Supply";
 import { ParsedName } from "./ParsedName";
 
-export class Nameservice {
+export class Collections {
   contractId: Uint8Array = System.getContractId();
   metadata: Metadata = new Metadata(this.contractId);
   names: Names = new Names(this.contractId);
@@ -75,48 +75,48 @@ export class Nameservice {
     return new authority.authorize_result(false);
   }
 
-  // KCS-2 nameservice STANDARD https://github.com/koinos/koinos-contract-standards/blob/master/KCSs/kcs-2.md
+  // KCS-2 collections STANDARD https://github.com/koinos/koinos-contract-standards/blob/master/KCSs/kcs-2.md
 
-  name(args: nameservice.name_arguments): nameservice.string_object {
-    return new nameservice.string_object(NAME);
+  name(args: collections.name_arguments): collections.string_object {
+    return new collections.string_object(NAME);
   }
 
-  symbol(args: nameservice.symbol_arguments): nameservice.string_object {
-    return new nameservice.string_object(SYMBOL);
+  symbol(args: collections.symbol_arguments): collections.string_object {
+    return new collections.string_object(SYMBOL);
   }
 
-  uri(args: nameservice.uri_arguments): nameservice.string_object {
-    return new nameservice.string_object(URI);
+  uri(args: collections.uri_arguments): collections.string_object {
+    return new collections.string_object(URI);
   }
 
   total_supply(
-    args: nameservice.total_supply_arguments
-  ): nameservice.uint64_object {
+    args: collections.total_supply_arguments
+  ): collections.uint64_object {
     const supply = this.supply.get()!;
-    return new nameservice.uint64_object(supply.value);
+    return new collections.uint64_object(supply.value);
   }
 
   royalties(
-    args: nameservice.royalties_arguments
-  ): nameservice.royalties_result {
-    return new nameservice.royalties_result();
+    args: collections.royalties_arguments
+  ): collections.royalties_result {
+    return new collections.royalties_result();
   }
 
   set_royalties(
-    args: nameservice.set_royalties_arguments
-  ): nameservice.empty_object {
+    args: collections.set_royalties_arguments
+  ): collections.empty_object {
     // not supported
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
-  owner(args: nameservice.owner_arguments): nameservice.bytes_address_object {
+  owner(args: collections.owner_arguments): collections.bytes_address_object {
     const metadata = this.metadata.get()!;
-    return new nameservice.bytes_address_object(metadata.owner);
+    return new collections.bytes_address_object(metadata.owner);
   }
 
   transfer_ownership(
-    args: nameservice.transfer_ownership_arguments
-  ): nameservice.empty_object {
+    args: collections.transfer_ownership_arguments
+  ): collections.empty_object {
     // only this contract owner can update the owner
     System.requireAuthority(
       authority.authorization_type.contract_call,
@@ -131,15 +131,15 @@ export class Nameservice {
 
     this.metadata.put(metadata);
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
   balance_of(
-    args: nameservice.balance_of_arguments
-  ): nameservice.uint64_object {
+    args: collections.balance_of_arguments
+  ): collections.uint64_object {
     const owner = args.owner;
 
-    let ownerIndexKey = new nameservice.owner_index_key(
+    let ownerIndexKey = new collections.owner_index_key(
       owner,
       // a sha256 multihash is 34 bytes long (2 bytes for the multihash code, and 32 bytes for the digest)
       // to get the first element in the index, use a hash where all the bytes are set to 0
@@ -148,18 +148,18 @@ export class Nameservice {
 
     let result: u64 = 0;
 
-    let nameObj: nameservice.name_object | null;
+    let nameObj: collections.name_object | null;
     let ownerIndexObj: system_calls.database_object | null;
     let tmpName: string;
-    let tmpOwnerIndexKey: nameservice.owner_index_key;
+    let tmpOwnerIndexKey: collections.owner_index_key;
 
     do {
       ownerIndexObj = this.ownersIndex.getNext(ownerIndexKey);
 
       if (ownerIndexObj) {
-        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(
+        tmpOwnerIndexKey = Protobuf.decode<collections.owner_index_key>(
           ownerIndexObj.key,
-          nameservice.owner_index_key.decode
+          collections.owner_index_key.decode
         );
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
@@ -179,15 +179,15 @@ export class Nameservice {
       }
     } while (ownerIndexObj != null);
 
-    return new nameservice.uint64_object(result);
+    return new collections.uint64_object(result);
   }
 
   owner_of(
-    args: nameservice.owner_of_arguments
-  ): nameservice.bytes_address_object {
+    args: collections.owner_of_arguments
+  ): collections.bytes_address_object {
     const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
-    const res = new nameservice.bytes_address_object();
+    const res = new collections.bytes_address_object();
 
     const nameObj = this.getName(parsedName.key());
 
@@ -199,11 +199,11 @@ export class Nameservice {
   }
 
   get_approved(
-    args: nameservice.get_approved_arguments
-  ): nameservice.bytes_address_object {
+    args: collections.get_approved_arguments
+  ): collections.bytes_address_object {
     const parsedName = new ParsedName(StringBytes.bytesToString(args.token_id));
 
-    const res = new nameservice.bytes_address_object();
+    const res = new collections.bytes_address_object();
 
     const approvedAddress = this.nameApprovals.get(parsedName.key());
 
@@ -215,12 +215,12 @@ export class Nameservice {
   }
 
   is_approved_for_all(
-    args: nameservice.is_approved_for_all_arguments
-  ): nameservice.bool_object {
+    args: collections.is_approved_for_all_arguments
+  ): collections.bool_object {
     return this.operatorApprovals.getApproval(args.owner, args.operator);
   }
 
-  mint(args: nameservice.mint_arguments): nameservice.empty_object {
+  mint(args: collections.mint_arguments): collections.empty_object {
     const name = args.name;
     const duration_increments = args.duration_increments;
     const owner = args.owner;
@@ -248,7 +248,7 @@ export class Nameservice {
     ) {
       System.revert(`name "${name}" is already taken`);
     } else if (nameObj == null) {
-      nameObj = new nameservice.name_object(parsedName.domain, parsedName.name);
+      nameObj = new collections.name_object(parsedName.domain, parsedName.name);
     }
 
     // is the user trying to mint a TLA?
@@ -347,21 +347,21 @@ export class Nameservice {
     }
 
     // emit event
-    const mintEvent = new nameservice.mint_event(
+    const mintEvent = new collections.mint_event(
       owner,
       StringBytes.stringToBytes(nameKey)
     );
 
     System.event(
       "collections.mint_event",
-      Protobuf.encode(mintEvent, nameservice.mint_event.encode),
+      Protobuf.encode(mintEvent, collections.mint_event.encode),
       [nameObj.owner]
     );
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
-  transfer(args: nameservice.transfer_arguments): nameservice.empty_object {
+  transfer(args: collections.transfer_arguments): collections.empty_object {
     const name = StringBytes.bytesToString(args.token_id);
     const from = args.from;
     const to = args.to;
@@ -429,7 +429,7 @@ export class Nameservice {
     this.ownersIndex.updateIndex(nameKey, nameObj!.owner, to);
 
     // emit event
-    const transferEvent = new nameservice.transfer_event(
+    const transferEvent = new collections.transfer_event(
       from,
       to,
       StringBytes.stringToBytes(nameKey)
@@ -437,7 +437,7 @@ export class Nameservice {
 
     System.event(
       "collections.transfer_event",
-      Protobuf.encode(transferEvent, nameservice.transfer_event.encode),
+      Protobuf.encode(transferEvent, collections.transfer_event.encode),
       [to, nameObj!.owner]
     );
 
@@ -445,10 +445,10 @@ export class Nameservice {
     nameObj!.owner = to;
     this.names.put(nameKey, nameObj!);
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
-  approve(args: nameservice.approve_arguments): nameservice.empty_object {
+  approve(args: collections.approve_arguments): collections.empty_object {
     const approver_address = args.approver_address;
     const to = args.to;
     const name = StringBytes.bytesToString(args.token_id);
@@ -488,7 +488,7 @@ export class Nameservice {
     this.nameApprovals.put(nameKey, to);
 
     // emit event
-    const approvalEvent = new nameservice.token_approval_event(
+    const approvalEvent = new collections.token_approval_event(
       approver_address,
       to,
       StringBytes.stringToBytes(name)
@@ -496,16 +496,16 @@ export class Nameservice {
 
     System.event(
       "collections.token_approval_event",
-      Protobuf.encode(approvalEvent, nameservice.token_approval_event.encode),
+      Protobuf.encode(approvalEvent, collections.token_approval_event.encode),
       [to, approver_address]
     );
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
   set_approval_for_all(
-    args: nameservice.set_approval_for_all_arguments
-  ): nameservice.empty_object {
+    args: collections.set_approval_for_all_arguments
+  ): collections.empty_object {
     const approver_address = args.approver_address;
     const operator_address = args.operator_address;
     const approved = args.approved;
@@ -535,7 +535,7 @@ export class Nameservice {
     );
 
     // emit event
-    const approvalEvent = new nameservice.operator_approval_event(
+    const approvalEvent = new collections.operator_approval_event(
       approver_address,
       operator_address,
       approved
@@ -545,18 +545,18 @@ export class Nameservice {
       "collections.operator_approval_event",
       Protobuf.encode(
         approvalEvent,
-        nameservice.operator_approval_event.encode
+        collections.operator_approval_event.encode
       ),
       [operator_address, approver_address]
     );
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
   // END KCS-2
   // CUSTOM FUNCTIONALITY
 
-  burn(args: nameservice.burn_arguments): nameservice.empty_object {
+  burn(args: collections.burn_arguments): collections.empty_object {
     const from = args.from;
     const name = StringBytes.bytesToString(args.token_id);
 
@@ -655,21 +655,21 @@ export class Nameservice {
     this.supply.put(supplyObj);
 
     // emit event
-    const burnEvent = new nameservice.burn_event(
+    const burnEvent = new collections.burn_event(
       from,
       StringBytes.stringToBytes(nameKey)
     );
 
     System.event(
       "collections.burn_event",
-      Protobuf.encode(burnEvent, nameservice.burn_event.encode),
+      Protobuf.encode(burnEvent, collections.burn_event.encode),
       [nameObj!.owner]
     );
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
-  renew(args: nameservice.renew_arguments): nameservice.empty_object {
+  renew(args: collections.renew_arguments): collections.empty_object {
     const name = args.name;
     const duration_increments = args.duration_increments;
     const payment_from = args.payment_from;
@@ -718,10 +718,10 @@ export class Nameservice {
       this.names.put(nameKey, nameObj!);
     }
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
-  get_name(args: nameservice.get_name_arguments): nameservice.name_object {
+  get_name(args: collections.get_name_arguments): collections.name_object {
     // parseName will fail if args.name has an invalid format
     const parsedName = new ParsedName(args.name);
     const nameKey = parsedName.key();
@@ -734,18 +734,18 @@ export class Nameservice {
       return nameObj;
     }
 
-    return new nameservice.name_object();
+    return new collections.name_object();
   }
 
   get_names(
-    args: nameservice.get_names_arguments
-  ): nameservice.get_names_result {
+    args: collections.get_names_arguments
+  ): collections.get_names_result {
     const owner = args.owner;
     const nameOffset = args.name_offset;
     const descending = args.descending;
     let limit = args.limit || u64.MAX_VALUE;
 
-    let nameObj: nameservice.name_object | null;
+    let nameObj: collections.name_object | null;
     let nameKeyHash: Uint8Array;
 
     // calculate offset address key if name_offset provided
@@ -763,13 +763,13 @@ export class Nameservice {
         : new Uint8Array(34).fill(u8.MIN_VALUE);
     }
 
-    let ownerIndexKey = new nameservice.owner_index_key(owner, nameKeyHash);
+    let ownerIndexKey = new collections.owner_index_key(owner, nameKeyHash);
 
-    const res = new nameservice.get_names_result();
+    const res = new collections.get_names_result();
 
     let ownerIndexObj: system_calls.database_object | null;
     let tmpName: string;
-    let tmpOwnerIndexKey: nameservice.owner_index_key;
+    let tmpOwnerIndexKey: collections.owner_index_key;
 
     do {
       ownerIndexObj = descending
@@ -777,9 +777,9 @@ export class Nameservice {
         : this.ownersIndex.getNext(ownerIndexKey);
 
       if (ownerIndexObj) {
-        tmpOwnerIndexKey = Protobuf.decode<nameservice.owner_index_key>(
+        tmpOwnerIndexKey = Protobuf.decode<collections.owner_index_key>(
           ownerIndexObj.key,
-          nameservice.owner_index_key.decode
+          collections.owner_index_key.decode
         );
 
         if (Arrays.equal(tmpOwnerIndexKey.owner, owner)) {
@@ -802,8 +802,8 @@ export class Nameservice {
   }
 
   set_metadata(
-    args: nameservice.set_metadata_arguments
-  ): nameservice.empty_object {
+    args: collections.set_metadata_arguments
+  ): collections.empty_object {
     // only this contract owner can set the metadata
     System.requireAuthority(
       authority.authorization_type.contract_call,
@@ -815,15 +815,15 @@ export class Nameservice {
     const owner = args.owner;
 
     this.metadata.put(
-      new nameservice.metadata_object(tla_mint_fee, kap_token_address, owner)
+      new collections.metadata_object(tla_mint_fee, kap_token_address, owner)
     );
 
-    return new nameservice.empty_object();
+    return new collections.empty_object();
   }
 
   get_metadata(
-    args: nameservice.get_metadata_arguments
-  ): nameservice.metadata_object {
+    args: collections.get_metadata_arguments
+  ): collections.metadata_object {
     return this.metadata.get()!;
   }
 
@@ -833,7 +833,7 @@ export class Nameservice {
    * Get a name from the Names space
    * @return the name if found and it has not expired and the grace_peiod has not ended
    */
-  private getName(key: string): nameservice.name_object | null {
+  private getName(key: string): collections.name_object | null {
     const nameObj = this.names.get(key);
 
     // if it exists and has not expired and the grace_period has not ended
@@ -861,8 +861,8 @@ export class Nameservice {
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
     domainContractId: Uint8Array
-  ): nameservice.authorize_mint_res {
-    const authArgs = new nameservice.authorize_mint_args(
+  ): collections.authorize_mint_res {
+    const authArgs = new collections.authorize_mint_args(
       name,
       domain,
       durationIncrements,
@@ -874,16 +874,16 @@ export class Nameservice {
     const callRes = System.call(
       domainContractId,
       AUTHORIZE_MINT_ENTRYPOINT,
-      Protobuf.encode(authArgs, nameservice.authorize_mint_args.encode)
+      Protobuf.encode(authArgs, collections.authorize_mint_args.encode)
     );
     System.require(
       callRes.code == 0,
       "failed to authorize mint",
       error.error_code.authorization_failure
     );
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_mint_res>(
+    const decodedCallRes = Protobuf.decode<collections.authorize_mint_res>(
       callRes.res.object,
-      nameservice.authorize_mint_res.decode
+      collections.authorize_mint_res.decode
     );
 
     return decodedCallRes;
@@ -893,24 +893,24 @@ export class Nameservice {
    * Call a domain contract to check if the burn of a name is allowed
    */
   private authorizeBurn(
-    nameObj: nameservice.name_object,
+    nameObj: collections.name_object,
     domainContractId: Uint8Array
   ): bool {
-    const authArgs = new nameservice.authorize_burn_args(nameObj);
+    const authArgs = new collections.authorize_burn_args(nameObj);
 
     const callRes = System.call(
       domainContractId,
       AUTHORIZE_BURN_ENTRYPOINT,
-      Protobuf.encode(authArgs, nameservice.authorize_burn_args.encode)
+      Protobuf.encode(authArgs, collections.authorize_burn_args.encode)
     );
     System.require(
       callRes.code == 0,
       "failed to authorize burn",
       error.error_code.authorization_failure
     );
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_burn_res>(
+    const decodedCallRes = Protobuf.decode<collections.authorize_burn_res>(
       callRes.res.object,
-      nameservice.authorize_burn_res.decode
+      collections.authorize_burn_res.decode
     );
 
     return decodedCallRes.authorized;
@@ -921,13 +921,13 @@ export class Nameservice {
    * @return the new expiration date of the name
    */
   private authorizeRenewal(
-    nameObj: nameservice.name_object,
+    nameObj: collections.name_object,
     durationIncrements: u32,
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
     domainContractId: Uint8Array
-  ): nameservice.authorize_renewal_res {
-    const authArgs = new nameservice.authorize_renewal_args(
+  ): collections.authorize_renewal_res {
+    const authArgs = new collections.authorize_renewal_args(
       nameObj,
       durationIncrements,
       paymentFrom,
@@ -937,16 +937,16 @@ export class Nameservice {
     const callRes = System.call(
       domainContractId,
       AUTHORIZE_RENEWAL_ENTRYPOINT,
-      Protobuf.encode(authArgs, nameservice.authorize_renewal_args.encode)
+      Protobuf.encode(authArgs, collections.authorize_renewal_args.encode)
     );
     System.require(
       callRes.code == 0,
       "failed to authorize reclaim",
       error.error_code.authorization_failure
     );
-    const decodedCallRes = Protobuf.decode<nameservice.authorize_renewal_res>(
+    const decodedCallRes = Protobuf.decode<collections.authorize_renewal_res>(
       callRes.res.object,
-      nameservice.authorize_renewal_res.decode
+      collections.authorize_renewal_res.decode
     );
 
     return decodedCallRes;

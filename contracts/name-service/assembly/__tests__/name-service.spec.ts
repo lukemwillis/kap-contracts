@@ -1,12 +1,12 @@
 import { Base58, MockVM, chain, protocol, System } from "@koinos/sdk-as";
-import { Nameservice } from "../Nameservice";
+import { Collections } from "../Collections";
 import { ParsedName } from "../ParsedName";
 
 const CONTRACT_ID = Base58.decode("1DQzuCcTKacbs9GGScRTU1Hc8BsyARTPqe");
 
 let headBlock = new protocol.block();
 
-describe("nameservice", () => {
+describe("Collections", () => {
   beforeEach(() => {
     MockVM.reset();
     MockVM.setContractId(CONTRACT_ID);
@@ -21,7 +21,7 @@ describe("nameservice", () => {
   });
 
   it("should parse a name into a name object", () => {
-    const ns = new Nameservice();
+    const ns = new Collections();
 
     let name = 'domain';
     let nameObj = new ParsedName(name);
@@ -73,7 +73,7 @@ describe("nameservice", () => {
 
 
     expect(() => {
-      const ns = new Nameservice();
+      const ns = new Collections();
 
       const name = '.domain';
       new ParsedName(name);
@@ -82,7 +82,7 @@ describe("nameservice", () => {
     expect(MockVM.getErrorMessage()).toStrictEqual('an element cannot be empty');
 
     expect(() => {
-      const ns = new Nameservice();
+      const ns = new Collections();
 
       const name = '-name.domain';
       new ParsedName(name);
@@ -91,7 +91,7 @@ describe("nameservice", () => {
     expect(MockVM.getErrorMessage()).toStrictEqual('element "-name" cannot start or end with a hyphen (-)');
 
     expect(() => {
-      const ns = new Nameservice();
+      const ns = new Collections();
 
       const name = 'name-.domain';
       new ParsedName(name);
@@ -100,7 +100,7 @@ describe("nameservice", () => {
     expect(MockVM.getErrorMessage()).toStrictEqual('element "name-" cannot start or end with a hyphen (-)');
 
     expect(() => {
-      const ns = new Nameservice();
+      const ns = new Collections();
 
       const name = 'name--test.domain';
       new ParsedName(name);

@@ -1,5 +1,5 @@
 import { chain, Crypto, Protobuf, StringBytes, System, system_calls } from '@koinos/sdk-as';
-import { nameservice } from '../proto/nameservice';
+import { collections } from '../proto/collections';
 
 const OWNERS_INDEX_SPACE_ID = 2;
 
@@ -26,26 +26,26 @@ export class OwnersIndex {
       nameBytes
     )!;
 
-    let indexKey: nameservice.owner_index_key;
+    let indexKey: collections.owner_index_key;
 
     // remove previous owner index
     if (previousOwner.length > 0) {
-      indexKey = new nameservice.owner_index_key(previousOwner, nameKeyHash);
-      System.removeObject(this.space, Protobuf.encode(indexKey, nameservice.owner_index_key.encode));
+      indexKey = new collections.owner_index_key(previousOwner, nameKeyHash);
+      System.removeObject(this.space, Protobuf.encode(indexKey, collections.owner_index_key.encode));
     }
 
     // add new owner index
     if (newOwner.length > 0) {
-      indexKey = new nameservice.owner_index_key(newOwner, nameKeyHash);
-      System.putBytes(this.space, Protobuf.encode(indexKey, nameservice.owner_index_key.encode), nameBytes);
+      indexKey = new collections.owner_index_key(newOwner, nameKeyHash);
+      System.putBytes(this.space, Protobuf.encode(indexKey, collections.owner_index_key.encode), nameBytes);
     }
   }
 
-  getNext(key: nameservice.owner_index_key): system_calls.database_object | null {
-    return System.getNextBytes(this.space, Protobuf.encode(key, nameservice.owner_index_key.encode));
+  getNext(key: collections.owner_index_key): system_calls.database_object | null {
+    return System.getNextBytes(this.space, Protobuf.encode(key, collections.owner_index_key.encode));
   }
 
-  getPrev(key: nameservice.owner_index_key): system_calls.database_object | null {
-    return System.getPrevBytes(this.space, Protobuf.encode(key, nameservice.owner_index_key.encode));
+  getPrev(key: collections.owner_index_key): system_calls.database_object | null {
+    return System.getPrevBytes(this.space, Protobuf.encode(key, collections.owner_index_key.encode));
   }
 }

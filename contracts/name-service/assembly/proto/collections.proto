@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package nameservice;
+package collections;
 
 import "koinos/options.proto"; 
 

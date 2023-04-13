@@ -1,6 +1,6 @@
 import { System, Protobuf, authority } from "@koinos/sdk-as";
-import { Nameservice as ContractClass } from "./Nameservice";
-import { nameservice as ProtoNamespace } from "./proto/nameservice";
+import { Collections as ContractClass } from "./Collections";
+import { collections as ProtoNamespace } from "./proto/collections";
 
 export function main(): i32 {
   const contractArgs = System.getArguments();

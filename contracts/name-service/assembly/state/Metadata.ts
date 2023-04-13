@@ -1,17 +1,17 @@
 import { Storage } from '@koinos/sdk-as';
-import { nameservice } from '../proto/nameservice';
+import { collections } from '../proto/collections';
 
 const METADATA_SPACE_ID = 0;
 
-export class Metadata extends Storage.Obj<nameservice.metadata_object> {
+export class Metadata extends Storage.Obj<collections.metadata_object> {
   constructor(contractId: Uint8Array) {
     super(
       contractId, 
       METADATA_SPACE_ID, 
-      nameservice.metadata_object.decode, 
-      nameservice.metadata_object.encode,
+      collections.metadata_object.decode, 
+      collections.metadata_object.encode,
       // the tla_registration_fee is set to 0 by default
-      () => new nameservice.metadata_object()
+      () => new collections.metadata_object()
     );
   }
 }
