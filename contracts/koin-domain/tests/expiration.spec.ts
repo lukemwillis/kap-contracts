@@ -3,7 +3,7 @@ import { Contract, LocalKoinos, Token } from '@roamin/local-koinos';
 
 // ABIs
 import * as koindomainAbi from '../abi/koindomain-abi.json';
-import * as nameserviceAbi from '../../name-service/abi/nameservice-abi.json';
+import * as nameserviceAbi from '../../name-service/abi/collections-abi.json';
 import * as usdOracleAbi from '../../usd-oracle/abi/usdoracle-abi.json';
 import * as collectionAbi from '../../test-collection/abi/testcollection-abi.json';
 
