@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Contract, LocalKoinos, Serializer, Token } from '@roamin/local-koinos';
 
-import * as abi from '../abi/nameservice-abi.json';
+import * as abi from '../abi/collections-abi.json';
 
 // @ts-ignore koilib_types is needed when using koilib
 abi.koilib_types = abi.types;
@@ -95,7 +95,7 @@ describe('mint', () => {
       }
     ]));
 
-    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.mint_event');
+    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'collections.mint_event');
     expect(eventData.to).toEqual(koinDomainAcct.address);
     expect(eventData.token_id).toEqual(encodeHex('koin'));
 
@@ -1045,7 +1045,7 @@ describe('transfer', () => {
       }
     ]));
 
-    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.transfer_event');
+    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'collections.transfer_event');
     expect(eventData.from).toEqual(user3.address);
     expect(eventData.to).toEqual(user4.address);
     expect(eventData.token_id).toEqual(encodeHex('transfer.koin'));
@@ -1210,7 +1210,7 @@ describe('burn', () => {
       }
     ]));
 
-    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'nameservice.burn_event');
+    const eventData = await serializer.deserialize(res.receipt.events[0].data, 'collections.burn_event');
     expect(eventData.from).toEqual(user3.address);
     expect(eventData.token_id).toEqual(encodeHex('burn.koin'));
 
