@@ -433,6 +433,11 @@ export namespace collections {
         writer.uint32(42);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.data.length != 0) {
+        writer.uint32(50);
+        writer.bytes(message.data);
+      }
     }
 
     static decode(reader: Reader, length: i32): mint_arguments {
@@ -462,6 +467,10 @@ export namespace collections {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 6:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -476,19 +485,22 @@ export namespace collections {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    data: Uint8Array;
 
     constructor(
       name: string = "",
       duration_increments: u32 = 0,
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
     ) {
       this.name = name;
       this.duration_increments = duration_increments;
       this.owner = owner;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.data = data;
     }
   }
 
@@ -502,6 +514,11 @@ export namespace collections {
       if (message.token_id.length != 0) {
         writer.uint32(18);
         writer.bytes(message.token_id);
+      }
+
+      if (message.data.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.data);
       }
     }
 
@@ -520,6 +537,10 @@ export namespace collections {
             message.token_id = reader.bytes();
             break;
 
+          case 3:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -531,13 +552,16 @@ export namespace collections {
 
     from: Uint8Array;
     token_id: Uint8Array;
+    data: Uint8Array;
 
     constructor(
       from: Uint8Array = new Uint8Array(0),
-      token_id: Uint8Array = new Uint8Array(0)
+      token_id: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
     ) {
       this.from = from;
       this.token_id = token_id;
+      this.data = data;
     }
   }
 
@@ -748,6 +772,11 @@ export namespace collections {
         writer.uint32(34);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.data.length != 0) {
+        writer.uint32(42);
+        writer.bytes(message.data);
+      }
     }
 
     static decode(reader: Reader, length: i32): renew_arguments {
@@ -773,6 +802,10 @@ export namespace collections {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 5:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -786,17 +819,20 @@ export namespace collections {
     duration_increments: u32;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    data: Uint8Array;
 
     constructor(
       name: string = "",
       duration_increments: u32 = 0,
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
     ) {
       this.name = name;
       this.duration_increments = duration_increments;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.data = data;
     }
   }
 
@@ -1928,6 +1964,11 @@ export namespace collections {
         writer.uint32(50);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.data.length != 0) {
+        writer.uint32(58);
+        writer.bytes(message.data);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_mint_args {
@@ -1961,6 +2002,10 @@ export namespace collections {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 7:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -1976,6 +2021,7 @@ export namespace collections {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    data: Uint8Array;
 
     constructor(
       name: string = "",
@@ -1983,7 +2029,8 @@ export namespace collections {
       duration_increments: u32 = 0,
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
     ) {
       this.name = name;
       this.domain = domain;
@@ -1991,6 +2038,7 @@ export namespace collections {
       this.owner = owner;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.data = data;
     }
   }
 
@@ -2050,6 +2098,11 @@ export namespace collections {
         name_object.encode(unique_name_name, writer);
         writer.ldelim();
       }
+
+      if (message.data.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.data);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_burn_args {
@@ -2063,6 +2116,10 @@ export namespace collections {
             message.name = name_object.decode(reader, reader.uint32());
             break;
 
+          case 2:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -2073,9 +2130,14 @@ export namespace collections {
     }
 
     name: name_object | null;
+    data: Uint8Array;
 
-    constructor(name: name_object | null = null) {
+    constructor(
+      name: name_object | null = null,
+      data: Uint8Array = new Uint8Array(0)
+    ) {
       this.name = name;
+      this.data = data;
     }
   }
 
@@ -2139,6 +2201,11 @@ export namespace collections {
         writer.uint32(34);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.data.length != 0) {
+        writer.uint32(42);
+        writer.bytes(message.data);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_renewal_args {
@@ -2164,6 +2231,10 @@ export namespace collections {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 5:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -2177,17 +2248,20 @@ export namespace collections {
     duration_increments: u32;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    data: Uint8Array;
 
     constructor(
       name: name_object | null = null,
       duration_increments: u32 = 0,
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
     ) {
       this.name = name;
       this.duration_increments = duration_increments;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.data = data;
     }
   }
 
@@ -2235,80 +2309,6 @@ export namespace collections {
     constructor(expiration: u64 = 0, grace_period_end: u64 = 0) {
       this.expiration = expiration;
       this.grace_period_end = grace_period_end;
-    }
-  }
-
-  export class authorize_reclaim_args {
-    static encode(message: authorize_reclaim_args, writer: Writer): void {
-      const unique_name_name = message.name;
-      if (unique_name_name !== null) {
-        writer.uint32(10);
-        writer.fork();
-        name_object.encode(unique_name_name, writer);
-        writer.ldelim();
-      }
-    }
-
-    static decode(reader: Reader, length: i32): authorize_reclaim_args {
-      const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new authorize_reclaim_args();
-
-      while (reader.ptr < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1:
-            message.name = name_object.decode(reader, reader.uint32());
-            break;
-
-          default:
-            reader.skipType(tag & 7);
-            break;
-        }
-      }
-
-      return message;
-    }
-
-    name: name_object | null;
-
-    constructor(name: name_object | null = null) {
-      this.name = name;
-    }
-  }
-
-  @unmanaged
-  export class authorize_reclaim_res {
-    static encode(message: authorize_reclaim_res, writer: Writer): void {
-      if (message.authorized != false) {
-        writer.uint32(8);
-        writer.bool(message.authorized);
-      }
-    }
-
-    static decode(reader: Reader, length: i32): authorize_reclaim_res {
-      const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new authorize_reclaim_res();
-
-      while (reader.ptr < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1:
-            message.authorized = reader.bool();
-            break;
-
-          default:
-            reader.skipType(tag & 7);
-            break;
-        }
-      }
-
-      return message;
-    }
-
-    authorized: bool;
-
-    constructor(authorized: bool = false) {
-      this.authorized = authorized;
     }
   }
 }

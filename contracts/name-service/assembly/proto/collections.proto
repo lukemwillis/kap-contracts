@@ -98,6 +98,7 @@ message mint_arguments {
   bytes owner = 3 [(koinos.btype) = ADDRESS];
   bytes payment_from = 4 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 5 [(koinos.btype) = CONTRACT_ID];
+  bytes data = 6;
 }
 
 /* 
@@ -108,6 +109,7 @@ message mint_arguments {
 message burn_arguments {
   bytes from = 1 [(koinos.btype) = ADDRESS];
   bytes token_id = 2 [(koinos.btype) = HEX];
+  bytes data = 3;
 }
 
 /* 
@@ -153,6 +155,7 @@ message renew_arguments {
   uint32 duration_increments = 2;
   bytes payment_from = 3 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+  bytes data = 5;
 }
 
 /* 
@@ -303,6 +306,7 @@ message authorize_mint_args {
   bytes owner = 4 [(koinos.btype) = ADDRESS];
   bytes payment_from = 5 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes data = 7;
 }
 
 message authorize_mint_res {
@@ -312,6 +316,7 @@ message authorize_mint_res {
 
 message authorize_burn_args {
   name_object name = 1;
+  bytes data = 2;
 }
 
 message authorize_burn_res {
@@ -323,17 +328,10 @@ message authorize_renewal_args {
   uint32 duration_increments = 2;
   bytes payment_from = 3 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 4 [(koinos.btype) = CONTRACT_ID];
+  bytes data = 5;
 }
 
 message authorize_renewal_res {
   uint64 expiration = 1;
   uint64 grace_period_end = 2;
-}
-
-message authorize_reclaim_args {
-  name_object name = 1;
-}
-
-message authorize_reclaim_res {
-  bool authorized = 1;
 }

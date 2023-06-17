@@ -294,6 +294,10 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 6
                             }
                         }
                     },
@@ -312,6 +316,10 @@
                                 "options": {
                                     "(koinos.btype)": "HEX"
                                 }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 3
                             }
                         }
                     },
@@ -410,6 +418,10 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 5
                             }
                         }
                     },
@@ -811,6 +823,10 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 7
                             }
                         }
                     },
@@ -831,6 +847,10 @@
                             "name": {
                                 "type": "name_object",
                                 "id": 1
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 2
                             }
                         }
                     },
@@ -865,6 +885,10 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 5
                             }
                         }
                     },
@@ -877,22 +901,6 @@
                             "grace_period_end": {
                                 "type": "uint64",
                                 "id": 2
-                            }
-                        }
-                    },
-                    "authorize_reclaim_args": {
-                        "fields": {
-                            "name": {
-                                "type": "name_object",
-                                "id": 1
-                            }
-                        }
-                    },
-                    "authorize_reclaim_res": {
-                        "fields": {
-                            "authorized": {
-                                "type": "bool",
-                                "id": 1
                             }
                         }
                     }
