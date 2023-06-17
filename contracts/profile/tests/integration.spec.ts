@@ -2,7 +2,7 @@
 import { Contract, LocalKoinos, Serializer, Token } from '@roamin/local-koinos';
 
 import * as profileAbi from '../abi/profile-abi.json';
-import * as nameserviceAbi from '../../name-service/abi/nameservice-abi.json';
+import * as nameserviceAbi from '../../name-service/abi/collections-abi.json';
 import * as collectionAbi from '../../test-collection/abi/testcollection-abi.json';
 
 // @ts-ignore koilib_types is needed when using koilib

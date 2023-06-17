@@ -1,11 +1,11 @@
 import { Signer, Provider, Contract } from 'koilib';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as abi from '../contracts/name-service/abi/nameservice-abi.json';
+import * as abi from '../contracts/name-service/abi/collections-abi.json';
 require('dotenv').config();
 
 const CONTRACT_WASM_PATH = '../contracts/name-service/build/release/contract.wasm';
-const CLI_ABI_PATH = '../contracts/name-service/abi/nameservice.abi';
+const CLI_ABI_PATH = '../contracts/name-service/abi/collections.abi';
 
 const { NAME_SERVICE_PRIVATE_KEY, RPC_URL } = process.env;
 

@@ -1,5 +1,5 @@
 import { Signer, Provider, Contract } from 'koilib';
-import * as abi from '../contracts/name-service/abi/nameservice-abi.json';
+import * as abi from '../contracts/name-service/abi/collections-abi.json';
 require('dotenv').config();
 
 const { 
