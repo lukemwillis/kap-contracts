@@ -130,10 +130,11 @@ export class Koindomain {
 
     return (
       // multiply the amount of tokens by 10^8 since Koin is 8 decimals
-      // @ts-ignore can be done in AS
       u128
         .from(
+          // @ts-ignore can be done in AS
           (u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000)) /
+          // @ts-ignore can be done in AS
             u128.fromU64(paymentTokenUSDPrice)
         )
         .toU64()

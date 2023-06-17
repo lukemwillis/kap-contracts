@@ -84,7 +84,6 @@ describe('mint', () => {
     let res = await koinDomainContract.functions.set_metadata({
       nameservice_address: nameserviceAcct.address,
       oracle_address: usdOracleAcct.address,
-      owner: user1.address,
       press_badge_address: collectionAcct.address,
       is_launched: true,
       beneficiary: koinDomainAcct.address
@@ -628,6 +627,5 @@ describe('authorizations', () => {
 
     await res.transaction?.wait();
     expect(res.receipt).toBeDefined();
-
   });
 });
