@@ -1,0 +1,1 @@
+export const REFERRAL_CODES_SPACE_ID = 0;

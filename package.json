@@ -36,8 +36,10 @@
     "profile:ci": "cd contracts/profile && yarn ci",
     "profile:deploy": "yarn ts-node ./scripts/deploy-profile.ts",
     "profile:set-metadata": "yarn ts-node ./scripts/set-metadata-profile.ts",
-    "all:build": "yarn test-domain:build && yarn test-collection:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build && yarn profile:build",
-    "all:ci": "yarn koin-domain:ci && yarn name-service:ci && yarn multi-sig:ci  && yarn profile:ci",
+    "referral:build": "cd contracts/referral && yarn install && yarn build:release",
+    "referral:ci": "cd contracts/referral && yarn ci",
+    "all:build": "yarn test-domain:build && yarn test-collection:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build && yarn profile:build && yarn referral:build",
+    "all:ci": "yarn koin-domain:ci && yarn name-service:ci && yarn multi-sig:ci && yarn profile:ci && yarn referral:ci",
     "ci": "yarn lint && yarn all:build && yarn all:ci"
   }
 }

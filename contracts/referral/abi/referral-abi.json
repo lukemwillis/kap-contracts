@@ -1,0 +1,97 @@
+{
+    "methods": {
+        "redeem": {
+            "argument": "referral.redeem_arguments",
+            "return": "referral.empty_message",
+            "description": "Redeems a referral code",
+            "entry_point": 777062092,
+            "read_only": false
+        },
+        "get_referral_code": {
+            "argument": "referral.get_referral_code_arguments",
+            "return": "referral.referral_code",
+            "description": "Gets a referral code if already redeemed",
+            "entry_point": 4064109570,
+            "read_only": true
+        }
+    },
+    "types": {
+        "nested": {
+            "referral": {
+                "nested": {
+                    "redeem_arguments": {
+                        "fields": {
+                            "referral_code": {
+                                "type": "referral_code",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "get_referral_code_arguments": {
+                        "fields": {
+                            "referral_code": {
+                                "type": "referral_code",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "empty_message": {
+                        "fields": {}
+                    },
+                    "referral_code_metadata": {
+                        "fields": {
+                            "chain_id": {
+                                "type": "bytes",
+                                "id": 1
+                            },
+                            "issuer": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "issuance_date": {
+                                "type": "uint64",
+                                "id": 3,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "allowed_redemption_contract": {
+                                "type": "bytes",
+                                "id": 4,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "allowed_redemption_account": {
+                                "type": "bytes",
+                                "id": 5,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 6
+                            }
+                        }
+                    },
+                    "referral_code": {
+                        "fields": {
+                            "metadata": {
+                                "type": "referral_code_metadata",
+                                "id": 1
+                            },
+                            "signature": {
+                                "type": "bytes",
+                                "id": 2
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
