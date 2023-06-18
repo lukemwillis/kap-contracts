@@ -51,7 +51,7 @@
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
-                            "issuance_date": {
+                            "expiration_date": {
                                 "type": "uint64",
                                 "id": 3,
                                 "options": {

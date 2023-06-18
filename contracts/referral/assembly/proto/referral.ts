@@ -118,9 +118,9 @@ export namespace referral {
         writer.bytes(message.issuer);
       }
 
-      if (message.issuance_date != 0) {
+      if (message.expiration_date != 0) {
         writer.uint32(24);
-        writer.uint64(message.issuance_date);
+        writer.uint64(message.expiration_date);
       }
 
       if (message.allowed_redemption_contract.length != 0) {
@@ -155,7 +155,7 @@ export namespace referral {
             break;
 
           case 3:
-            message.issuance_date = reader.uint64();
+            message.expiration_date = reader.uint64();
             break;
 
           case 4:
@@ -181,7 +181,7 @@ export namespace referral {
 
     chain_id: Uint8Array;
     issuer: Uint8Array;
-    issuance_date: u64;
+    expiration_date: u64;
     allowed_redemption_contract: Uint8Array;
     allowed_redemption_account: Uint8Array;
     data: Uint8Array;
@@ -189,14 +189,14 @@ export namespace referral {
     constructor(
       chain_id: Uint8Array = new Uint8Array(0),
       issuer: Uint8Array = new Uint8Array(0),
-      issuance_date: u64 = 0,
+      expiration_date: u64 = 0,
       allowed_redemption_contract: Uint8Array = new Uint8Array(0),
       allowed_redemption_account: Uint8Array = new Uint8Array(0),
       data: Uint8Array = new Uint8Array(0)
     ) {
       this.chain_id = chain_id;
       this.issuer = issuer;
-      this.issuance_date = issuance_date;
+      this.expiration_date = expiration_date;
       this.allowed_redemption_contract = allowed_redemption_contract;
       this.allowed_redemption_account = allowed_redemption_account;
       this.data = data;

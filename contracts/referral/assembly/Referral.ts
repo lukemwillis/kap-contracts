@@ -4,7 +4,7 @@ import { ReferralCodesStorage } from "./state/ReferralCodesStorage";
 
 export class Referral {
   contractId: Uint8Array = System.getContractId();
-  headBlockTime: u64 = System.getHeadInfo().head_block_time;
+  now: u64 = System.getHeadInfo().head_block_time;
   chainId: Uint8Array = System.getChainId();
   referralCodes: ReferralCodesStorage = new ReferralCodesStorage(this.contractId);
 
@@ -21,8 +21,8 @@ export class Referral {
     // must be a code for this chain
     System.require(Arrays.equal(this.chainId, referral_code!.metadata!.chain_id), 'invalid "chain_id"', -1);
 
-    // there must be an issuance date
-    System.require(referral_code!.metadata!.issuance_date > 0 && referral_code!.metadata!.issuance_date <= this.headBlockTime, 'invalid "issuance_date"', -1);
+    // check expiration date if provided
+    System.require(referral_code!.metadata!.expiration_date == 0 || referral_code!.metadata!.expiration_date >= this.now, 'referral code expired', -1);
 
     // check allowed_redemption_contract if provided
     const caller = System.getCaller().caller;

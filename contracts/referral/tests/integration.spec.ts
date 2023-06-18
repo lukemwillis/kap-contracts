@@ -56,17 +56,18 @@ afterAll(async () => {
   await localKoinos.stopNode();
 });
 
-async function generateReferalCode(
+async function generateReferralCode(
   signer: Signer,
   chain_id: string,
-  issuance_date: string,
+  expiration_date: string,
   allowed_redemption_account = '',
   allowed_redemption_contract = '',
-  data = '') {
+  data = ''
+) {
   const metadata = {
     chain_id,
     issuer: signer.address,
-    issuance_date,
+    expiration_date,
     allowed_redemption_account,
     allowed_redemption_contract,
     data
@@ -85,10 +86,10 @@ describe('referral', () => {
   it('redeems a referral code', async () => {
     const chain_id = await referralContract.provider.getChainId();
 
-    let referral_code = await generateReferalCode(
+    let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
-      (new Date().getTime() - 10000).toString()
+      (new Date().getTime() + 10000).toString()
     );
 
     // should not get a code that's not redeemed
@@ -117,10 +118,10 @@ describe('referral', () => {
 
     const chain_id = await referralContract.provider.getChainId();
 
-    let referral_code = await generateReferalCode(
+    let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
-      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
       user2.address
     );
 
@@ -204,18 +205,18 @@ describe('referral', () => {
           metadata: {
             issuer: user1.address,
             chain_id,
-            issuance_date: (new Date().getTime() + 100000).toString()
+            expiration_date: '1'
           }
         }
       });
     } catch (error) {
-      expect(JSON.parse(error.message).error).toStrictEqual('invalid "issuance_date"');
+      expect(JSON.parse(error.message).error).toStrictEqual('referral code expired');
     }
 
-    let referral_code = await generateReferalCode(
+    let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
-      (new Date().getTime() - 10000).toString()
+      (new Date().getTime() + 10000).toString()
     );
 
     let res = await referralContract.functions.redeem({
@@ -232,13 +233,13 @@ describe('referral', () => {
       expect(JSON.parse(error.message).error).toStrictEqual('referral code already redeemed');
     }
 
-    referral_code = await generateReferalCode(
+    referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
-      (new Date().getTime() - 10000).toString()
+      (new Date().getTime() + 10000).toString()
     );
 
-    const { issuance_date } = referral_code.metadata;
+    const { expiration_date } = referral_code.metadata;
 
     referral_code.metadata.issuer = user2.address;
 
@@ -251,7 +252,7 @@ describe('referral', () => {
     }
 
     referral_code.metadata.issuer = user1.address;
-    referral_code.metadata.issuance_date = (new Date().getTime() - 10000).toString();
+    referral_code.metadata.expiration_date = (new Date().getTime() + 100000).toString();
 
     try {
       await referralContract.functions.redeem({
@@ -261,7 +262,7 @@ describe('referral', () => {
       expect(JSON.parse(error.message).error).toStrictEqual('invalid signature');
     }
 
-    referral_code.metadata.issuance_date = issuance_date;
+    referral_code.metadata.expiration_date = expiration_date;
     referral_code.signature = '';
 
     try {
