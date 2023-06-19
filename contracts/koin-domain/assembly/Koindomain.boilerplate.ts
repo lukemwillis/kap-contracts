@@ -80,6 +80,21 @@ export class Koindomain {
     return res;
   }
 
+  get_referral_allowance(
+    args: koindomain.get_referral_allowance_arguments
+  ): koindomain.referral_allowance {
+    // const name = args.name;
+
+    // YOUR CODE HERE
+
+    const res = new koindomain.referral_allowance();
+    // res.max_amount = ;
+    // res.remaining = ;
+    // res.next_refresh = ;
+
+    return res;
+  }
+
   set_metadata(
     args: koindomain.set_metadata_arguments
   ): koindomain.empty_object {

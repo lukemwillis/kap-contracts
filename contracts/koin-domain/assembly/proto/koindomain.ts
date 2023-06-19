@@ -467,6 +467,47 @@ export namespace koindomain {
     }
   }
 
+  export class get_referral_allowance_arguments {
+    static encode(
+      message: get_referral_allowance_arguments,
+      writer: Writer
+    ): void {
+      if (message.name.length != 0) {
+        writer.uint32(10);
+        writer.string(message.name);
+      }
+    }
+
+    static decode(
+      reader: Reader,
+      length: i32
+    ): get_referral_allowance_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new get_referral_allowance_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.name = reader.string();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    name: string;
+
+    constructor(name: string = "") {
+      this.name = name;
+    }
+  }
+
   export class set_metadata_arguments {
     static encode(message: set_metadata_arguments, writer: Writer): void {
       const unique_name_metadata = message.metadata;
@@ -678,6 +719,47 @@ export namespace koindomain {
 
     constructor(value: u64 = 0) {
       this.value = value;
+    }
+  }
+
+  export class redeem_referral_code_args {
+    static encode(message: redeem_referral_code_args, writer: Writer): void {
+      const unique_name_referral_code = message.referral_code;
+      if (unique_name_referral_code !== null) {
+        writer.uint32(10);
+        writer.fork();
+        referral_code.encode(unique_name_referral_code, writer);
+        writer.ldelim();
+      }
+    }
+
+    static decode(reader: Reader, length: i32): redeem_referral_code_args {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new redeem_referral_code_args();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.referral_code = referral_code.decode(
+              reader,
+              reader.uint32()
+            );
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    referral_code: referral_code | null;
+
+    constructor(referral_code: referral_code | null = null) {
+      this.referral_code = referral_code;
     }
   }
 
@@ -1394,47 +1476,6 @@ export namespace koindomain {
     ) {
       this.metadata = metadata;
       this.signature = signature;
-    }
-  }
-
-  export class redeem_referral_code_args {
-    static encode(message: redeem_referral_code_args, writer: Writer): void {
-      const unique_name_referral_code = message.referral_code;
-      if (unique_name_referral_code !== null) {
-        writer.uint32(10);
-        writer.fork();
-        referral_code.encode(unique_name_referral_code, writer);
-        writer.ldelim();
-      }
-    }
-
-    static decode(reader: Reader, length: i32): redeem_referral_code_args {
-      const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new redeem_referral_code_args();
-
-      while (reader.ptr < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1:
-            message.referral_code = referral_code.decode(
-              reader,
-              reader.uint32()
-            );
-            break;
-
-          default:
-            reader.skipType(tag & 7);
-            break;
-        }
-      }
-
-      return message;
-    }
-
-    referral_code: referral_code | null;
-
-    constructor(referral_code: referral_code | null = null) {
-      this.referral_code = referral_code;
     }
   }
 }

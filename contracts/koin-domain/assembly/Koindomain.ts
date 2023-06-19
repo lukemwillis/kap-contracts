@@ -296,7 +296,7 @@ export class Koindomain {
       // try to redeem the referral code
       this.redeemReferralCode(referral_code, metadata.referral_contract_address);
 
-      // the metadata.data field of the referral code is used to store the issuer's KAP nam
+      // the metadata.data field of the referral code is used to store the issuer's KAP name
       const issuerKAPNameStr = StringBytes.bytesToString(referral_code.metadata!.data);
       const issuerKAPName = this.getKAPName(issuerKAPNameStr, metadata.nameservice_address);
 
@@ -500,6 +500,27 @@ export class Koindomain {
     } while (!done && limit > 0);
 
     return res;
+  }
+
+  get_referral_allowance(
+    args: koindomain.get_referral_allowance_arguments
+  ): koindomain.referral_allowance {
+    const name = args.name;
+
+    const metadata = this.metadata.get()!;
+    const referralAllowance = this.referralAllowances.get(name);
+
+    if (referralAllowance) {
+      if (referralAllowance.next_refresh <= this.now) {
+        referralAllowance.max_amount = metadata.max_referrals_per_period;
+        referralAllowance.remaining = metadata.max_referrals_per_period;
+        referralAllowance.next_refresh = this.now + metadata.referrals_refresh_period;
+      }
+
+      return referralAllowance;
+    }
+
+    return new koindomain.referral_allowance();
   }
 
   set_metadata(

@@ -35,6 +35,13 @@
             "entry_point": 2443088571,
             "read_only": true
         },
+        "get_referral_allowance": {
+            "argument": "koindomain.get_referral_allowance_arguments",
+            "return": "koindomain.referral_allowance",
+            "description": "Get referral allowance for a name",
+            "entry_point": 1739503026,
+            "read_only": true
+        },
         "set_metadata": {
             "argument": "koindomain.set_metadata_arguments",
             "return": "koindomain.empty_object",
@@ -193,6 +200,14 @@
                             }
                         }
                     },
+                    "get_referral_allowance_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
                     "set_metadata_arguments": {
                         "fields": {
                             "metadata": {
@@ -246,6 +261,14 @@
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
+                            }
+                        }
+                    },
+                    "redeem_referral_code_args": {
+                        "fields": {
+                            "referral_code": {
+                                "type": "referral_code",
+                                "id": 1
                             }
                         }
                     },
@@ -525,14 +548,6 @@
                             "signature": {
                                 "type": "bytes",
                                 "id": 2
-                            }
-                        }
-                    },
-                    "redeem_referral_code_args": {
-                        "fields": {
-                            "referral_code": {
-                                "type": "referral_code",
-                                "id": 1
                             }
                         }
                     }

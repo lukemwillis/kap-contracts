@@ -69,6 +69,15 @@ message get_purchases_result {
 }
 
 /* 
+  @description Get referral allowance for a name
+  @read-only true
+  @result referral_allowance
+*/
+message get_referral_allowance_arguments {
+  string name = 1;
+}
+
+/* 
   @description Set contract metadata
   @read-only false
   @result empty_object
@@ -103,6 +112,11 @@ message balance_of_nft_args {
 
 message balance_of_nft_res {
   uint64 value = 1 [jstype = JS_STRING];
+}
+
+// referral
+message redeem_referral_code_args {
+  referral_code referral_code = 1;
 }
 
 // objects
@@ -176,8 +190,4 @@ message referral_code_metadata {
 message referral_code {
   referral_code_metadata metadata = 1;
   bytes signature = 2;
-}
-
-message redeem_referral_code_args {
-  referral_code referral_code = 1;
 }

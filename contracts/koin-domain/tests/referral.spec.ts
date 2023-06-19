@@ -82,9 +82,9 @@ beforeAll(async () => {
   await localKoinos.startBlockProduction();
 });
 
-afterAll(async () => {
+afterAll(() => {
   // stop local-koinos node
-  await localKoinos.stopNode();
+  localKoinos.stopNode();
 });
 
 async function generateReferralCode(
@@ -116,8 +116,12 @@ async function generateReferralCode(
   };
 }
 
+async function wait(time: number) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 describe('referral', () => {
-  it('allow minting a free KAP name with a referral code', async () => {
+  it('allow minting a KAP name with a referral code', async () => {
     // set koin domain contract metadata
     let res = await koinDomainContract.functions.set_metadata({
       metadata: {
@@ -263,4 +267,249 @@ describe('referral', () => {
     });
   });
 
+  it('does not allow minting a KAP name with an invalid referral code', async () => {
+    expect.assertions(3);
+
+    let res = await koinDomainContract.functions.set_metadata({
+      metadata: {
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: usdOracleAcct.address,
+        press_badge_address: collectionAcct.address,
+        is_launched: true,
+        beneficiary: koinDomainAcct.address,
+        referral_contract_address: referralAcct.address,
+        // 1 day
+        referrals_refresh_period: `${3600 * 1000 * 24}`,
+        max_referrals_per_period: '1',
+        premium_account_referral_discount_percent: 50
+      }
+    });
+
+    await res.transaction?.wait();
+
+    // buy a premium name
+    res = await nameserviceContract.functions.mint({
+      name: 'premium4.koin',
+      owner: user4.address,
+      duration_increments: 1, // 1 year
+      payment_from: user4.address,
+    }, {
+      beforeSend: async (tx) => {
+        await user4.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    // generate referral code
+    const chain_id = await referralContract.provider.getChainId();
+
+    let referral_code = await generateReferralCode(
+      user1.signer,
+      chain_id,
+      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
+      '',
+      koinDomainAcct.address,
+      Buffer.from('premium5.koin').toString('base64url')
+    );
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'thisisafreename2.koin',
+        owner: user2.address,
+        data: utils.encodeBase64url(
+          await referralContract.serializer.serialize(referral_code, 'referral.referral_code')
+        )
+      }, {
+        beforeSend: async (tx) => {
+          await user2.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('referral code issuer is different than the KAP name owner');
+    }
+
+    referral_code = await generateReferralCode(
+      user2.signer,
+      chain_id,
+      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
+      '',
+      koinDomainAcct.address,
+      Buffer.from('thisisafreename.koin').toString('base64url')
+    );
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'thisisafreename2.koin',
+        owner: user2.address,
+        data: utils.encodeBase64url(
+          await referralContract.serializer.serialize(referral_code, 'referral.referral_code')
+        )
+      }, {
+        beforeSend: async (tx) => {
+          await user2.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('only premium KAP name holders can issue referral codes');
+    }
+
+    referral_code = await generateReferralCode(
+      user4.signer,
+      chain_id,
+      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
+      '',
+      koinDomainAcct.address,
+      Buffer.from('premium4.koin').toString('base64url')
+    );
+
+    res = await nameserviceContract.functions.mint({
+      name: 'thisisafreename2.koin',
+      owner: user2.address,
+      data: utils.encodeBase64url(
+        await referralContract.serializer.serialize(referral_code, 'referral.referral_code')
+      )
+    }, {
+      beforeSend: async (tx) => {
+        await user2.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction.wait();
+
+    referral_code = await generateReferralCode(
+      user4.signer,
+      chain_id,
+      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
+      '',
+      koinDomainAcct.address,
+      Buffer.from('premium4.koin').toString('base64url')
+    );
+
+    try {
+      await nameserviceContract.functions.mint({
+        name: 'thisisafreename3.koin',
+        owner: user2.address,
+        data: utils.encodeBase64url(
+          await referralContract.serializer.serialize(referral_code, 'referral.referral_code')
+        )
+      }, {
+        beforeSend: async (tx) => {
+          await user2.signer.signTransaction(tx);
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('the referral code issuer does not have enough referral allowances');
+    }
+
+  });
+
+  it('refreshes referral allowances', async () => {
+    // set koin domain contract metadata
+    let res = await koinDomainContract.functions.set_metadata({
+      metadata: {
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: usdOracleAcct.address,
+        press_badge_address: collectionAcct.address,
+        is_launched: true,
+        beneficiary: koinDomainAcct.address,
+        referral_contract_address: referralAcct.address,
+        // 2 seconds
+        referrals_refresh_period: '2000',
+        max_referrals_per_period: '3',
+        premium_account_referral_discount_percent: 50
+      }
+    });
+
+    await res.transaction?.wait();
+
+
+    // buy a premium name
+    res = await nameserviceContract.functions.mint({
+      name: 'user1.koin',
+      owner: user1.address,
+      duration_increments: 1, // 1 year
+      payment_from: user1.address,
+    }, {
+      beforeSend: async (tx) => {
+        await user1.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    // generate referral code
+    const chain_id = await referralContract.provider.getChainId();
+
+    let referral_code = await generateReferralCode(
+      user1.signer,
+      chain_id,
+      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
+      '',
+      koinDomainAcct.address,
+      Buffer.from('user1.koin').toString('base64url')
+    );
+
+    // buy a free name
+    res = await nameserviceContract.functions.mint({
+      name: 'thisisanotherfreename.koin',
+      owner: user2.address,
+      data: utils.encodeBase64url(
+        await referralContract.serializer.serialize(referral_code, 'referral.referral_code')
+      )
+    }, {
+      beforeSend: async (tx) => {
+        await user2.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    res = await koinDomainContract.functions.get_referral_allowance({
+      name: 'user1.koin'
+    });
+
+    expect(res?.result?.max_amount).toEqual('3');
+    expect(res?.result?.remaining).toEqual('2');
+
+    await wait(2000);
+    await localKoinos.produceBlock();
+
+    referral_code = await generateReferralCode(
+      user1.signer,
+      chain_id,
+      (new Date().getTime() - 10000).toString(),
+      (new Date().getTime() + 10000).toString(),
+      '',
+      koinDomainAcct.address,
+      Buffer.from('user1.koin').toString('base64url')
+    );
+
+    // buy a free name
+    res = await nameserviceContract.functions.mint({
+      name: 'thisisanotherfreename1.koin',
+      owner: user2.address,
+      data: utils.encodeBase64url(
+        await referralContract.serializer.serialize(referral_code, 'referral.referral_code')
+      )
+    }, {
+      beforeSend: async (tx) => {
+        await user2.signer.signTransaction(tx);
+      }
+    });
+
+    await res.transaction?.wait();
+
+    res = await koinDomainContract.functions.get_referral_allowance({
+      name: 'user1.koin'
+    });
+
+    expect(res?.result?.max_amount).toEqual('3');
+    expect(res?.result?.remaining).toEqual('2');
+  });
 });
