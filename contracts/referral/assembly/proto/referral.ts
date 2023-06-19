@@ -118,23 +118,28 @@ export namespace referral {
         writer.bytes(message.issuer);
       }
 
-      if (message.expiration_date != 0) {
+      if (message.issuance_date != 0) {
         writer.uint32(24);
+        writer.uint64(message.issuance_date);
+      }
+
+      if (message.expiration_date != 0) {
+        writer.uint32(32);
         writer.uint64(message.expiration_date);
       }
 
       if (message.allowed_redemption_contract.length != 0) {
-        writer.uint32(34);
+        writer.uint32(42);
         writer.bytes(message.allowed_redemption_contract);
       }
 
       if (message.allowed_redemption_account.length != 0) {
-        writer.uint32(42);
+        writer.uint32(50);
         writer.bytes(message.allowed_redemption_account);
       }
 
       if (message.data.length != 0) {
-        writer.uint32(50);
+        writer.uint32(58);
         writer.bytes(message.data);
       }
     }
@@ -155,18 +160,22 @@ export namespace referral {
             break;
 
           case 3:
-            message.expiration_date = reader.uint64();
+            message.issuance_date = reader.uint64();
             break;
 
           case 4:
-            message.allowed_redemption_contract = reader.bytes();
+            message.expiration_date = reader.uint64();
             break;
 
           case 5:
-            message.allowed_redemption_account = reader.bytes();
+            message.allowed_redemption_contract = reader.bytes();
             break;
 
           case 6:
+            message.allowed_redemption_account = reader.bytes();
+            break;
+
+          case 7:
             message.data = reader.bytes();
             break;
 
@@ -181,6 +190,7 @@ export namespace referral {
 
     chain_id: Uint8Array;
     issuer: Uint8Array;
+    issuance_date: u64;
     expiration_date: u64;
     allowed_redemption_contract: Uint8Array;
     allowed_redemption_account: Uint8Array;
@@ -189,6 +199,7 @@ export namespace referral {
     constructor(
       chain_id: Uint8Array = new Uint8Array(0),
       issuer: Uint8Array = new Uint8Array(0),
+      issuance_date: u64 = 0,
       expiration_date: u64 = 0,
       allowed_redemption_contract: Uint8Array = new Uint8Array(0),
       allowed_redemption_account: Uint8Array = new Uint8Array(0),
@@ -196,6 +207,7 @@ export namespace referral {
     ) {
       this.chain_id = chain_id;
       this.issuer = issuer;
+      this.issuance_date = issuance_date;
       this.expiration_date = expiration_date;
       this.allowed_redemption_contract = allowed_redemption_contract;
       this.allowed_redemption_account = allowed_redemption_account;

@@ -25,10 +25,11 @@ message empty_message {
 message referral_code_metadata {
   bytes chain_id = 1;
   bytes issuer = 2 [(koinos.btype) = ADDRESS];
-  uint64 expiration_date = 3 [jstype = JS_STRING];
-  bytes allowed_redemption_contract = 4 [(koinos.btype) = CONTRACT_ID];
-  bytes allowed_redemption_account = 5 [(koinos.btype) = ADDRESS];
-  bytes data = 6;
+  uint64 issuance_date = 3 [jstype = JS_STRING];
+  uint64 expiration_date = 4 [jstype = JS_STRING];
+  bytes allowed_redemption_contract = 5 [(koinos.btype) = CONTRACT_ID];
+  bytes allowed_redemption_account = 6 [(koinos.btype) = ADDRESS];
+  bytes data = 7;
 }
 
 message referral_code {

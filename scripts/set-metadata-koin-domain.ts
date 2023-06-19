@@ -2,9 +2,9 @@ import { Signer, Provider, Contract } from 'koilib';
 import * as abi from '../contracts/koin-domain/abi/koindomain-abi.json';
 require('dotenv').config();
 
-const { 
-  KOIN_DOMAIN_PRIVATE_KEY, 
-  RPC_URL, 
+const {
+  KOIN_DOMAIN_PRIVATE_KEY,
+  RPC_URL,
   NAME_SERVICE_ADDRESS,
   USD_ORACLE_ADDRESS
 } = process.env;
@@ -26,8 +26,10 @@ abi.koilib_types = abi.types;
   });
 
   const res = await contract.functions.set_metadata({
-    nameservice_address: NAME_SERVICE_ADDRESS,
-    oracle_address: USD_ORACLE_ADDRESS
+    metadata: {
+      nameservice_address: NAME_SERVICE_ADDRESS,
+      oracle_address: USD_ORACLE_ADDRESS
+    }
   });
 
   await res.transaction?.wait();

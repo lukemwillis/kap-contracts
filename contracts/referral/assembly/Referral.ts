@@ -21,6 +21,9 @@ export class Referral {
     // must be a code for this chain
     System.require(Arrays.equal(this.chainId, referral_code!.metadata!.chain_id), 'invalid "chain_id"', -1);
 
+    // check issuance date is valid
+    System.require(referral_code!.metadata!.issuance_date > 0 && referral_code!.metadata!.issuance_date <= this.now, 'invalid issuance_date', -1);
+
     // check expiration date if provided
     System.require(referral_code!.metadata!.expiration_date == 0 || referral_code!.metadata!.expiration_date >= this.now, 'referral code expired', -1);
 
@@ -66,7 +69,7 @@ export class Referral {
 
     const serializedMetadata = Protobuf.encode(referral_code!.metadata, referral.referral_code_metadata.encode);
     const hash = System.hash(Crypto.multicodec.sha2_256, serializedMetadata)!;
-    
+
     const refCode = this.referralCodes.get(hash);
     if (refCode) {
       return refCode;

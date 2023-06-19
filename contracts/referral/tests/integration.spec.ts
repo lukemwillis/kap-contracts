@@ -59,6 +59,7 @@ afterAll(async () => {
 async function generateReferralCode(
   signer: Signer,
   chain_id: string,
+  issuance_date: string,
   expiration_date: string,
   allowed_redemption_account = '',
   allowed_redemption_contract = '',
@@ -67,6 +68,7 @@ async function generateReferralCode(
   const metadata = {
     chain_id,
     issuer: signer.address,
+    issuance_date,
     expiration_date,
     allowed_redemption_account,
     allowed_redemption_contract,
@@ -89,6 +91,7 @@ describe('referral', () => {
     let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString()
     );
 
@@ -121,6 +124,7 @@ describe('referral', () => {
     let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString(),
       user2.address
     );
@@ -152,7 +156,7 @@ describe('referral', () => {
   });
 
   it('does not allow the redemption of invalid codes', async () => {
-    expect.assertions(10);
+    expect.assertions(11);
 
     const chain_id = await referralContract.provider.getChainId();
 
@@ -205,6 +209,20 @@ describe('referral', () => {
           metadata: {
             issuer: user1.address,
             chain_id,
+          }
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('invalid issuance_date');
+    }
+
+    try {
+      await referralContract.functions.redeem({
+        referral_code: {
+          metadata: {
+            issuer: user1.address,
+            chain_id,
+            issuance_date: '1',
             expiration_date: '1'
           }
         }
@@ -216,6 +234,7 @@ describe('referral', () => {
     let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString()
     );
 
@@ -236,6 +255,7 @@ describe('referral', () => {
     referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString()
     );
 
