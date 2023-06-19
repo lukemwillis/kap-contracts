@@ -164,12 +164,13 @@ message referral_allowance {
 
 message referral_code_metadata {
   bytes chain_id = 1;
-  bytes issuer = 2 [(koinos.btype) = ADDRESS];
-  uint64 issuance_date = 3 [jstype = JS_STRING];
-  uint64 expiration_date = 4 [jstype = JS_STRING];
-  bytes allowed_redemption_contract = 5 [(koinos.btype) = CONTRACT_ID];
-  bytes allowed_redemption_account = 6 [(koinos.btype) = ADDRESS];
-  bytes data = 7;
+  bytes referral_contract_id = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes issuer = 3 [(koinos.btype) = ADDRESS];
+  uint64 issuance_date = 4 [jstype = JS_STRING];
+  uint64 expiration_date = 5 [jstype = JS_STRING];
+  bytes allowed_redemption_contract = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes allowed_redemption_account = 7 [(koinos.btype) = ADDRESS];
+  bytes data = 8;
 }
 
 message referral_code {

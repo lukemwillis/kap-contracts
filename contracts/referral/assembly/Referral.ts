@@ -21,6 +21,9 @@ export class Referral {
     // must be a code for this chain
     System.require(Arrays.equal(this.chainId, referral_code!.metadata!.chain_id), 'invalid "chain_id"', -1);
 
+    // must be a code for this contract
+    System.require(Arrays.equal(this.contractId, referral_code!.metadata!.referral_contract_id), 'invalid "referral_contract_id"', -1);
+
     // check issuance date is valid
     System.require(referral_code!.metadata!.issuance_date > 0 && referral_code!.metadata!.issuance_date <= this.now, 'invalid issuance_date', -1);
 

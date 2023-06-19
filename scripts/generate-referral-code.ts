@@ -31,6 +31,7 @@ async function generateReferralCode(
 ) {
   const metadata = {
     chain_id: await provider.getChainId(),
+    referral_contract_id: referralContract.getId(),
     issuer: signer.address,
     issuance_date: new Date().getTime().toString(),
     expiration_date,

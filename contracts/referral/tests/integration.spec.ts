@@ -59,6 +59,7 @@ afterAll(async () => {
 async function generateReferralCode(
   signer: Signer,
   chain_id: string,
+  referral_contract_id: string,
   issuance_date: string,
   expiration_date: string,
   allowed_redemption_account = '',
@@ -67,6 +68,7 @@ async function generateReferralCode(
 ) {
   const metadata = {
     chain_id,
+    referral_contract_id,
     issuer: signer.address,
     issuance_date,
     expiration_date,
@@ -91,6 +93,7 @@ describe('referral', () => {
     let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      referralAcct.address,
       (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString()
     );
@@ -124,6 +127,7 @@ describe('referral', () => {
     let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      referralAcct.address,
       (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString(),
       user2.address
@@ -156,7 +160,7 @@ describe('referral', () => {
   });
 
   it('does not allow the redemption of invalid codes', async () => {
-    expect.assertions(11);
+    expect.assertions(12);
 
     const chain_id = await referralContract.provider.getChainId();
 
@@ -208,7 +212,21 @@ describe('referral', () => {
         referral_code: {
           metadata: {
             issuer: user1.address,
+            chain_id
+          }
+        }
+      });
+    } catch (error) {
+      expect(JSON.parse(error.message).error).toStrictEqual('invalid "referral_contract_id"');
+    }
+
+    try {
+      await referralContract.functions.redeem({
+        referral_code: {
+          metadata: {
+            issuer: user1.address,
             chain_id,
+            referral_contract_id: referralAcct.address
           }
         }
       });
@@ -222,6 +240,7 @@ describe('referral', () => {
           metadata: {
             issuer: user1.address,
             chain_id,
+            referral_contract_id: referralAcct.address,
             issuance_date: '1',
             expiration_date: '1'
           }
@@ -234,6 +253,7 @@ describe('referral', () => {
     let referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      referralAcct.address,
       (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString()
     );
@@ -255,6 +275,7 @@ describe('referral', () => {
     referral_code = await generateReferralCode(
       user1.signer,
       chain_id,
+      referralAcct.address,
       (new Date().getTime() - 10000).toString(),
       (new Date().getTime() + 10000).toString()
     );

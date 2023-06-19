@@ -44,44 +44,51 @@
                                 "type": "bytes",
                                 "id": 1
                             },
-                            "issuer": {
+                            "referral_contract_id": {
                                 "type": "bytes",
                                 "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "issuer": {
+                                "type": "bytes",
+                                "id": 3,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
                             "issuance_date": {
                                 "type": "uint64",
-                                "id": 3,
+                                "id": 4,
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
                             },
                             "expiration_date": {
                                 "type": "uint64",
-                                "id": 4,
+                                "id": 5,
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
                             },
                             "allowed_redemption_contract": {
                                 "type": "bytes",
-                                "id": 5,
+                                "id": 6,
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
                             },
                             "allowed_redemption_account": {
                                 "type": "bytes",
-                                "id": 6,
+                                "id": 7,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
                             "data": {
                                 "type": "bytes",
-                                "id": 7
+                                "id": 8
                             }
                         }
                     },
