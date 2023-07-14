@@ -1,63 +1,92 @@
-import { authority, Crypto, Protobuf, error, System, StringBytes, claim, value, Arrays } from "@koinos/sdk-as";
-import { protocol } from "@koinos/proto-as";
+import { authority, Crypto, Protobuf, System, value } from "@koinos/sdk-as";
+import { manastation } from './proto/manastation';
+import { Metadata } from "./state/Metadata";
 
-export class ManaStation {
-  private _claim_contract_id: Uint8Array;
-  private _claim_entry: u32 = 0xdd1b3c31;
-  private _check_claim_entry: u32 = 0x2ac66b4c;
+const BALANCE_OF_ENTRYPOINT = 0x5c721497;
 
-  constructor() {
-    this._claim_contract_id = System.getContractAddress('claim');
+export class Manastation {
+  contractId: Uint8Array = System.getContractId();
+  metadata: Metadata = new Metadata(this.contractId);
+
+  private hasKapName(address: Uint8Array, nameserviceAddress: Uint8Array): bool {
+    const args = new manastation.balance_of_args(address);
+
+    const callRes = System.call(
+      nameserviceAddress,
+      BALANCE_OF_ENTRYPOINT,
+      Protobuf.encode(args, manastation.balance_of_args.encode)
+    );
+    System.require(callRes.code == 0, "failed to retrieve KAP balance");
+    const res = Protobuf.decode<manastation.balance_of_res>(
+      callRes.res.object!,
+      manastation.balance_of_res.decode
+    );
+
+    return res.value > 0;
   }
 
-  checkClaim(account: Uint8Array): claim.claim_status {
-    let checkArgs = new claim.check_claim_arguments(account);
-    let argsBytes = Protobuf.encode<claim.check_claim_arguments>(checkArgs, claim.check_claim_arguments.encode);
-
-    let ret = System.call(this._claim_contract_id, this._check_claim_entry, argsBytes);
-
-    if (ret.code != error.error_code.success)
-      System.exit(ret.code, StringBytes.stringToBytes('failed to check claim'));
-
-    let res = Protobuf.decode<claim.check_claim_result>(ret.res.object!, claim.check_claim_result.decode);
-
-    return res.value != null ? res.value! : new claim.claim_status(0, false);
+  /*
+  * Recover an address from a signature and transactionId
+  */
+  private recoverAddressFromSignature(signature: Uint8Array, transactionId: Uint8Array): Uint8Array {
+    return Crypto.addressFromPublicKey(System.recoverPublicKey(signature, transactionId)!);
   }
 
-  authorize(args: authority.authorize_arguments): authority.authorize_result {
-    const contractId = System.getContractId();
+  /*
+  * Check if an address was used to sign the transaction
+  */
+  private checkIfAnySignerHasKapName(signatures: value.list_type, transactionId: Uint8Array, nameserviceAddress: Uint8Array): bool {
+    let addr: Uint8Array;
+
+    for (let i = 0; i < signatures.values.length; i++) {
+      addr = this.recoverAddressFromSignature(
+        signatures.values[i].bytes_value!,
+        transactionId
+      );
+
+      if (this.hasKapName(addr, nameserviceAddress)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  authorize(_: authority.authorize_arguments): authority.authorize_result {
+    const metadata = this.metadata.get()!;
 
     const transactionId = System.getTransactionField('id')!.bytes_value!;
     const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
-    for (let i = 0; i < signatures.values.length; i++) {
-      const signature = signatures.values[i].bytes_value!;
-      let recoveredKey = System.recoverPublicKey(signature, transactionId)!;
-      const addr = Crypto.addressFromPublicKey(recoveredKey);
-      if (Arrays.equal(addr, contractId)) {
-        return new authority.authorize_result(true);
-      }
-    }
+    const rcLimit = System.getTransactionField('header.rc_limit')!.uint64_value;
 
-    if (args.type == authority.authorization_type.transaction_application) {
-      const operations = Protobuf.decode<value.list_type>(System.getTransactionField('operations')!.message_value!.value!, value.list_type.decode);
-      System.require(operations.values.length == 1, 'transaction must have only 1 operation');
+    return new authority.authorize_result(rcLimit <= metadata.max_rc_limit && this.checkIfAnySignerHasKapName(signatures, transactionId, metadata.nameservice_address!));
+  }
 
-      const operation = Protobuf.decode<protocol.operation>(operations.values[0].message_value!.value!, protocol.operation.decode);
-      System.require(operation.call_contract != null, 'expected call contract operation');
-      System.require(Arrays.equal(operation.call_contract!.contract_id, this._claim_contract_id), 'expected call contract operation to be the claim contract');
-      System.require(operation.call_contract!.entry_point == this._claim_entry, 'expected call contract operation to be the claim entry point');
+  set_metadata(
+    args: manastation.set_metadata_arguments
+  ): manastation.empty_object {
+    // only this contract can set the metadata for now
+    System.requireAuthority(
+      authority.authorization_type.contract_call,
+      this.contractId
+    );
 
-      System.require(operation.call_contract!.args != null, 'expected call contract arguments to not be null');
-      const claimArgs = Protobuf.decode<claim.check_claim_arguments>(operation.call_contract!.args!, claim.check_claim_arguments.decode);
+    const nameservice_address = args.nameservice_address;
+    const max_rc_limit = args.max_rc_limit;
 
-      System.require(claimArgs.eth_address != null, 'expected eth address to not be null');
+    this.metadata.put(
+      new manastation.metadata_object(
+        nameservice_address, 
+        max_rc_limit, 
+      )
+    );
 
-      let claimStatus = this.checkClaim(claimArgs.eth_address!);
-      if (claimStatus.claimed == false && claimStatus.token_amount > 0) {
-        return new authority.authorize_result(true);
-      }
-    }
+    return new manastation.empty_object();
+  }
 
-    return new authority.authorize_result(false);
+  get_metadata(
+    _: manastation.get_metadata_arguments
+  ): manastation.metadata_object {
+    return this.metadata.get()!;
   }
 }

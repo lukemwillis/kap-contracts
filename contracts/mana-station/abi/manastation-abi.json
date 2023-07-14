@@ -1,0 +1,154 @@
+{
+    "methods": {
+        "set_metadata": {
+            "input": "manastation.set_metadata_arguments",
+            "output": "manastation.empty_object",
+            "description": "Set contract metadata",
+            "entryPoint": 1029287705,
+            "readOnly": false
+        },
+        "authorize": {
+            "input": "koinos.chain.authorize_arguments",
+            "output": "koinos.chain.authorize_result",
+            "description": "Check if authorized",
+            "entryPoint": 1244511632,
+            "read-only": false
+        },
+        "get_metadata": {
+            "input": "manastation.get_metadata_arguments",
+            "output": "manastation.metadata_object",
+            "description": "Get contract metadata",
+            "entryPoint": 4244088463,
+            "readOnly": true
+        }
+    },
+    "types": {
+        "nested": {
+            "manastation": {
+                "nested": {
+                    "set_metadata_arguments": {
+                        "fields": {
+                            "nameserviceAddress": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "maxRcLimit": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    },
+                    "get_metadata_arguments": {
+                        "fields": {}
+                    },
+                    "balance_of_args": {
+                        "fields": {
+                            "owner": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "balance_of_res": {
+                        "fields": {
+                            "value": {
+                                "type": "uint64",
+                                "id": 1,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "empty_object": {
+                        "fields": {}
+                    },
+                    "metadata_object": {
+                        "fields": {
+                            "nameserviceAddress": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "maxRcLimit": {
+                                "type": "uint64",
+                                "id": 2
+                            }
+                        }
+                    }
+                }
+            },
+            "koinos": {
+                "nested": {
+                    "chain": {
+                        "options": {
+                            "go_package": "github.com/koinos/koinos-proto-golang/koinos/chain"
+                        },
+                        "nested": {
+                            "authorization_type": {
+                                "values": {
+                                    "contract_call": 0,
+                                    "transaction_application": 1,
+                                    "contract_upload": 2
+                                }
+                            },
+                            "call_target": {
+                                "fields": {
+                                    "contractId": {
+                                        "type": "bytes",
+                                        "id": 1,
+                                        "options": {
+                                            "(btype)": "ADDRESS"
+                                        }
+                                    },
+                                    "entryPoint": {
+                                        "type": "uint32",
+                                        "id": 2
+                                    }
+                                }
+                            },
+                            "authorize_arguments": {
+                                "oneofs": {
+                                    "_call": {
+                                        "oneof": [
+                                            "call"
+                                        ]
+                                    }
+                                },
+                                "fields": {
+                                    "type": {
+                                        "type": "authorization_type",
+                                        "id": 1
+                                    },
+                                    "call": {
+                                        "type": "call_target",
+                                        "id": 2,
+                                        "options": {
+                                            "proto3_optional": true
+                                        }
+                                    }
+                                }
+                            },
+                            "authorize_result": {
+                                "fields": {
+                                    "value": {
+                                        "type": "bool",
+                                        "id": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

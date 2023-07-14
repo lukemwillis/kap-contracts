@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package manastation;
+
+import "koinos/options.proto"; 
+
+// Entrypoints
+
+/* 
+  @description Set contract metadata
+  @read-only false
+  @result empty_object
+*/
+message set_metadata_arguments {
+  bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
+  uint64 max_rc_limit = 2;
+}
+
+/* 
+  @description Get contract metadata
+  @read-only true
+  @result metadata_object
+*/
+message get_metadata_arguments {
+}
+
+// external calls
+// name service
+message balance_of_args {
+  bytes owner = 1 [(koinos.btype) = ADDRESS];
+}
+
+message balance_of_res {
+  uint64 value = 1 [jstype = JS_STRING];
+}
+
+// objects
+message empty_object {
+
+}
+
+message metadata_object {
+  bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
+  uint64 max_rc_limit = 2;
+}
