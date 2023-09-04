@@ -1,25 +1,25 @@
 {
     "methods": {
         "set_metadata": {
-            "input": "manastation.set_metadata_arguments",
-            "output": "manastation.empty_object",
+            "argument": "manastation.set_metadata_arguments",
+            "return": "manastation.empty_object",
             "description": "Set contract metadata",
-            "entryPoint": 1029287705,
-            "readOnly": false
+            "entry_point": 1029287705,
+            "read_only": false
         },
         "authorize": {
-            "input": "koinos.chain.authorize_arguments",
-            "output": "koinos.chain.authorize_result",
+            "argument": "koinos.chain.authorize_arguments",
+            "return": "koinos.chain.authorize_result",
             "description": "Check if authorized",
-            "entryPoint": 1244511632,
-            "read-only": false
+            "entry_point": 1244511632,
+            "read_only": false
         },
         "get_metadata": {
-            "input": "manastation.get_metadata_arguments",
-            "output": "manastation.metadata_object",
+            "argument": "manastation.get_metadata_arguments",
+            "return": "manastation.metadata_object",
             "description": "Get contract metadata",
-            "entryPoint": 4244088463,
-            "readOnly": true
+            "entry_point": 4244088463,
+            "read_only": true
         }
     },
     "types": {
@@ -28,14 +28,14 @@
                 "nested": {
                     "set_metadata_arguments": {
                         "fields": {
-                            "nameserviceAddress": {
+                            "nameservice_address": {
                                 "type": "bytes",
                                 "id": 1,
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
                             },
-                            "maxRcLimit": {
+                            "max_rc_limit": {
                                 "type": "uint64",
                                 "id": 2
                             }
@@ -71,14 +71,14 @@
                     },
                     "metadata_object": {
                         "fields": {
-                            "nameserviceAddress": {
+                            "nameservice_address": {
                                 "type": "bytes",
                                 "id": 1,
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
                             },
-                            "maxRcLimit": {
+                            "max_rc_limit": {
                                 "type": "uint64",
                                 "id": 2
                             }
@@ -102,14 +102,14 @@
                             },
                             "call_target": {
                                 "fields": {
-                                    "contractId": {
+                                    "contract_id": {
                                         "type": "bytes",
                                         "id": 1,
                                         "options": {
                                             "(btype)": "ADDRESS"
                                         }
                                     },
-                                    "entryPoint": {
+                                    "entry_point": {
                                         "type": "uint32",
                                         "id": 2
                                     }

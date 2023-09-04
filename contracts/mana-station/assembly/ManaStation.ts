@@ -53,13 +53,15 @@ export class Manastation {
   }
 
   authorize(_: authority.authorize_arguments): authority.authorize_result {
-    const metadata = this.metadata.get()!;
+    // const metadata = this.metadata.get()!;
 
-    const transactionId = System.getTransactionField('id')!.bytes_value!;
-    const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
-    const rcLimit = System.getTransactionField('header.rc_limit')!.uint64_value;
+    // const transactionId = System.getTransactionField('id')!.bytes_value!;
+    // const signatures = Protobuf.decode<value.list_type>(System.getTransactionField('signatures')!.message_value!.value!, value.list_type.decode);
+    // const rcLimit = System.getTransactionField('header.rc_limit')!.uint64_value;
 
-    return new authority.authorize_result(rcLimit <= metadata.max_rc_limit && this.checkIfAnySignerHasKapName(signatures, transactionId, metadata.nameservice_address!));
+    // return new authority.authorize_result(rcLimit <= metadata.max_rc_limit && this.checkIfAnySignerHasKapName(signatures, transactionId, metadata.nameservice_address!));
+
+    return new authority.authorize_result(true);
   }
 
   set_metadata(

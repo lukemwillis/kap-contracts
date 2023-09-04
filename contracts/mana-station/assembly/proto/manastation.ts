@@ -3,10 +3,9 @@ import { Writer, Reader } from "as-proto";
 export namespace manastation {
   export class set_metadata_arguments {
     static encode(message: set_metadata_arguments, writer: Writer): void {
-      const unique_name_nameservice_address = message.nameservice_address;
-      if (unique_name_nameservice_address !== null) {
+      if (message.nameservice_address.length != 0) {
         writer.uint32(10);
-        writer.bytes(unique_name_nameservice_address);
+        writer.bytes(message.nameservice_address);
       }
 
       if (message.max_rc_limit != 0) {
@@ -39,11 +38,11 @@ export namespace manastation {
       return message;
     }
 
-    nameservice_address: Uint8Array | null;
+    nameservice_address: Uint8Array;
     max_rc_limit: u64;
 
     constructor(
-      nameservice_address: Uint8Array | null = null,
+      nameservice_address: Uint8Array = new Uint8Array(0),
       max_rc_limit: u64 = 0
     ) {
       this.nameservice_address = nameservice_address;
@@ -76,10 +75,9 @@ export namespace manastation {
 
   export class balance_of_args {
     static encode(message: balance_of_args, writer: Writer): void {
-      const unique_name_owner = message.owner;
-      if (unique_name_owner !== null) {
+      if (message.owner.length != 0) {
         writer.uint32(10);
-        writer.bytes(unique_name_owner);
+        writer.bytes(message.owner);
       }
     }
 
@@ -103,9 +101,9 @@ export namespace manastation {
       return message;
     }
 
-    owner: Uint8Array | null;
+    owner: Uint8Array;
 
-    constructor(owner: Uint8Array | null = null) {
+    constructor(owner: Uint8Array = new Uint8Array(0)) {
       this.owner = owner;
     }
   }
@@ -171,10 +169,9 @@ export namespace manastation {
 
   export class metadata_object {
     static encode(message: metadata_object, writer: Writer): void {
-      const unique_name_nameservice_address = message.nameservice_address;
-      if (unique_name_nameservice_address !== null) {
+      if (message.nameservice_address.length != 0) {
         writer.uint32(10);
-        writer.bytes(unique_name_nameservice_address);
+        writer.bytes(message.nameservice_address);
       }
 
       if (message.max_rc_limit != 0) {
@@ -207,11 +204,11 @@ export namespace manastation {
       return message;
     }
 
-    nameservice_address: Uint8Array | null;
+    nameservice_address: Uint8Array;
     max_rc_limit: u64;
 
     constructor(
-      nameservice_address: Uint8Array | null = null,
+      nameservice_address: Uint8Array = new Uint8Array(0),
       max_rc_limit: u64 = 0
     ) {
       this.nameservice_address = nameservice_address;
