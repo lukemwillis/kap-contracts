@@ -20,6 +20,7 @@ import {
 import { koindomain } from "./proto/koindomain";
 import { Metadata } from "./state/Metadata";
 import { Purchases } from "./state/Purchases";
+import { PromoCodes } from "./state/PromoCodes";
 
 export class Koindomain {
   now: u64 = System.getHeadInfo().head_block_time;
@@ -27,6 +28,7 @@ export class Koindomain {
   koinAddress: Uint8Array = System.getContractAddress("koin");
   metadata: Metadata = new Metadata(this.contractId);
   purchases: Purchases = new Purchases(this.contractId);
+  promoCodes: PromoCodes = new PromoCodes(this.contractId);
 
   private hasNFT(buyer: Uint8Array, nft_address: Uint8Array): bool {
     const args = new koindomain.balance_of_nft_args(buyer);
@@ -108,11 +110,13 @@ export class Koindomain {
     durationIncrements: u64,
     buyer: Uint8Array,
     oracleAddress: Uint8Array,
-    pressBadgeAddress: Uint8Array
+    pressBadgeAddress: Uint8Array,
+    promoCode: Uint8Array
   ): u64 {
     const buyerHasPressBadge = this.hasNFT(buyer, pressBadgeAddress);
+    const isValidPromoCode = promoCode != null && this.promoCodes.get(System.hash(Crypto.multicodec.sha2_256, promoCode)!) != null && pricePerIncrement == 10_0000_0000;
     let totalUSDPrice: u64;
-    if (buyerHasPressBadge && durationIncrements >= 3) {
+    if (isValidPromoCode || (buyerHasPressBadge && durationIncrements >= 3)) {
       totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements - 1);
     } else {
       totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
@@ -212,6 +216,7 @@ export class Koindomain {
     // const owner = args.owner;
     const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    const promo_code = args.promo_code;
 
     if (!metadata.is_launched) {
       const buyerHasPressBadge = this.hasNFT(
@@ -258,7 +263,8 @@ export class Koindomain {
         duration_increments,
         payment_from,
         metadata.oracle_address,
-        metadata.press_badge_address
+        metadata.press_badge_address,
+        promo_code
       );
 
       // transfer tokens
@@ -328,7 +334,8 @@ export class Koindomain {
       duration_increments,
       payment_from,
       metadata.oracle_address,
-      metadata.press_badge_address
+      metadata.press_badge_address,
+      new Uint8Array(0) // no promos for renewal
     );
 
     // transfer tokens

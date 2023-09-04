@@ -23,6 +23,7 @@ export class Koindomain {
     // const owner = args.owner;
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    // const promo_code = args.promo_code;
 
     // YOUR CODE HERE
 

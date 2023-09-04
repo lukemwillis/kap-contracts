@@ -1,7 +1,6 @@
 {
   "name": "kap-contracts",
   "version": "1.0.0",
-  "main": "assembly/index.ts",
   "license": "MIT",
   "author": "Luke Willis <luke@thekoinpress.com>",
   "repository": "https://github.com/lukemwillis/kap-contracts",

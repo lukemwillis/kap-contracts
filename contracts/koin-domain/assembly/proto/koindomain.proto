@@ -17,6 +17,7 @@ message authorize_mint_arguments {
   bytes owner = 4 [(koinos.btype) = ADDRESS];
   bytes payment_from = 5 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes promo_code = 7;
 }
 
 message authorize_mint_result {

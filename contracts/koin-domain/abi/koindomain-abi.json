@@ -88,6 +88,10 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "promo_code": {
+                                "type": "bytes",
+                                "id": 7
                             }
                         }
                     },

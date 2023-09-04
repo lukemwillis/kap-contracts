@@ -32,6 +32,11 @@ export namespace koindomain {
         writer.uint32(50);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.promo_code.length != 0) {
+        writer.uint32(58);
+        writer.bytes(message.promo_code);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_mint_arguments {
@@ -65,6 +70,10 @@ export namespace koindomain {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 7:
+            message.promo_code = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -80,6 +89,7 @@ export namespace koindomain {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    promo_code: Uint8Array;
 
     constructor(
       name: string = "",
@@ -87,7 +97,8 @@ export namespace koindomain {
       duration_increments: u32 = 0,
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      promo_code: Uint8Array = new Uint8Array(0)
     ) {
       this.name = name;
       this.domain = domain;
@@ -95,6 +106,7 @@ export namespace koindomain {
       this.owner = owner;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.promo_code = promo_code;
     }
   }
 
