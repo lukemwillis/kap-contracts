@@ -78,6 +78,30 @@ export function main(): i32 {
       break;
     }
 
+    case 0xfb3719d2: {
+      const args = Protobuf.decode<ProtoNamespace.add_promo_code_arguments>(
+        contractArgs.args,
+        ProtoNamespace.add_promo_code_arguments.decode
+      );
+      const res = c.add_promo_code(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.empty_object.encode);
+      break;
+    }
+
+    case 0x197d7389: {
+      const args =
+        Protobuf.decode<ProtoNamespace.is_promo_code_valid_arguments>(
+          contractArgs.args,
+          ProtoNamespace.is_promo_code_valid_arguments.decode
+        );
+      const res = c.is_promo_code_valid(args);
+      retbuf = Protobuf.encode(
+        res,
+        ProtoNamespace.is_promo_code_valid_result.encode
+      );
+      break;
+    }
+
     case 0xfcf7a68f: {
       const args = Protobuf.decode<ProtoNamespace.get_metadata_arguments>(
         contractArgs.args,

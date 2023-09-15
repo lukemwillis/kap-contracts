@@ -436,7 +436,7 @@ export namespace collections {
 
       if (message.promo_code.length != 0) {
         writer.uint32(50);
-        writer.bytes(message.promo_code);
+        writer.string(message.promo_code);
       }
     }
 
@@ -468,7 +468,7 @@ export namespace collections {
             break;
 
           case 6:
-            message.promo_code = reader.bytes();
+            message.promo_code = reader.string();
             break;
 
           default:
@@ -485,7 +485,7 @@ export namespace collections {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
-    promo_code: Uint8Array;
+    promo_code: string;
 
     constructor(
       name: string = "",
@@ -493,7 +493,7 @@ export namespace collections {
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
       payment_token_address: Uint8Array = new Uint8Array(0),
-      promo_code: Uint8Array = new Uint8Array(0)
+      promo_code: string = ""
     ) {
       this.name = name;
       this.duration_increments = duration_increments;
@@ -1943,7 +1943,7 @@ export namespace collections {
 
       if (message.promo_code.length != 0) {
         writer.uint32(58);
-        writer.bytes(message.promo_code);
+        writer.string(message.promo_code);
       }
     }
 
@@ -1979,7 +1979,7 @@ export namespace collections {
             break;
 
           case 7:
-            message.promo_code = reader.bytes();
+            message.promo_code = reader.string();
             break;
 
           default:
@@ -1997,7 +1997,7 @@ export namespace collections {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
-    promo_code: Uint8Array;
+    promo_code: string;
 
     constructor(
       name: string = "",
@@ -2006,7 +2006,7 @@ export namespace collections {
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
       payment_token_address: Uint8Array = new Uint8Array(0),
-      promo_code: Uint8Array = new Uint8Array(0)
+      promo_code: string = ""
     ) {
       this.name = name;
       this.domain = domain;

@@ -863,7 +863,7 @@ export class Collections {
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
     domainContractId: Uint8Array,
-    promo_code: Uint8Array
+    promo_code: string
   ): collections.authorize_mint_res {
     const authArgs = new collections.authorize_mint_args(
       name,

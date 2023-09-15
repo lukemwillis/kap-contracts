@@ -25,6 +25,7 @@
     "koin-domain:ci": "cd contracts/koin-domain && yarn ci",
     "koin-domain:deploy": "yarn ts-node ./scripts/deploy-koin-domain.ts",
     "koin-domain:set-metadata": "yarn ts-node ./scripts/set-metadata-koin-domain.ts",
+    "koin-domain:generate-promo-codes": "yarn ts-node ./scripts/generate-promo-codes.ts",
     "name-service:build": "cd contracts/name-service && yarn install && yarn build:release && yarn test",
     "name-service:ci": "cd contracts/name-service && yarn ci",
     "name-service:deploy": "yarn ts-node ./scripts/deploy-name-service.ts",

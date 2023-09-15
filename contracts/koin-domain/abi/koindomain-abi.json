@@ -42,6 +42,20 @@
             "entry_point": 1029287705,
             "read_only": false
         },
+        "add_promo_code": {
+            "argument": "koindomain.add_promo_code_arguments",
+            "return": "koindomain.empty_object",
+            "description": "Add hashed promo code",
+            "entry_point": 4214692306,
+            "read_only": false
+        },
+        "is_promo_code_valid": {
+            "argument": "koindomain.is_promo_code_valid_arguments",
+            "return": "koindomain.is_promo_code_valid_result",
+            "description": "Check whether promo code is valid",
+            "entry_point": 427651977,
+            "read_only": true
+        },
         "get_metadata": {
             "argument": "koindomain.get_metadata_arguments",
             "return": "koindomain.metadata_object",
@@ -90,7 +104,7 @@
                                 }
                             },
                             "promo_code": {
-                                "type": "bytes",
+                                "type": "string",
                                 "id": 7
                             }
                         }
@@ -233,6 +247,33 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            }
+                        }
+                    },
+                    "add_promo_code_arguments": {
+                        "fields": {
+                            "hashed_promo_code": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            }
+                        }
+                    },
+                    "is_promo_code_valid_arguments": {
+                        "fields": {
+                            "promo_code": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "is_promo_code_valid_result": {
+                        "fields": {
+                            "is_valid": {
+                                "type": "bool",
+                                "id": 1
                             }
                         }
                     },

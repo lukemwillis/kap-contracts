@@ -9,6 +9,7 @@ import {
   u128,
   value,
   Crypto,
+  StringBytes
 } from "@koinos/sdk-as";
 import {
   GET_LATEST_PRICE_ENTRYPOINT,
@@ -111,12 +112,18 @@ export class Koindomain {
     buyer: Uint8Array,
     oracleAddress: Uint8Array,
     pressBadgeAddress: Uint8Array,
-    promoCode: Uint8Array
+    promoCode: string
   ): u64 {
     const buyerHasPressBadge = this.hasNFT(buyer, pressBadgeAddress);
-    const isValidPromoCode = promoCode != null && this.promoCodes.get(System.hash(Crypto.multicodec.sha2_256, promoCode)!) != null && pricePerIncrement == 10_0000_0000;
     let totalUSDPrice: u64;
-    if (isValidPromoCode || (buyerHasPressBadge && durationIncrements >= 3)) {
+    if (promoCode != null && promoCode != "") {
+      const hashedPromoCode = System.hash(Crypto.multicodec.sha2_256, StringBytes.stringToBytes(promoCode))!;
+      const isValidPromoCode = this.promoCodes.get(hashedPromoCode) != null;
+      System.require(isValidPromoCode, "invalid promo code: " + hashedPromoCode.toString());
+      System.require(pricePerIncrement == 10_0000_0000, "promo codes are only valid for $10 names");
+      totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements - 1);
+      this.promoCodes.remove(hashedPromoCode);
+    } else if (buyerHasPressBadge && durationIncrements >= 3) {
       totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements - 1);
     } else {
       totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
@@ -267,16 +274,18 @@ export class Koindomain {
         promo_code
       );
 
-      // transfer tokens
-      const tokenContract = new Token(this.koinAddress);
-      System.require(
-        tokenContract.transfer(
-          payment_from,
-          metadata.beneficiary,
-          numberOfTokensToTransfer
-        ),
-        "could not transfer Koin tokens"
-      );
+      if (numberOfTokensToTransfer > 0) {
+        // transfer tokens
+        const tokenContract = new Token(this.koinAddress);
+        System.require(
+          tokenContract.transfer(
+            payment_from,
+            metadata.beneficiary,
+            numberOfTokensToTransfer
+          ),
+          "could not transfer Koin tokens"
+        );
+      }
 
       // calculate expiration
       const expiration = this.calculateExpiration(duration_increments);
@@ -335,7 +344,7 @@ export class Koindomain {
       payment_from,
       metadata.oracle_address,
       metadata.press_badge_address,
-      new Uint8Array(0) // no promos for renewal
+      "" // no promos for renewal
     );
 
     // transfer tokens
@@ -446,5 +455,20 @@ export class Koindomain {
     args: koindomain.get_metadata_arguments
   ): koindomain.metadata_object {
     return this.metadata.get()!;
+  }
+
+  add_promo_code(
+    args: koindomain.add_promo_code_arguments
+  ): koindomain.empty_object {
+    System.requireAuthority(authority.authorization_type.contract_call, this.contractId);
+    System.log(args.hashed_promo_code.toString());
+    this.promoCodes.put(args.hashed_promo_code, new koindomain.empty_object());
+    return new koindomain.empty_object();
+  }
+
+  is_promo_code_valid(args: koindomain.is_promo_code_valid_arguments): koindomain.is_promo_code_valid_result {
+    const hashedPromoCode = System.hash(Crypto.multicodec.sha2_256, StringBytes.stringToBytes(args.promo_code))!;
+    const isValidPromoCode = this.promoCodes.get(hashedPromoCode) != null;
+    return new koindomain.is_promo_code_valid_result(isValidPromoCode);
   }
 }

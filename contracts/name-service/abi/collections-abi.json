@@ -296,7 +296,7 @@
                                 }
                             },
                             "promo_code": {
-                                "type": "bytes",
+                                "type": "string",
                                 "id": 6
                             }
                         }
@@ -817,7 +817,7 @@
                                 }
                             },
                             "promo_code": {
-                                "type": "bytes",
+                                "type": "string",
                                 "id": 7
                             }
                         }
