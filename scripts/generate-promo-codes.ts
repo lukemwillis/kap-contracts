@@ -4,20 +4,18 @@ import { config } from "dotenv";
 config();
 import koinDomainAbi from "../contracts/koin-domain/abi/koindomain-abi.json";
 
-const result = {
-  codes: [],
-};
+const codes = [];
 
 for (let i = 0; i < 10000; i++) {
-  const code = randomUUID();
-  const hash = createHash("sha256").update(code).digest();
-  result.codes.push({
-    code,
+  const guid = randomUUID();
+  const hash = createHash("sha256").update(guid).digest();
+  const code = {
+    code: guid,
     hash: `0x1220${hash.toString("hex")}`,
-  });
+  };
+  console.log(code);
+  codes.push(code);
 }
-
-console.log(result);
 
 const WIF = process.env.WIF; // Read WIF from environment variable
 const CONTRACT_ID = process.env.CONTRACT_ID;
@@ -43,8 +41,8 @@ const contract = new Contract({
 let current = 0;
 async function processBatch() {
   const operations = [];
-  for (let i = 0; i < 100 && current < result.codes.length; i++, current++) {
-    const { code, hash } = result.codes[current];
+  for (let i = 0; i < 100 && current < codes.length; i++, current++) {
+    const { code, hash } = codes[current];
     console.log(`Adding promo code ${code} with hash ${hash}`);
     const { operation } = await contract.functions.add_promo_code(
       {
@@ -64,7 +62,7 @@ async function processBatch() {
   });
   const { transaction } = await signer.sendTransaction(tx);
   console.log(`batch sent with tx id ${transaction.id}`);
-  await transaction.wait().then((receipt) => {
+  await transaction.wait("byTransactionId", 90000).then((receipt) => {
     console.log(`batch included in block ${receipt.blockId}`);
     processBatch();
   });
