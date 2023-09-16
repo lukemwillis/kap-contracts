@@ -8,7 +8,7 @@ const result = {
   codes: [],
 };
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 10000; i++) {
   const code = randomUUID();
   const hash = createHash("sha256").update(code).digest();
   result.codes.push({
@@ -66,6 +66,7 @@ async function processBatch() {
   console.log(`batch sent with tx id ${transaction.id}`);
   await transaction.wait().then((receipt) => {
     console.log(`batch included in block ${receipt.blockId}`);
+    processBatch();
   });
 }
 
