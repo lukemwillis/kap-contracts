@@ -1,21 +1,25 @@
 import { createHash, randomUUID } from "crypto";
+import fs from "fs";
 import { Contract, Provider, Signer } from "koilib";
 import { config } from "dotenv";
 config();
 import koinDomainAbi from "../contracts/koin-domain/abi/koindomain-abi.json";
 
-const codes = [];
+const codes = []; 
 
 for (let i = 0; i < 10000; i++) {
-  const guid = randomUUID();
+  const guid = randomUUID(); 
   const hash = createHash("sha256").update(guid).digest();
-  const code = {
-    code: guid,
-    hash: `0x1220${hash.toString("hex")}`,
-  };
-  console.log(code);
-  codes.push(code);
+  codes.push({
+    index: i,
+    guid, 
+    hashed_promo_code: `0x1220${hash.toString("hex")}`,
+  });
 }
+
+// Write the promo codes to a JSON file (uuids.json)
+fs.writeFileSync("uuids.json", JSON.stringify(codes, null, 2), "utf8");
+console.log("Promo codes saved to uuids.json");
 
 const WIF = process.env.WIF; // Read WIF from environment variable
 const CONTRACT_ID = process.env.CONTRACT_ID;
@@ -42,11 +46,11 @@ let current = 0;
 async function processBatch() {
   const operations = [];
   for (let i = 0; i < 100 && current < codes.length; i++, current++) {
-    const { code, hash } = codes[current];
-    console.log(`Adding promo code ${code} with hash ${hash}`);
+    const { guid, hashed_promo_code } = codes[current]; 
+    console.log(`Adding promo code ${guid} with hash ${hashed_promo_code}`);
     const { operation } = await contract.functions.add_promo_code(
       {
-        hashed_promo_code: hash,
+        hashed_promo_code,
       },
       {
         onlyOperation: true,
