@@ -32,6 +32,11 @@ export namespace koindomain {
         writer.uint32(50);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.promo_code.length != 0) {
+        writer.uint32(58);
+        writer.string(message.promo_code);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_mint_arguments {
@@ -65,6 +70,10 @@ export namespace koindomain {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 7:
+            message.promo_code = reader.string();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -80,6 +89,7 @@ export namespace koindomain {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    promo_code: string;
 
     constructor(
       name: string = "",
@@ -87,7 +97,8 @@ export namespace koindomain {
       duration_increments: u32 = 0,
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      promo_code: string = ""
     ) {
       this.name = name;
       this.domain = domain;
@@ -95,6 +106,7 @@ export namespace koindomain {
       this.owner = owner;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.promo_code = promo_code;
     }
   }
 
@@ -549,6 +561,115 @@ export namespace koindomain {
       this.press_badge_address = press_badge_address;
       this.is_launched = is_launched;
       this.beneficiary = beneficiary;
+    }
+  }
+
+  export class add_promo_code_arguments {
+    static encode(message: add_promo_code_arguments, writer: Writer): void {
+      if (message.hashed_promo_code.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.hashed_promo_code);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): add_promo_code_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new add_promo_code_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.hashed_promo_code = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    hashed_promo_code: Uint8Array;
+
+    constructor(hashed_promo_code: Uint8Array = new Uint8Array(0)) {
+      this.hashed_promo_code = hashed_promo_code;
+    }
+  }
+
+  export class is_promo_code_valid_arguments {
+    static encode(
+      message: is_promo_code_valid_arguments,
+      writer: Writer
+    ): void {
+      if (message.promo_code.length != 0) {
+        writer.uint32(10);
+        writer.string(message.promo_code);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): is_promo_code_valid_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new is_promo_code_valid_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.promo_code = reader.string();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    promo_code: string;
+
+    constructor(promo_code: string = "") {
+      this.promo_code = promo_code;
+    }
+  }
+
+  @unmanaged
+  export class is_promo_code_valid_result {
+    static encode(message: is_promo_code_valid_result, writer: Writer): void {
+      if (message.is_valid != false) {
+        writer.uint32(8);
+        writer.bool(message.is_valid);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): is_promo_code_valid_result {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new is_promo_code_valid_result();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.is_valid = reader.bool();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    is_valid: bool;
+
+    constructor(is_valid: bool = false) {
+      this.is_valid = is_valid;
     }
   }
 

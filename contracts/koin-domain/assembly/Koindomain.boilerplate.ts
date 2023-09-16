@@ -23,6 +23,7 @@ export class Koindomain {
     // const owner = args.owner;
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    // const promo_code = args.promo_code;
 
     // YOUR CODE HERE
 
@@ -92,6 +93,31 @@ export class Koindomain {
     // YOUR CODE HERE
 
     const res = new koindomain.empty_object();
+
+    return res;
+  }
+
+  add_promo_code(
+    args: koindomain.add_promo_code_arguments
+  ): koindomain.empty_object {
+    // const hashed_promo_code = args.hashed_promo_code;
+
+    // YOUR CODE HERE
+
+    const res = new koindomain.empty_object();
+
+    return res;
+  }
+
+  is_promo_code_valid(
+    args: koindomain.is_promo_code_valid_arguments
+  ): koindomain.is_promo_code_valid_result {
+    // const promo_code = args.promo_code;
+
+    // YOUR CODE HERE
+
+    const res = new koindomain.is_promo_code_valid_result();
+    // res.is_valid = ;
 
     return res;
   }

@@ -17,6 +17,7 @@ message authorize_mint_arguments {
   bytes owner = 4 [(koinos.btype) = ADDRESS];
   bytes payment_from = 5 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+  string promo_code = 7;
 }
 
 message authorize_mint_result {
@@ -79,6 +80,27 @@ message set_metadata_arguments {
   bytes press_badge_address = 4 [(koinos.btype) = CONTRACT_ID];
   bool is_launched = 5;
   bytes beneficiary = 6 [(koinos.btype) = CONTRACT_ID];
+}
+
+/* 
+  @description Add hashed promo code
+  @read-only false
+  @result empty_object
+*/
+message add_promo_code_arguments {
+  bytes hashed_promo_code = 1 [(koinos.btype) = HEX];
+}
+
+/* 
+  @description Check whether promo code is valid
+  @read-only true
+*/
+message is_promo_code_valid_arguments {
+  string promo_code = 1;
+}
+
+message is_promo_code_valid_result {
+  bool is_valid = 1;
 }
 
 /* 

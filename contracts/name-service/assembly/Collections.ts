@@ -226,6 +226,7 @@ export class Collections {
     const owner = args.owner;
     const payment_from = args.payment_from;
     const payment_token_address = args.payment_token_address;
+    const promo_code = args.promo_code;
 
     System.require(owner.length > 0, 'missing "owner" argument');
 
@@ -310,7 +311,8 @@ export class Collections {
         owner,
         payment_from,
         payment_token_address,
-        domainObj!.owner
+        domainObj!.owner,
+        promo_code
       );
 
       nameObj.expiration = authorizeMintResult.expiration;
@@ -860,7 +862,8 @@ export class Collections {
     owner: Uint8Array,
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
-    domainContractId: Uint8Array
+    domainContractId: Uint8Array,
+    promo_code: string
   ): collections.authorize_mint_res {
     const authArgs = new collections.authorize_mint_args(
       name,
@@ -868,7 +871,8 @@ export class Collections {
       durationIncrements,
       owner,
       paymentFrom,
-      paymentTokenAddress
+      paymentTokenAddress,
+      promo_code
     );
 
     const callRes = System.call(
