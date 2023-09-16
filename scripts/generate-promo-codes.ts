@@ -58,7 +58,7 @@ async function processBatch() {
   }
   const tx = await signer.prepareTransaction({
     header: {
-      rc_limit: "10000000000",
+      rc_limit: "500000000",
     },
     operations,
   });
