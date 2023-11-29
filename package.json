@@ -30,6 +30,8 @@
     "name-service:ci": "cd contracts/name-service && yarn ci",
     "name-service:deploy": "yarn ts-node ./scripts/deploy-name-service.ts",
     "name-service:set-metadata": "yarn ts-node ./scripts/set-metadata-name-service.ts",
+    "mana-station:build": "cd contracts/mana-station && yarn install && yarn build:release && yarn test",
+    "mana-station:ci": "cd contracts/mana-station && yarn ci",
     "multi-sig:build": "cd contracts/multi-sig && yarn install && yarn build:release",
     "multi-sig:ci": "cd contracts/multi-sig && yarn ci",
     "profile:build": "cd contracts/profile && yarn install && yarn build:release",
@@ -40,7 +42,7 @@
     "referral:ci": "cd contracts/referral && yarn ci",
     "referral:deploy": "yarn ts-node ./scripts/deploy-referral.ts",
     "referral:generate-referral-code": "yarn ts-node ./scripts/generate-referral-code.ts",
-    "all:build": "yarn test-domain:build && yarn test-collection:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build && yarn profile:build && yarn referral:build",
+    "all:build": "yarn test-domain:build && yarn test-collection:build && yarn usd-oracle:build && yarn koin-domain:build && yarn name-service:build && yarn multi-sig:build && yarn profile:build && yarn mana-station:build && yarn referral:build",
     "all:ci": "yarn koin-domain:ci && yarn name-service:ci && yarn multi-sig:ci && yarn profile:ci && yarn referral:ci",
     "ci": "yarn lint && yarn all:build && yarn all:ci"
   }

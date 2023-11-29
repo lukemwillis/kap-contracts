@@ -1,0 +1,19 @@
+{
+    "methods": {
+        "set_metadata": {
+            "argument": "manastation.set_metadata_arguments",
+            "return": "manastation.empty_object",
+            "description": "Set contract metadata",
+            "entry-point": "0x3d59af19",
+            "read-only": false
+        },
+        "get_metadata": {
+            "argument": "manastation.get_metadata_arguments",
+            "return": "manastation.metadata_object",
+            "description": "Get contract metadata",
+            "entry-point": "0xfcf7a68f",
+            "read-only": true
+        }
+    },
+    "types": "CrEDCiBhc3NlbWJseS9wcm90by9tYW5hc3RhdGlvbi5wcm90bxILbWFuYXN0YXRpb24aFGtvaW5vcy9vcHRpb25zLnByb3RvInEKFnNldF9tZXRhZGF0YV9hcmd1bWVudHMSNQoTbmFtZXNlcnZpY2VfYWRkcmVzcxgBIAEoDEIEgLUYBVISbmFtZXNlcnZpY2VBZGRyZXNzEiAKDG1heF9yY19saW1pdBgCIAEoBFIKbWF4UmNMaW1pdCIYChZnZXRfbWV0YWRhdGFfYXJndW1lbnRzIi0KD2JhbGFuY2Vfb2ZfYXJncxIaCgVvd25lchgBIAEoDEIEgLUYBlIFb3duZXIiKgoOYmFsYW5jZV9vZl9yZXMSGAoFdmFsdWUYASABKARCAjABUgV2YWx1ZSIOCgxlbXB0eV9vYmplY3QiagoPbWV0YWRhdGFfb2JqZWN0EjUKE25hbWVzZXJ2aWNlX2FkZHJlc3MYASABKAxCBIC1GAVSEm5hbWVzZXJ2aWNlQWRkcmVzcxIgCgxtYXhfcmNfbGltaXQYAiABKARSCm1heFJjTGltaXRiBnByb3RvMwrnAwoca29pbm9zL2NoYWluL2F1dGhvcml0eS5wcm90bxIMa29pbm9zLmNoYWluGhRrb2lub3Mvb3B0aW9ucy5wcm90byJVCgtjYWxsX3RhcmdldBIlCgtjb250cmFjdF9pZBgBIAEoDEIEgLUYBlIKY29udHJhY3RJZBIfCgtlbnRyeV9wb2ludBgCIAEoDVIKZW50cnlQb2ludCKIAQoTYXV0aG9yaXplX2FyZ3VtZW50cxI0CgR0eXBlGAEgASgOMiAua29pbm9zLmNoYWluLmF1dGhvcml6YXRpb25fdHlwZVIEdHlwZRIyCgRjYWxsGAIgASgLMhkua29pbm9zLmNoYWluLmNhbGxfdGFyZ2V0SABSBGNhbGyIAQFCBwoFX2NhbGwiKAoQYXV0aG9yaXplX3Jlc3VsdBIUCgV2YWx1ZRgBIAEoCFIFdmFsdWUqWQoSYXV0aG9yaXphdGlvbl90eXBlEhEKDWNvbnRyYWN0X2NhbGwQABIbChd0cmFuc2FjdGlvbl9hcHBsaWNhdGlvbhABEhMKD2NvbnRyYWN0X3VwbG9hZBACQjRaMmdpdGh1Yi5jb20va29pbm9zL2tvaW5vcy1wcm90by1nb2xhbmcva29pbm9zL2NoYWluYgZwcm90bzM="
+}
