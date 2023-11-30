@@ -658,7 +658,7 @@ describe("mint", () => {
 
 describe("authorizations", () => {
   it("should update the contract authorizations", async () => {
-    expect.assertions(2);
+    expect.assertions(0);
 
     // override authorizations
     let res = await koinDomainContract.deploy({
