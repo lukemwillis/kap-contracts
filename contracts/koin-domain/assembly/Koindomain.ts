@@ -9,6 +9,7 @@ import {
   u128,
   value,
   Crypto,
+  StringBytes,
 } from "@koinos/sdk-as";
 import {
   GET_LATEST_PRICE_ENTRYPOINT,
@@ -16,10 +17,13 @@ import {
   GRACE_PERIOD_IN_MS,
   MILLISECONDS_IN_10_YEARS,
   MILLISECONDS_PER_YEAR,
+  REDEEM_REFERRAL_CODE_ENTRYPOINT,
+  GET_NAME_ENTRYPOINT,
 } from "./Constants";
 import { koindomain } from "./proto/koindomain";
 import { Metadata } from "./state/Metadata";
 import { Purchases } from "./state/Purchases";
+import { ReferralAllowances } from "./state/ReferralAllowances";
 
 export class Koindomain {
   now: u64 = System.getHeadInfo().head_block_time;
@@ -27,6 +31,7 @@ export class Koindomain {
   koinAddress: Uint8Array = System.getContractAddress("koin");
   metadata: Metadata = new Metadata(this.contractId);
   purchases: Purchases = new Purchases(this.contractId);
+  referralAllowances: ReferralAllowances = new ReferralAllowances(this.contractId);
 
   private hasNFT(buyer: Uint8Array, nft_address: Uint8Array): bool {
     const args = new koindomain.balance_of_nft_args(buyer);
@@ -43,6 +48,39 @@ export class Koindomain {
     );
 
     return res.value > 0;
+  }
+
+  private getKAPName(kapName: string, nameservice_address: Uint8Array): koindomain.name_object {
+    const args = new koindomain.get_name_args(kapName);
+
+    const callRes = System.call(
+      nameservice_address,
+      GET_NAME_ENTRYPOINT,
+      Protobuf.encode(args, koindomain.get_name_args.encode)
+    );
+
+    System.require(callRes.code == 0, "failed to retrieve name");
+
+    const res = Protobuf.decode<koindomain.name_object>(
+      callRes.res.object,
+      koindomain.name_object.decode
+    );
+
+    return res;
+  }
+
+  private redeemReferralCode(referral_code: koindomain.referral_code, referralContractAddress: Uint8Array): void {
+    const args = new koindomain.redeem_referral_code_args(referral_code);
+
+    const callRes = System.call(
+      referralContractAddress,
+      REDEEM_REFERRAL_CODE_ENTRYPOINT,
+      Protobuf.encode(args, koindomain.redeem_referral_code_args.encode)
+    );
+
+    if (callRes.code != 0) {
+      System.revert(callRes.res.error ? callRes.res.error!.message : 'could not redeem referral code');
+    }
   }
 
   /**
@@ -107,19 +145,33 @@ export class Koindomain {
     pricePerIncrement: u64,
     durationIncrements: u64,
     buyer: Uint8Array,
-    oracleAddress: Uint8Array,
-    pressBadgeAddress: Uint8Array
+    metadata: koindomain.metadata_object,
+    applyReferralDiscount: bool = false
   ): u64 {
-    const buyerHasPressBadge = this.hasNFT(buyer, pressBadgeAddress);
+    const buyerHasPressBadge = this.hasNFT(buyer, metadata.press_badge_address);
     let totalUSDPrice: u64;
     if (buyerHasPressBadge && durationIncrements >= 3) {
       totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements - 1);
     } else {
       totalUSDPrice = SafeMath.mul(pricePerIncrement, durationIncrements);
     }
+
+    // apply referral discount
+    if (applyReferralDiscount) {
+      const discount = u128
+        .from(
+          // @ts-ignore can be done in AS
+          (u128.fromU64(totalUSDPrice) * u128.from(metadata.premium_account_referral_discount_percent)) /
+          // @ts-ignore can be done in AS
+          u128.fromU64(100)
+        )
+        .toU64();
+      totalUSDPrice = SafeMath.sub(totalUSDPrice, discount);
+    }
+
     const paymentTokenUSDPrice = this.getLatestUSDPrice(
       this.koinAddress,
-      oracleAddress
+      metadata.oracle_address
     );
 
     // add purchase for $KAP airdrop
@@ -130,11 +182,12 @@ export class Koindomain {
 
     return (
       // multiply the amount of tokens by 10^8 since Koin is 8 decimals
-      // @ts-ignore can be done in AS
       u128
         .from(
+          // @ts-ignore can be done in AS
           (u128.fromU64(totalUSDPrice) * u128.from(1_0000_0000)) /
-            u128.fromU64(paymentTokenUSDPrice)
+          // @ts-ignore can be done in AS
+          u128.fromU64(paymentTokenUSDPrice)
         )
         .toU64()
     );
@@ -203,7 +256,7 @@ export class Koindomain {
     args: koindomain.authorize_mint_arguments
   ): koindomain.authorize_mint_result {
     const metadata = this.metadata.get()!;
-    
+
     this.requireNameserviceAuthority(metadata.nameservice_address);
 
     const name = args.name;
@@ -212,6 +265,7 @@ export class Koindomain {
     // const owner = args.owner;
     const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    const data = args.data;
 
     if (!metadata.is_launched) {
       const buyerHasPressBadge = this.hasNFT(
@@ -231,6 +285,45 @@ export class Koindomain {
       if (buyerHasKAPName) {
         System.revert("Pre-launch name already minted for this address.");
       }
+    }
+
+    let isUsingReferralCode = false;
+    // if "data" were provided, deserialize into referral code object
+    // and process it
+    if (data.length > 0) {
+      const referral_code = Protobuf.decode<koindomain.referral_code>(data, koindomain.referral_code.decode);
+      
+      // try to redeem the referral code
+      this.redeemReferralCode(referral_code, metadata.referral_contract_address);
+
+      // the metadata.data field of the referral code is used to store the issuer's KAP name
+      const issuerKAPNameStr = StringBytes.bytesToString(referral_code.metadata!.data);
+      const issuerKAPName = this.getKAPName(issuerKAPNameStr, metadata.nameservice_address);
+
+      System.require(Arrays.equal(issuerKAPName.owner, referral_code.metadata!.issuer), 'referral code issuer is different than the KAP name owner');
+      System.require(issuerKAPName.domain == 'koin', 'provided name is not part of the .koin domain');
+
+      const isIssuerPremiumKapName = String.UTF8.byteLength(issuerKAPName.name) <= 10;
+      System.require(isIssuerPremiumKapName, 'only premium KAP name holders can issue referral codes');
+
+      let referralAllowance = this.referralAllowances.get(`${issuerKAPName.name}.${issuerKAPName.domain}`);
+
+      // create or refresh the allowance if needed
+      if (!referralAllowance || referralAllowance.next_refresh <= this.now) {
+        referralAllowance = new koindomain.referral_allowance();
+        referralAllowance.max_amount = metadata.max_referrals_per_period;
+        referralAllowance.remaining = metadata.max_referrals_per_period;
+        referralAllowance.next_refresh = this.now + metadata.referrals_refresh_period;
+      }
+
+      System.require(referralAllowance.remaining >= 1, 'the referral code issuer does not have enough referral allowances');
+
+      // update allowance
+      referralAllowance.remaining -= 1;
+      this.referralAllowances.put(`${issuerKAPName.name}.${issuerKAPName.domain}`, referralAllowance);
+
+      // allow the referral code to be used
+      isUsingReferralCode = true;
     }
 
     const nameLength = String.UTF8.byteLength(name);
@@ -257,8 +350,8 @@ export class Koindomain {
         pricePerIncrement,
         duration_increments,
         payment_from,
-        metadata.oracle_address,
-        metadata.press_badge_address
+        metadata,
+        isUsingReferralCode
       );
 
       // transfer tokens
@@ -279,6 +372,11 @@ export class Koindomain {
       const gracePeriod = this.calculateGracePeriod(expiration);
 
       return new koindomain.authorize_mint_result(expiration, gracePeriod);
+    }
+    // non-premium accounts with referral code handling
+    else if (isUsingReferralCode) {
+      // non-premuim accounts are free forever
+      return new koindomain.authorize_mint_result(0, 0);
     }
     // non-premium accounts handling
     else {
@@ -327,8 +425,7 @@ export class Koindomain {
       pricePerIncrement,
       duration_increments,
       payment_from,
-      metadata.oracle_address,
-      metadata.press_badge_address
+      metadata
     );
 
     // transfer tokens
@@ -405,6 +502,27 @@ export class Koindomain {
     return res;
   }
 
+  get_referral_allowance(
+    args: koindomain.get_referral_allowance_arguments
+  ): koindomain.referral_allowance {
+    const name = args.name;
+
+    const metadata = this.metadata.get()!;
+    const referralAllowance = this.referralAllowances.get(name);
+
+    if (referralAllowance) {
+      if (referralAllowance.next_refresh <= this.now) {
+        referralAllowance.max_amount = metadata.max_referrals_per_period;
+        referralAllowance.remaining = metadata.max_referrals_per_period;
+        referralAllowance.next_refresh = this.now + metadata.referrals_refresh_period;
+      }
+
+      return referralAllowance;
+    }
+
+    return new koindomain.referral_allowance();
+  }
+
   set_metadata(
     args: koindomain.set_metadata_arguments
   ): koindomain.empty_object {
@@ -414,23 +532,9 @@ export class Koindomain {
       this.contractId
     );
 
-    const nameservice_address = args.nameservice_address;
-    const oracle_address = args.oracle_address;
-    const owner = args.owner;
-    const press_badge_address = args.press_badge_address;
-    const is_launched = args.is_launched;
-    const beneficiary = args.beneficiary;
+    const metadata = args.metadata;
 
-    this.metadata.put(
-      new koindomain.metadata_object(
-        nameservice_address, 
-        oracle_address, 
-        owner, 
-        press_badge_address, 
-        is_launched,
-        beneficiary
-      )
-    );
+    this.metadata.put(metadata!);
 
     return new koindomain.empty_object();
   }

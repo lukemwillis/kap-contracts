@@ -32,6 +32,11 @@ export namespace koindomain {
         writer.uint32(50);
         writer.bytes(message.payment_token_address);
       }
+
+      if (message.data.length != 0) {
+        writer.uint32(58);
+        writer.bytes(message.data);
+      }
     }
 
     static decode(reader: Reader, length: i32): authorize_mint_arguments {
@@ -65,6 +70,10 @@ export namespace koindomain {
             message.payment_token_address = reader.bytes();
             break;
 
+          case 7:
+            message.data = reader.bytes();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -80,6 +89,7 @@ export namespace koindomain {
     owner: Uint8Array;
     payment_from: Uint8Array;
     payment_token_address: Uint8Array;
+    data: Uint8Array;
 
     constructor(
       name: string = "",
@@ -87,7 +97,8 @@ export namespace koindomain {
       duration_increments: u32 = 0,
       owner: Uint8Array = new Uint8Array(0),
       payment_from: Uint8Array = new Uint8Array(0),
-      payment_token_address: Uint8Array = new Uint8Array(0)
+      payment_token_address: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
     ) {
       this.name = name;
       this.domain = domain;
@@ -95,6 +106,7 @@ export namespace koindomain {
       this.owner = owner;
       this.payment_from = payment_from;
       this.payment_token_address = payment_token_address;
+      this.data = data;
     }
   }
 
@@ -455,68 +467,29 @@ export namespace koindomain {
     }
   }
 
-  export class set_metadata_arguments {
-    static encode(message: set_metadata_arguments, writer: Writer): void {
-      if (message.nameservice_address.length != 0) {
+  export class get_referral_allowance_arguments {
+    static encode(
+      message: get_referral_allowance_arguments,
+      writer: Writer
+    ): void {
+      if (message.name.length != 0) {
         writer.uint32(10);
-        writer.bytes(message.nameservice_address);
-      }
-
-      if (message.oracle_address.length != 0) {
-        writer.uint32(18);
-        writer.bytes(message.oracle_address);
-      }
-
-      if (message.owner.length != 0) {
-        writer.uint32(26);
-        writer.bytes(message.owner);
-      }
-
-      if (message.press_badge_address.length != 0) {
-        writer.uint32(34);
-        writer.bytes(message.press_badge_address);
-      }
-
-      if (message.is_launched != false) {
-        writer.uint32(40);
-        writer.bool(message.is_launched);
-      }
-
-      if (message.beneficiary.length != 0) {
-        writer.uint32(50);
-        writer.bytes(message.beneficiary);
+        writer.string(message.name);
       }
     }
 
-    static decode(reader: Reader, length: i32): set_metadata_arguments {
+    static decode(
+      reader: Reader,
+      length: i32
+    ): get_referral_allowance_arguments {
       const end: usize = length < 0 ? reader.end : reader.ptr + length;
-      const message = new set_metadata_arguments();
+      const message = new get_referral_allowance_arguments();
 
       while (reader.ptr < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.nameservice_address = reader.bytes();
-            break;
-
-          case 2:
-            message.oracle_address = reader.bytes();
-            break;
-
-          case 3:
-            message.owner = reader.bytes();
-            break;
-
-          case 4:
-            message.press_badge_address = reader.bytes();
-            break;
-
-          case 5:
-            message.is_launched = reader.bool();
-            break;
-
-          case 6:
-            message.beneficiary = reader.bytes();
+            message.name = reader.string();
             break;
 
           default:
@@ -528,27 +501,48 @@ export namespace koindomain {
       return message;
     }
 
-    nameservice_address: Uint8Array;
-    oracle_address: Uint8Array;
-    owner: Uint8Array;
-    press_badge_address: Uint8Array;
-    is_launched: bool;
-    beneficiary: Uint8Array;
+    name: string;
 
-    constructor(
-      nameservice_address: Uint8Array = new Uint8Array(0),
-      oracle_address: Uint8Array = new Uint8Array(0),
-      owner: Uint8Array = new Uint8Array(0),
-      press_badge_address: Uint8Array = new Uint8Array(0),
-      is_launched: bool = false,
-      beneficiary: Uint8Array = new Uint8Array(0)
-    ) {
-      this.nameservice_address = nameservice_address;
-      this.oracle_address = oracle_address;
-      this.owner = owner;
-      this.press_badge_address = press_badge_address;
-      this.is_launched = is_launched;
-      this.beneficiary = beneficiary;
+    constructor(name: string = "") {
+      this.name = name;
+    }
+  }
+
+  export class set_metadata_arguments {
+    static encode(message: set_metadata_arguments, writer: Writer): void {
+      const unique_name_metadata = message.metadata;
+      if (unique_name_metadata !== null) {
+        writer.uint32(10);
+        writer.fork();
+        metadata_object.encode(unique_name_metadata, writer);
+        writer.ldelim();
+      }
+    }
+
+    static decode(reader: Reader, length: i32): set_metadata_arguments {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new set_metadata_arguments();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.metadata = metadata_object.decode(reader, reader.uint32());
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    metadata: metadata_object | null;
+
+    constructor(metadata: metadata_object | null = null) {
+      this.metadata = metadata;
     }
   }
 
@@ -728,6 +722,47 @@ export namespace koindomain {
     }
   }
 
+  export class redeem_referral_code_args {
+    static encode(message: redeem_referral_code_args, writer: Writer): void {
+      const unique_name_referral_code = message.referral_code;
+      if (unique_name_referral_code !== null) {
+        writer.uint32(10);
+        writer.fork();
+        referral_code.encode(unique_name_referral_code, writer);
+        writer.ldelim();
+      }
+    }
+
+    static decode(reader: Reader, length: i32): redeem_referral_code_args {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new redeem_referral_code_args();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.referral_code = referral_code.decode(
+              reader,
+              reader.uint32()
+            );
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    referral_code: referral_code | null;
+
+    constructor(referral_code: referral_code | null = null) {
+      this.referral_code = referral_code;
+    }
+  }
+
   @unmanaged
   export class empty_object {
     static encode(message: empty_object, writer: Writer): void {}
@@ -891,6 +926,26 @@ export namespace koindomain {
         writer.uint32(50);
         writer.bytes(message.beneficiary);
       }
+
+      if (message.referral_contract_address.length != 0) {
+        writer.uint32(58);
+        writer.bytes(message.referral_contract_address);
+      }
+
+      if (message.referrals_refresh_period != 0) {
+        writer.uint32(64);
+        writer.uint64(message.referrals_refresh_period);
+      }
+
+      if (message.max_referrals_per_period != 0) {
+        writer.uint32(72);
+        writer.uint64(message.max_referrals_per_period);
+      }
+
+      if (message.premium_account_referral_discount_percent != 0) {
+        writer.uint32(80);
+        writer.uint32(message.premium_account_referral_discount_percent);
+      }
     }
 
     static decode(reader: Reader, length: i32): metadata_object {
@@ -924,6 +979,22 @@ export namespace koindomain {
             message.beneficiary = reader.bytes();
             break;
 
+          case 7:
+            message.referral_contract_address = reader.bytes();
+            break;
+
+          case 8:
+            message.referrals_refresh_period = reader.uint64();
+            break;
+
+          case 9:
+            message.max_referrals_per_period = reader.uint64();
+            break;
+
+          case 10:
+            message.premium_account_referral_discount_percent = reader.uint32();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -939,6 +1010,10 @@ export namespace koindomain {
     press_badge_address: Uint8Array;
     is_launched: bool;
     beneficiary: Uint8Array;
+    referral_contract_address: Uint8Array;
+    referrals_refresh_period: u64;
+    max_referrals_per_period: u64;
+    premium_account_referral_discount_percent: u32;
 
     constructor(
       nameservice_address: Uint8Array = new Uint8Array(0),
@@ -946,7 +1021,11 @@ export namespace koindomain {
       owner: Uint8Array = new Uint8Array(0),
       press_badge_address: Uint8Array = new Uint8Array(0),
       is_launched: bool = false,
-      beneficiary: Uint8Array = new Uint8Array(0)
+      beneficiary: Uint8Array = new Uint8Array(0),
+      referral_contract_address: Uint8Array = new Uint8Array(0),
+      referrals_refresh_period: u64 = 0,
+      max_referrals_per_period: u64 = 0,
+      premium_account_referral_discount_percent: u32 = 0
     ) {
       this.nameservice_address = nameservice_address;
       this.oracle_address = oracle_address;
@@ -954,6 +1033,11 @@ export namespace koindomain {
       this.press_badge_address = press_badge_address;
       this.is_launched = is_launched;
       this.beneficiary = beneficiary;
+      this.referral_contract_address = referral_contract_address;
+      this.referrals_refresh_period = referrals_refresh_period;
+      this.max_referrals_per_period = max_referrals_per_period;
+      this.premium_account_referral_discount_percent =
+        premium_account_referral_discount_percent;
     }
   }
 
@@ -1119,6 +1203,279 @@ export namespace koindomain {
     constructor(buyer: Uint8Array = new Uint8Array(0), usd_amount: u64 = 0) {
       this.buyer = buyer;
       this.usd_amount = usd_amount;
+    }
+  }
+
+  export class get_name_args {
+    static encode(message: get_name_args, writer: Writer): void {
+      if (message.name.length != 0) {
+        writer.uint32(10);
+        writer.string(message.name);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): get_name_args {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new get_name_args();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.name = reader.string();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    name: string;
+
+    constructor(name: string = "") {
+      this.name = name;
+    }
+  }
+
+  @unmanaged
+  export class referral_allowance {
+    static encode(message: referral_allowance, writer: Writer): void {
+      if (message.max_amount != 0) {
+        writer.uint32(8);
+        writer.uint64(message.max_amount);
+      }
+
+      if (message.remaining != 0) {
+        writer.uint32(16);
+        writer.uint64(message.remaining);
+      }
+
+      if (message.next_refresh != 0) {
+        writer.uint32(24);
+        writer.uint64(message.next_refresh);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): referral_allowance {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new referral_allowance();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.max_amount = reader.uint64();
+            break;
+
+          case 2:
+            message.remaining = reader.uint64();
+            break;
+
+          case 3:
+            message.next_refresh = reader.uint64();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    max_amount: u64;
+    remaining: u64;
+    next_refresh: u64;
+
+    constructor(
+      max_amount: u64 = 0,
+      remaining: u64 = 0,
+      next_refresh: u64 = 0
+    ) {
+      this.max_amount = max_amount;
+      this.remaining = remaining;
+      this.next_refresh = next_refresh;
+    }
+  }
+
+  export class referral_code_metadata {
+    static encode(message: referral_code_metadata, writer: Writer): void {
+      if (message.chain_id.length != 0) {
+        writer.uint32(10);
+        writer.bytes(message.chain_id);
+      }
+
+      if (message.referral_contract_id.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.referral_contract_id);
+      }
+
+      if (message.issuer.length != 0) {
+        writer.uint32(26);
+        writer.bytes(message.issuer);
+      }
+
+      if (message.issuance_date != 0) {
+        writer.uint32(32);
+        writer.uint64(message.issuance_date);
+      }
+
+      if (message.expiration_date != 0) {
+        writer.uint32(40);
+        writer.uint64(message.expiration_date);
+      }
+
+      if (message.allowed_redemption_contract.length != 0) {
+        writer.uint32(50);
+        writer.bytes(message.allowed_redemption_contract);
+      }
+
+      if (message.allowed_redemption_account.length != 0) {
+        writer.uint32(58);
+        writer.bytes(message.allowed_redemption_account);
+      }
+
+      if (message.data.length != 0) {
+        writer.uint32(66);
+        writer.bytes(message.data);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): referral_code_metadata {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new referral_code_metadata();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.chain_id = reader.bytes();
+            break;
+
+          case 2:
+            message.referral_contract_id = reader.bytes();
+            break;
+
+          case 3:
+            message.issuer = reader.bytes();
+            break;
+
+          case 4:
+            message.issuance_date = reader.uint64();
+            break;
+
+          case 5:
+            message.expiration_date = reader.uint64();
+            break;
+
+          case 6:
+            message.allowed_redemption_contract = reader.bytes();
+            break;
+
+          case 7:
+            message.allowed_redemption_account = reader.bytes();
+            break;
+
+          case 8:
+            message.data = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    chain_id: Uint8Array;
+    referral_contract_id: Uint8Array;
+    issuer: Uint8Array;
+    issuance_date: u64;
+    expiration_date: u64;
+    allowed_redemption_contract: Uint8Array;
+    allowed_redemption_account: Uint8Array;
+    data: Uint8Array;
+
+    constructor(
+      chain_id: Uint8Array = new Uint8Array(0),
+      referral_contract_id: Uint8Array = new Uint8Array(0),
+      issuer: Uint8Array = new Uint8Array(0),
+      issuance_date: u64 = 0,
+      expiration_date: u64 = 0,
+      allowed_redemption_contract: Uint8Array = new Uint8Array(0),
+      allowed_redemption_account: Uint8Array = new Uint8Array(0),
+      data: Uint8Array = new Uint8Array(0)
+    ) {
+      this.chain_id = chain_id;
+      this.referral_contract_id = referral_contract_id;
+      this.issuer = issuer;
+      this.issuance_date = issuance_date;
+      this.expiration_date = expiration_date;
+      this.allowed_redemption_contract = allowed_redemption_contract;
+      this.allowed_redemption_account = allowed_redemption_account;
+      this.data = data;
+    }
+  }
+
+  export class referral_code {
+    static encode(message: referral_code, writer: Writer): void {
+      const unique_name_metadata = message.metadata;
+      if (unique_name_metadata !== null) {
+        writer.uint32(10);
+        writer.fork();
+        referral_code_metadata.encode(unique_name_metadata, writer);
+        writer.ldelim();
+      }
+
+      if (message.signature.length != 0) {
+        writer.uint32(18);
+        writer.bytes(message.signature);
+      }
+    }
+
+    static decode(reader: Reader, length: i32): referral_code {
+      const end: usize = length < 0 ? reader.end : reader.ptr + length;
+      const message = new referral_code();
+
+      while (reader.ptr < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1:
+            message.metadata = referral_code_metadata.decode(
+              reader,
+              reader.uint32()
+            );
+            break;
+
+          case 2:
+            message.signature = reader.bytes();
+            break;
+
+          default:
+            reader.skipType(tag & 7);
+            break;
+        }
+      }
+
+      return message;
+    }
+
+    metadata: referral_code_metadata | null;
+    signature: Uint8Array;
+
+    constructor(
+      metadata: referral_code_metadata | null = null,
+      signature: Uint8Array = new Uint8Array(0)
+    ) {
+      this.metadata = metadata;
+      this.signature = signature;
     }
   }
 }

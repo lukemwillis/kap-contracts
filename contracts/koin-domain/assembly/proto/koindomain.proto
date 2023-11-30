@@ -17,6 +17,7 @@ message authorize_mint_arguments {
   bytes owner = 4 [(koinos.btype) = ADDRESS];
   bytes payment_from = 5 [(koinos.btype) = ADDRESS];
   bytes payment_token_address = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes data = 7;
 }
 
 message authorize_mint_result {
@@ -68,17 +69,21 @@ message get_purchases_result {
 }
 
 /* 
+  @description Get referral allowance for a name
+  @read-only true
+  @result referral_allowance
+*/
+message get_referral_allowance_arguments {
+  string name = 1;
+}
+
+/* 
   @description Set contract metadata
   @read-only false
   @result empty_object
 */
 message set_metadata_arguments {
-  bytes nameservice_address = 1 [(koinos.btype) = CONTRACT_ID];
-  bytes oracle_address = 2 [(koinos.btype) = CONTRACT_ID];
-  bytes owner = 3 [(koinos.btype) = CONTRACT_ID];
-  bytes press_badge_address = 4 [(koinos.btype) = CONTRACT_ID];
-  bool is_launched = 5;
-  bytes beneficiary = 6 [(koinos.btype) = CONTRACT_ID];
+  metadata_object metadata = 1;
 }
 
 /* 
@@ -109,6 +114,11 @@ message balance_of_nft_res {
   uint64 value = 1 [jstype = JS_STRING];
 }
 
+// referral
+message redeem_referral_code_args {
+  referral_code referral_code = 1;
+}
+
 // objects
 message empty_object {
 
@@ -131,6 +141,10 @@ message metadata_object {
   bytes press_badge_address = 4 [(koinos.btype) = CONTRACT_ID];
   bool is_launched = 5;
   bytes beneficiary = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes referral_contract_address = 7 [(koinos.btype) = CONTRACT_ID];
+  uint64 referrals_refresh_period = 8 [jstype = JS_STRING];
+  uint64 max_referrals_per_period = 9 [jstype = JS_STRING];
+  uint32 premium_account_referral_discount_percent = 10;
 }
 
 message purchase_object{
@@ -148,4 +162,32 @@ message purchase_key {
 message purchase_record {
   bytes buyer = 1 [(koinos.btype) = ADDRESS];
   uint64 usd_amount = 2 [jstype = JS_STRING];
+}
+
+// Nameservice objects
+message get_name_args {
+  string name = 1;
+}
+
+// Referral objects
+message referral_allowance {
+  uint64 max_amount = 1 [jstype = JS_STRING];
+  uint64 remaining = 2 [jstype = JS_STRING];
+  uint64 next_refresh = 3 [jstype = JS_STRING];
+}
+
+message referral_code_metadata {
+  bytes chain_id = 1;
+  bytes referral_contract_id = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes issuer = 3 [(koinos.btype) = ADDRESS];
+  uint64 issuance_date = 4 [jstype = JS_STRING];
+  uint64 expiration_date = 5 [jstype = JS_STRING];
+  bytes allowed_redemption_contract = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes allowed_redemption_account = 7 [(koinos.btype) = ADDRESS];
+  bytes data = 8;
+}
+
+message referral_code {
+  referral_code_metadata metadata = 1;
+  bytes signature = 2;
 }

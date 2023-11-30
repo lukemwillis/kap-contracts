@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package referral;
+
+import "koinos/options.proto"; 
+
+// @description Redeems a referral code
+// @read-only false
+// @result empty_message
+message redeem_arguments {
+  referral_code referral_code = 1;
+}
+
+// @description Gets a referral code if already redeemed
+// @read-only true
+// @result referral_code
+message get_referral_code_arguments {
+  referral_code referral_code = 1;
+}
+
+message empty_message {
+  
+}
+
+message referral_code_metadata {
+  bytes chain_id = 1;
+  bytes referral_contract_id = 2 [(koinos.btype) = CONTRACT_ID];
+  bytes issuer = 3 [(koinos.btype) = ADDRESS];
+  uint64 issuance_date = 4 [jstype = JS_STRING];
+  uint64 expiration_date = 5 [jstype = JS_STRING];
+  bytes allowed_redemption_contract = 6 [(koinos.btype) = CONTRACT_ID];
+  bytes allowed_redemption_account = 7 [(koinos.btype) = ADDRESS];
+  bytes data = 8;
+}
+
+message referral_code {
+  referral_code_metadata metadata = 1;
+  bytes signature = 2;
+}

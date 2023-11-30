@@ -155,6 +155,7 @@ export class Collections {
     // const owner = args.owner;
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    // const data = args.data;
 
     // YOUR CODE HERE
 
@@ -166,6 +167,7 @@ export class Collections {
   burn(args: collections.burn_arguments): collections.empty_object {
     // const from = args.from;
     // const token_id = args.token_id;
+    // const data = args.data;
 
     // YOUR CODE HERE
 
@@ -217,6 +219,7 @@ export class Collections {
     // const duration_increments = args.duration_increments;
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    // const data = args.data;
 
     // YOUR CODE HERE
 

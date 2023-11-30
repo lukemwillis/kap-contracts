@@ -84,12 +84,14 @@ describe("mint", () => {
   it("should mint a .koin name", async () => {
     // set koin domain contract metadata
     let res = await koinDomainContract.functions.set_metadata({
-      nameservice_address: nameserviceAcct.address,
-      oracle_address: usdOracleAcct.address,
-      owner: user1.address,
-      press_badge_address: collectionAcct.address,
-      is_launched: true,
-      beneficiary: koinDomainAcct.address,
+      metadata: {
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: usdOracleAcct.address,
+        owner: user1.address,
+        press_badge_address: collectionAcct.address,
+        is_launched: true,
+        beneficiary: koinDomainAcct.address
+      }
     });
 
     await res.transaction?.wait();
@@ -671,15 +673,15 @@ describe("authorizations", () => {
 
     // TODO I think this fails so zero assertions
     // change contract owner
-    res = await koinDomainContract.functions.set_metadata(
-      {
+    res = await koinDomainContract.functions.set_metadata({
+      metadata: {
         nameservice_address: nameserviceAcct.address,
         oracle_address: usdOracleAcct.address,
         owner: user1.address,
         press_badge_address: collectionAcct.address,
         is_launched: true,
-        beneficiary: koinDomainAcct.address,
-      },
+        beneficiary: koinDomainAcct.address
+      }},
       {
         beforeSend: async (tx) => {
           await koinDomainAcct.signer.signTransaction(tx);

@@ -99,10 +99,12 @@ describe('mint', () => {
 
     // set koin domain contract metadata
     res = await koinDomainContract.functions.set_metadata({
-      nameservice_address: nameserviceAcct.address,
-      oracle_address: usdOracleAcct.address,
-      press_badge_address: collectionAcct.address,
-      is_launched: true,
+      metadata: {
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: usdOracleAcct.address,
+        press_badge_address: collectionAcct.address,
+        is_launched: true,
+      }
     });
 
     await localKoinos.produceBlock();

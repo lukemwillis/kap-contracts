@@ -35,6 +35,13 @@
             "entry_point": 2443088571,
             "read_only": true
         },
+        "get_referral_allowance": {
+            "argument": "koindomain.get_referral_allowance_arguments",
+            "return": "koindomain.referral_allowance",
+            "description": "Get referral allowance for a name",
+            "entry_point": 1739503026,
+            "read_only": true
+        },
         "set_metadata": {
             "argument": "koindomain.set_metadata_arguments",
             "return": "koindomain.empty_object",
@@ -88,6 +95,10 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 7
                             }
                         }
                     },
@@ -189,46 +200,19 @@
                             }
                         }
                     },
+                    "get_referral_allowance_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
                     "set_metadata_arguments": {
                         "fields": {
-                            "nameservice_address": {
-                                "type": "bytes",
-                                "id": 1,
-                                "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
-                                }
-                            },
-                            "oracle_address": {
-                                "type": "bytes",
-                                "id": 2,
-                                "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
-                                }
-                            },
-                            "owner": {
-                                "type": "bytes",
-                                "id": 3,
-                                "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
-                                }
-                            },
-                            "press_badge_address": {
-                                "type": "bytes",
-                                "id": 4,
-                                "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
-                                }
-                            },
-                            "is_launched": {
-                                "type": "bool",
-                                "id": 5
-                            },
-                            "beneficiary": {
-                                "type": "bytes",
-                                "id": 6,
-                                "options": {
-                                    "(koinos.btype)": "CONTRACT_ID"
-                                }
+                            "metadata": {
+                                "type": "metadata_object",
+                                "id": 1
                             }
                         }
                     },
@@ -277,6 +261,14 @@
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
+                            }
+                        }
+                    },
+                    "redeem_referral_code_args": {
+                        "fields": {
+                            "referral_code": {
+                                "type": "referral_code",
+                                "id": 1
                             }
                         }
                     },
@@ -370,6 +362,31 @@
                                 "options": {
                                     "(koinos.btype)": "CONTRACT_ID"
                                 }
+                            },
+                            "referral_contract_address": {
+                                "type": "bytes",
+                                "id": 7,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "referrals_refresh_period": {
+                                "type": "uint64",
+                                "id": 8,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "max_referrals_per_period": {
+                                "type": "uint64",
+                                "id": 9,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "premium_account_referral_discount_percent": {
+                                "type": "uint32",
+                                "id": 10
                             }
                         }
                     },
@@ -432,6 +449,105 @@
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
+                            }
+                        }
+                    },
+                    "get_name_args": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "referral_allowance": {
+                        "fields": {
+                            "max_amount": {
+                                "type": "uint64",
+                                "id": 1,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "remaining": {
+                                "type": "uint64",
+                                "id": 2,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "next_refresh": {
+                                "type": "uint64",
+                                "id": 3,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            }
+                        }
+                    },
+                    "referral_code_metadata": {
+                        "fields": {
+                            "chain_id": {
+                                "type": "bytes",
+                                "id": 1
+                            },
+                            "referral_contract_id": {
+                                "type": "bytes",
+                                "id": 2,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "issuer": {
+                                "type": "bytes",
+                                "id": 3,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "issuance_date": {
+                                "type": "uint64",
+                                "id": 4,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "expiration_date": {
+                                "type": "uint64",
+                                "id": 5,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
+                            },
+                            "allowed_redemption_contract": {
+                                "type": "bytes",
+                                "id": 6,
+                                "options": {
+                                    "(koinos.btype)": "CONTRACT_ID"
+                                }
+                            },
+                            "allowed_redemption_account": {
+                                "type": "bytes",
+                                "id": 7,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            },
+                            "data": {
+                                "type": "bytes",
+                                "id": 8
+                            }
+                        }
+                    },
+                    "referral_code": {
+                        "fields": {
+                            "metadata": {
+                                "type": "referral_code_metadata",
+                                "id": 1
+                            },
+                            "signature": {
+                                "type": "bytes",
+                                "id": 2
                             }
                         }
                     }

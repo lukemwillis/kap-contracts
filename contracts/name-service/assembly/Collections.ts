@@ -226,6 +226,7 @@ export class Collections {
     const owner = args.owner;
     const payment_from = args.payment_from;
     const payment_token_address = args.payment_token_address;
+    const data = args.data;
 
     System.require(owner.length > 0, 'missing "owner" argument');
 
@@ -310,7 +311,8 @@ export class Collections {
         owner,
         payment_from,
         payment_token_address,
-        domainObj!.owner
+        domainObj!.owner,
+        data
       );
 
       nameObj.expiration = authorizeMintResult.expiration;
@@ -559,6 +561,7 @@ export class Collections {
   burn(args: collections.burn_arguments): collections.empty_object {
     const from = args.from;
     const name = StringBytes.bytesToString(args.token_id);
+    const data = args.data;
 
     // parseName will fail if name has an invalid format
     const parsedName = new ParsedName(name);
@@ -622,7 +625,7 @@ export class Collections {
       // call the "authorize_burn" entrypoint of the contract hosted at "owner" address
       // if this call doesn't revert the transaction,
       // proceed with the burn
-      const authorized = this.authorizeBurn(nameObj!, domainObj.owner);
+      const authorized = this.authorizeBurn(nameObj!, domainObj.owner, data);
 
       System.require(
         authorized == true,
@@ -674,6 +677,7 @@ export class Collections {
     const duration_increments = args.duration_increments;
     const payment_from = args.payment_from;
     const payment_token_address = args.payment_token_address;
+    const data = args.data;
 
     // parseName will fail if name has an invalid format
     const parsedName = new ParsedName(name);
@@ -710,7 +714,8 @@ export class Collections {
         duration_increments,
         payment_from,
         payment_token_address,
-        domainObj!.owner
+        domainObj!.owner,
+        data
       );
 
       nameObj!.expiration = authorizeRenewalResult.expiration;
@@ -860,7 +865,8 @@ export class Collections {
     owner: Uint8Array,
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
-    domainContractId: Uint8Array
+    domainContractId: Uint8Array,
+    data: Uint8Array
   ): collections.authorize_mint_res {
     const authArgs = new collections.authorize_mint_args(
       name,
@@ -868,7 +874,8 @@ export class Collections {
       durationIncrements,
       owner,
       paymentFrom,
-      paymentTokenAddress
+      paymentTokenAddress,
+      data
     );
 
     const callRes = System.call(
@@ -894,9 +901,10 @@ export class Collections {
    */
   private authorizeBurn(
     nameObj: collections.name_object,
-    domainContractId: Uint8Array
+    domainContractId: Uint8Array,
+    data: Uint8Array
   ): bool {
-    const authArgs = new collections.authorize_burn_args(nameObj);
+    const authArgs = new collections.authorize_burn_args(nameObj, data);
 
     const callRes = System.call(
       domainContractId,
@@ -925,13 +933,15 @@ export class Collections {
     durationIncrements: u32,
     paymentFrom: Uint8Array,
     paymentTokenAddress: Uint8Array,
-    domainContractId: Uint8Array
+    domainContractId: Uint8Array,
+    data: Uint8Array
   ): collections.authorize_renewal_res {
     const authArgs = new collections.authorize_renewal_args(
       nameObj,
       durationIncrements,
       paymentFrom,
-      paymentTokenAddress
+      paymentTokenAddress,
+      data
     );
 
     const callRes = System.call(

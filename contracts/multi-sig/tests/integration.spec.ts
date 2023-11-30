@@ -319,9 +319,11 @@ describe('multi-sig contract ownership', () => {
 
     // set koin domain contract metadata
     let res = await koinDomainContract.functions.set_metadata({
-      nameservice_address: nameserviceAcct.address,
-      oracle_address: usdOracleAcct.address,
-      owner: multisigAcct.address
+      metadata: {
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: usdOracleAcct.address,
+        owner: multisigAcct.address
+      }
     });
 
     await res.transaction?.wait();
@@ -334,9 +336,11 @@ describe('multi-sig contract ownership', () => {
 
     // can consume mana and call a contract using multi-sig
     res = await koinDomainContract.functions.set_metadata({
-      nameservice_address: nameserviceAcct.address,
-      oracle_address: user4.address,
-      owner: multisigAcct.address
+      metadata: {
+        nameservice_address: nameserviceAcct.address,
+        oracle_address: user4.address,
+        owner: multisigAcct.address
+      }
     }, {
       beforeSend: async (tx) => {
         tx.signatures = [];
@@ -394,9 +398,11 @@ describe('multi-sig contract ownership', () => {
     try {
       // cannot consume mana
       await koinDomainContract.functions.set_metadata({
-        nameservice_address: nameserviceAcct.address,
-        oracle_address: user4.address,
-        owner: multisigAcct.address
+        metadata: {
+          nameservice_address: nameserviceAcct.address,
+          oracle_address: user4.address,
+          owner: multisigAcct.address
+        }
       }, {
         beforeSend: async (tx) => {
           await user1.signer.signTransaction(tx);
@@ -409,9 +415,11 @@ describe('multi-sig contract ownership', () => {
     try {
       // cannot consume mana
       await koinDomainContract.functions.set_metadata({
-        nameservice_address: nameserviceAcct.address,
-        oracle_address: user4.address,
-        owner: multisigAcct.address
+        metadata: {
+          nameservice_address: nameserviceAcct.address,
+          oracle_address: user4.address,
+          owner: multisigAcct.address
+        }
       });
     } catch (error) {
       expect(JSON.parse(error.message).error).toStrictEqual(`account ${koinDomainAcct.address} has not authorized transaction`);

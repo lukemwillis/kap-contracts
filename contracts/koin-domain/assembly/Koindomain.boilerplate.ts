@@ -23,6 +23,7 @@ export class Koindomain {
     // const owner = args.owner;
     // const payment_from = args.payment_from;
     // const payment_token_address = args.payment_token_address;
+    // const data = args.data;
 
     // YOUR CODE HERE
 
@@ -79,15 +80,25 @@ export class Koindomain {
     return res;
   }
 
+  get_referral_allowance(
+    args: koindomain.get_referral_allowance_arguments
+  ): koindomain.referral_allowance {
+    // const name = args.name;
+
+    // YOUR CODE HERE
+
+    const res = new koindomain.referral_allowance();
+    // res.max_amount = ;
+    // res.remaining = ;
+    // res.next_refresh = ;
+
+    return res;
+  }
+
   set_metadata(
     args: koindomain.set_metadata_arguments
   ): koindomain.empty_object {
-    // const nameservice_address = args.nameservice_address;
-    // const oracle_address = args.oracle_address;
-    // const owner = args.owner;
-    // const press_badge_address = args.press_badge_address;
-    // const is_launched = args.is_launched;
-    // const beneficiary = args.beneficiary;
+    // const metadata = args.metadata;
 
     // YOUR CODE HERE
 
@@ -108,6 +119,10 @@ export class Koindomain {
     // res.press_badge_address = ;
     // res.is_launched = ;
     // res.beneficiary = ;
+    // res.referral_contract_address = ;
+    // res.referrals_refresh_period = ;
+    // res.max_referrals_per_period = ;
+    // res.premium_account_referral_discount_percent = ;
 
     return res;
   }

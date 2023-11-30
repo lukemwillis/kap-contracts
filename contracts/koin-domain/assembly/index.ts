@@ -68,6 +68,17 @@ export function main(): i32 {
       break;
     }
 
+    case 0x67aeb5b2: {
+      const args =
+        Protobuf.decode<ProtoNamespace.get_referral_allowance_arguments>(
+          contractArgs.args,
+          ProtoNamespace.get_referral_allowance_arguments.decode
+        );
+      const res = c.get_referral_allowance(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.referral_allowance.encode);
+      break;
+    }
+
     case 0x3d59af19: {
       const args = Protobuf.decode<ProtoNamespace.set_metadata_arguments>(
         contractArgs.args,

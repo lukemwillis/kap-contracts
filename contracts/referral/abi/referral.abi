@@ -1,0 +1,19 @@
+{
+    "methods": {
+        "redeem": {
+            "argument": "referral.redeem_arguments",
+            "return": "referral.empty_message",
+            "description": "Redeems a referral code",
+            "entry-point": "0x2e5106cc",
+            "read-only": false
+        },
+        "get_referral_code": {
+            "argument": "referral.get_referral_code_arguments",
+            "return": "referral.referral_code",
+            "description": "Gets a referral code if already redeemed",
+            "entry-point": "0xf23d6402",
+            "read-only": true
+        }
+    },
+    "types": "CvQFCh1hc3NlbWJseS9wcm90by9yZWZlcnJhbC5wcm90bxIIcmVmZXJyYWwaFGtvaW5vcy9vcHRpb25zLnByb3RvIlAKEHJlZGVlbV9hcmd1bWVudHMSPAoNcmVmZXJyYWxfY29kZRgBIAEoCzIXLnJlZmVycmFsLnJlZmVycmFsX2NvZGVSDHJlZmVycmFsQ29kZSJbChtnZXRfcmVmZXJyYWxfY29kZV9hcmd1bWVudHMSPAoNcmVmZXJyYWxfY29kZRgBIAEoCzIXLnJlZmVycmFsLnJlZmVycmFsX2NvZGVSDHJlZmVycmFsQ29kZSIPCg1lbXB0eV9tZXNzYWdlIv0CChZyZWZlcnJhbF9jb2RlX21ldGFkYXRhEhkKCGNoYWluX2lkGAEgASgMUgdjaGFpbklkEjYKFHJlZmVycmFsX2NvbnRyYWN0X2lkGAIgASgMQgSAtRgFUhJyZWZlcnJhbENvbnRyYWN0SWQSHAoGaXNzdWVyGAMgASgMQgSAtRgGUgZpc3N1ZXISJwoNaXNzdWFuY2VfZGF0ZRgEIAEoBEICMAFSDGlzc3VhbmNlRGF0ZRIrCg9leHBpcmF0aW9uX2RhdGUYBSABKARCAjABUg5leHBpcmF0aW9uRGF0ZRJEChthbGxvd2VkX3JlZGVtcHRpb25fY29udHJhY3QYBiABKAxCBIC1GAVSGWFsbG93ZWRSZWRlbXB0aW9uQ29udHJhY3QSQgoaYWxsb3dlZF9yZWRlbXB0aW9uX2FjY291bnQYByABKAxCBIC1GAZSGGFsbG93ZWRSZWRlbXB0aW9uQWNjb3VudBISCgRkYXRhGAggASgMUgRkYXRhImsKDXJlZmVycmFsX2NvZGUSPAoIbWV0YWRhdGEYASABKAsyIC5yZWZlcnJhbC5yZWZlcnJhbF9jb2RlX21ldGFkYXRhUghtZXRhZGF0YRIcCglzaWduYXR1cmUYAiABKAxSCXNpZ25hdHVyZWIGcHJvdG8z"
+}
