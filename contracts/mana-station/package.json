@@ -9,6 +9,7 @@
     "@koinos/as-proto-gen": "^1.0.3",
     "@koinos/mock-vm": "^1.0.0",
     "@koinos/sdk-as": "^1.0.2",
+    "@koinos/sdk-as-cli": "^1.0.2",
     "@roamin/local-koinos": "^0.4.9",
     "@roamin/protoc": "^2.4.0",
     "@types/jest": "^29.4.0",
